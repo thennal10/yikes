@@ -1,4 +1,5 @@
 import discord
+import os
 
 
 def baha_sort(l):
@@ -86,6 +87,5 @@ async def on_message(message):
         await message.channel.send(leaderboard)
 
 
-# keep_alive()
-# token = os.environ.get("secretToken")
-client.run("NTM2NDAyMzk1MTE1MTU5NTYz.XNT_9Q.2RPxP8nQzqQL0ugOqkgS4LeFhEs")
+token = os.environ.get("TOKEN")
+client.run(token)
