@@ -88,6 +88,11 @@ async def on_message(message):
             leaderboard += f"""[{i + 1}]   > {peeps[i][0]}: {peeps[i][1]}\n"""
         leaderboard += "```"
         await message.channel.send(leaderboard)
+    elif message.content.startswith("immortalize:"):
+        msplit = message.content.split()
+        if len(msplit) == 3:
+            file = open("customcommands.txt", "a")
+            file.write(msplit[1] + " - " + msplit[2])
 
 
 
