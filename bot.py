@@ -60,7 +60,7 @@ async def on_message(message):
         # send result
         new_message = " ".join(new_message)
         await message.channel.send(new_message)
-    elif message.content == "bahaha_leaderboarder":
+    elif message.content == "bahaha_leaderboard":
         # redo this with pandas
         await message.channel.send("Loading...")
         peeps = [["N/A", 0]]
