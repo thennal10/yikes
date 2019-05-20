@@ -38,13 +38,9 @@ async def on_message(message):
 
         # replace words
         new_message = message.content.split()
-        if len(new_message) <= 1:
-            new_message[0] = "Peachlator at your service."
-        else:
-            new_message[0] = "Translation:"
+        new_message[0] = "Translation:"
         for i in range(len(new_message)):
             for key in trans_dict:
-                #don't ask
                 splitkey = key.split()
                 for j in range(len(splitkey)):
                     if i + j >= len(new_message):
@@ -55,7 +51,6 @@ async def on_message(message):
                         break
                     incl = True
                 splitval = trans_dict[key].split()
-                #still need to add a case for when splitval > splitkey but eh
                 if incl:
                     for k in range(len(splitval)):
                         new_message[i + k] = splitval[k]
@@ -67,13 +62,13 @@ async def on_message(message):
         new_message = " ".join(new_message)
         await message.channel.send(new_message)
     elif message.content == "bahaha_leaderboard":
-        # redo this with pandas later
+        # redo this with pandas
         await message.channel.send("Loading...")
         peeps = [["N/A", 0]]
-
         for chan in serv.text_channels:
             perm = chan.permissions_for(serv.me)
             if perm.read_message_history:
+
                 async for msg in chan.history(limit=3000):
                     if "the" in msg.content:
                         found = 0
@@ -84,35 +79,12 @@ async def on_message(message):
                                 break
                         if found == 0:
                             peeps.append([msg.author.name, 0])
-
         peeps.sort(key=baha_sort, reverse=True)
         leaderboard = "**The Bahaha Leaderboard**```\nRank  | Name\n\n"
         for i in range(len(peeps)):
             leaderboard += f"""[{i + 1}]   > {peeps[i][0]}: {peeps[i][1]}\n"""
         leaderboard += "```"
         await message.channel.send(leaderboard)
-    elif message.content.startswith("immortalize:"):
-        msplit = message.content.split()
-        if len(msplit) == 3:
-            file = open("customcommands.txt", "+a")
-            file.write(msplit[1] + " - " + msplit[2] + "\n")
-            await message.channel.send("Immortalized!")
-        else:
-            await message.channel.send("Usage: ``immortalize: [command] [link]``")
-    elif message.content.startswith("cst"):
-        msplit = message.content.split()
-        if len(msplit) == 2:
-            cc_dict = {}
-            file = open("customcommands.txt", "r")
-            for line in file:
-                cc_dict[line.split()[0].rstrip("\n")] = line.split()[2].rstrip()
-
-            for key in cc_dict:
-                if msplit[1] == key:
-                    await message.channel.send(cc_dict[key])
-                    break
-        else:
-            await message.channel.send("Usage: ``cm [command]``")
 
 
 token = os.environ.get("TOKEN")
