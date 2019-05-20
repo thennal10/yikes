@@ -46,19 +46,19 @@ async def on_message(message):
             for key in trans_dict:
                 splitkey = key.split()
                 #don't ask
-                for j in range(len(splitkey)):
+                for j, skey in enumerate(splitkey):
                     if i + j >= len(new_message):
                         incl = False
                         break
-                    elif splitkey[j] != new_message[i + j]:
+                    elif skey != new_message[i + j]:
                         incl = False
                         break
                     incl = True
                 splitval = trans_dict[key].split()
                 #still need to add a case for when splitval > splitkey but eh
                 if incl:
-                    for k in range(len(splitval)):
-                        new_message[i + k] = splitval[k]
+                    for k, val in enumerate(splitval):
+                        new_message[i + k] = val
                     for l in range((len(splitkey)) - (len(splitval))):
                         del new_message[i + l + len(splitval)]
                     i = i - len(splitval)
@@ -77,17 +77,17 @@ async def on_message(message):
                 async for msg in chan.history(limit=3000):
                     if "the" in msg.content:
                         found = 0
-                        for j in range(len(peeps)):
-                            if msg.author.name == peeps[j][0]:
-                                peeps[j][1] += 1
+                        for peep in peeps:
+                            if msg.author.name == peep[0]:
+                                peep[1] += 1
                                 found = 1
                                 break
                         if found == 0:
                             peeps.append([msg.author.name, 0])
         peeps.sort(key=baha_sort, reverse=True)
         leaderboard = "**The Bahaha Leaderboard**```\nRank  | Name\n\n"
-        for i in range(len(peeps)):
-            leaderboard += f"""[{i + 1}]   > {peeps[i][0]}: {peeps[i][1]}\n"""
+        for count, peep in enumerate(peeps):
+            leaderboard += f"""[{count + 1}]   > {peep[0]}: {peep[1]}\n"""
         leaderboard += "```"
         await message.channel.send(leaderboard)
 
