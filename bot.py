@@ -38,10 +38,14 @@ async def on_message(message):
 
         # replace words
         new_message = message.content.split()
-        new_message[0] = "Translation:"
+        if len(new_message) <= 1:
+            new_message[0] = "Peachlator at your service. Usage: ``peachlator: [text]``"
+        else:
+            new_message[0] = "Translation:"
         for i in range(len(new_message)):
             for key in trans_dict:
                 splitkey = key.split()
+                #don't ask
                 for j in range(len(splitkey)):
                     if i + j >= len(new_message):
                         incl = False
@@ -51,6 +55,7 @@ async def on_message(message):
                         break
                     incl = True
                 splitval = trans_dict[key].split()
+                #still need to add a case for when splitval > splitkey but eh
                 if incl:
                     for k in range(len(splitval)):
                         new_message[i + k] = splitval[k]
@@ -62,7 +67,7 @@ async def on_message(message):
         new_message = " ".join(new_message)
         await message.channel.send(new_message)
     elif message.content == "bahaha_leaderboard":
-        # redo this with pandas
+        # redo this with pandas later
         await message.channel.send("Loading...")
         peeps = [["N/A", 0]]
         for chan in serv.text_channels:
