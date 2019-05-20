@@ -38,7 +38,10 @@ async def on_message(message):
 
         # replace words
         new_message = message.content.split()
-        new_message[0] = "Translation:"
+        if len(new_message) <= 1:
+            new_message[0] = "Peachlator at your service."
+        else:
+            new_message[0] = "Translation:"
         for i in range(len(new_message)):
             for key in trans_dict:
                 #don't ask
@@ -92,10 +95,24 @@ async def on_message(message):
         msplit = message.content.split()
         if len(msplit) == 3:
             file = open("customcommands.txt", "+a")
-            file.write(msplit[1] + " - " + msplit[2])
-            await message.channel.send("works?")
-        await message.channel.send("kinda?")
+            file.write(msplit[1] + " - " + msplit[2] + "\n")
+            await message.channel.send("Immortalized!")
+        else:
+            await message.channel.send("Usage: ``immortalize: [command] [link]``")
+    elif message.content.startswith("cst"):
+        msplit = message.content.split()
+        if len(msplit) == 2:
+            cc_dict = {}
+            file = open("customcommands.txt", "r")
+            for line in file:
+                cc_dict[line.split()[0].rstrip("\n")] = line.split()[2].rstrip()
 
+            for key in cc_dict:
+                if msplit[1] == key:
+                    await message.channel.send(cc_dict[key])
+                    break
+        else:
+            await message.channel.send("Usage: ``cm [command]``")
 
 
 token = os.environ.get("TOKEN")
