@@ -91,7 +91,7 @@ async def on_message(message):
     elif message.content.startswith("immortalize:"):
         msplit = message.content.split()
         if len(msplit) == 3:
-            file = open("customcommands.txt", "a")
+            file = open("customcommands.txt", "+a")
             file.write(msplit[1] + " - " + msplit[2])
             await message.channel.send("works?")
         await message.channel.send("kinda?")
