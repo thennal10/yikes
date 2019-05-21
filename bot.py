@@ -90,7 +90,7 @@ async def on_message(message):
                 print(chan)
             peeps.sort(key=baha_sort, reverse=True)
             leaderboard = f"**The {searchword.capitalize()} Leaderboard**```\nRank  | Name\n\n"
-            for count, peep in enumerate(peeps[:4]):
+            for count, peep in enumerate(peeps[:10]):
                 leaderboard += f"""[{count + 1}]   > {peep[0]}: {peep[1]}\n"""
             leaderboard += "```"
             await message.channel.send(leaderboard)
