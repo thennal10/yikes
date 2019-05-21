@@ -48,7 +48,7 @@ async def on_message(message):
         # replace words
         new_message = message.content.split()
         if len(new_message) <= 1:
-            new_message[0] = "Peachlator at your service. Usage: ``peachlator: [text]``"
+            new_message[0] = "Peachlator, at your service. Usage: ``peachlator: [text]``"
         else:
             new_message[0] = "Translation:"
         for i in range(len(new_message)):
@@ -112,6 +112,7 @@ async def on_message(message):
         for character in message.content[7:]:
             num += ord(character)
         num = (num % 10) + 1
+        print(num)
         await message.channel.send(f"bout {num}/10")
 
 
