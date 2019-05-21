@@ -75,7 +75,7 @@ async def on_message(message):
             if perm.read_message_history:
 
                 async for msg in chan.history(limit=3000):
-                    if "the" in msg.content:
+                    if "bahaha" in msg.content:
                         found = 0
                         for peep in peeps:
                             if msg.author.name == peep[0]:
@@ -86,7 +86,7 @@ async def on_message(message):
                             peeps.append([msg.author.name, 0])
         peeps.sort(key=baha_sort, reverse=True)
         leaderboard = "**The Bahaha Leaderboard**```\nRank  | Name\n\n"
-        for count, peep in enumerate(peeps):
+        for count, peep in enumerate(peeps[:4]):
             leaderboard += f"""[{count + 1}]   > {peep[0]}: {peep[1]}\n"""
         leaderboard += "```"
         await message.channel.send(leaderboard)
