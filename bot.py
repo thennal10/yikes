@@ -107,6 +107,12 @@ async def on_message(message):
             await message.channel.send(leaderboard)
         else:
             await message.channel.send("Usage: ``word_leaderboard [no. of messages] [word1] [word2]...``")
+    elif message.content.startswith("score:"):
+        num = 0
+        for character in message.content[7:]:
+            num += ord(character)
+        num = (num % 10) + 1
+        await message.channel.send(f"bout {num}/10")
 
 
 token = os.environ.get("TOKEN")
