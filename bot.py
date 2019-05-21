@@ -70,20 +70,21 @@ async def on_message(message):
         # redo this with pandas later
         await message.channel.send("Loading...")
         peeps = [["N/A", 0]]
+        bahahas = ["baha", "bahaha", "bahahaha", "bahahahaha", "bahahahahaha" , "bahahahahahaha"]
         for chan in serv.text_channels:
             perm = chan.permissions_for(serv.me)
             if perm.read_message_history:
-
-                async for msg in chan.history(limit=3000):
-                    if "bahaha" in msg.content:
-                        found = 0
-                        for peep in peeps:
-                            if msg.author.name == peep[0]:
-                                peep[1] += 1
-                                found = 1
-                                break
-                        if found == 0:
-                            peeps.append([msg.author.name, 0])
+                async for msg in chan.history(limit=5000):
+                    for bahaha in bahahas
+                        if bahaha in msg.content:
+                            found = 0
+                            for peep in peeps:
+                                if msg.author.name == peep[0]:
+                                    peep[1] += 1
+                                    found = 1
+                                    break
+                            if found == 0:
+                                peeps.append([msg.author.name, 0])
         peeps.sort(key=baha_sort, reverse=True)
         leaderboard = "**The Bahaha Leaderboard**```\nRank  | Name\n\n"
         for count, peep in enumerate(peeps[:4]):
