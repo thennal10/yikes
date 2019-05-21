@@ -99,5 +99,5 @@ async def on_message(message):
             await message.channel.send("Usage: ``bahaha_leaderboard [no. of messages]``")
 
 
-token = "NTM2NDAyMzk1MTE1MTU5NTYz.XOKzgw.ENGk2X0bHlkrcMVZ4PCGBWkuNI8" #os.environ.get("TOKEN")
+token =  os.environ.get("TOKEN")
 client.run(token)
