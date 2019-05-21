@@ -66,32 +66,38 @@ async def on_message(message):
         # send result
         new_message = " ".join(new_message)
         await message.channel.send(new_message)
-    elif message.content == "bahaha_leaderboard":
+    elif message.content.startswith("bahaha_leaderboard"):
         # redo this with pandas later
-        await message.channel.send("Loading...")
-        peeps = [["N/A", 0]]
-        bahahas = ["baha", "bahaha", "bahahaha", "bahahahaha", "bahahahahaha" , "bahahahahahaha"]
-        for chan in serv.text_channels:
-            perm = chan.permissions_for(serv.me)
-            if perm.read_message_history:
-                async for msg in chan.history(limit=5000):
-                    for bahaha in bahahas
-                        if bahaha in msg.content:
-                            found = 0
-                            for peep in peeps:
-                                if msg.author.name == peep[0]:
-                                    peep[1] += 1
-                                    found = 1
-                                    break
-                            if found == 0:
-                                peeps.append([msg.author.name, 0])
-        peeps.sort(key=baha_sort, reverse=True)
-        leaderboard = "**The Bahaha Leaderboard**```\nRank  | Name\n\n"
-        for count, peep in enumerate(peeps[:4]):
-            leaderboard += f"""[{count + 1}]   > {peep[0]}: {peep[1]}\n"""
-        leaderboard += "```"
-        await message.channel.send(leaderboard)
+        smsg = message.content.split()
+        if len(smsg) == 2 and smsg[1].isdigit():
+            msglimit = int(smsg[1])
+            await message.channel.send("Loading...")
+            peeps = [["N/A", 0]]
+            bahahas = ["baha", "bahaha", "bahahaha", "bahahahaha", "bahahahahaha" , "bahahahahahaha", "bahah", "bahahah", "bahahahah"]
+            for chan in serv.text_channels:
+                perm = chan.permissions_for(serv.me)
+                if perm.read_message_history:
+                    async for msg in chan.history(limit=msglimit):
+                        for bahaha in bahahas:
+                            if bahaha in msg.content and not msg.author.bot:
+                                found = 0
+                                for peep in peeps:
+                                    if msg.author.name == peep[0]:
+                                        peep[1] += 1
+                                        found = 1
+                                        break
+                                if found == 0:
+                                    peeps.append([msg.author.name, 0])
+                print(chan)
+            peeps.sort(key=baha_sort, reverse=True)
+            leaderboard = "**The Bahaha Leaderboard**```\nRank  | Name\n\n"
+            for count, peep in enumerate(peeps[:4]):
+                leaderboard += f"""[{count + 1}]   > {peep[0]}: {peep[1]}\n"""
+            leaderboard += "```"
+            await message.channel.send(leaderboard)
+        else:
+            await message.channel.send("Usage: ``bahaha_leaderboard [no. of messages]``")
 
 
-token = os.environ.get("TOKEN")
+token = "NTM2NDAyMzk1MTE1MTU5NTYz.XOKzgw.ENGk2X0bHlkrcMVZ4PCGBWkuNI8" #os.environ.get("TOKEN")
 client.run(token)
