@@ -66,37 +66,36 @@ async def on_message(message):
         # send result
         new_message = " ".join(new_message)
         await message.channel.send(new_message)
-    elif message.content.startswith("bahaha_leaderboard"):
+    elif message.content.startswith("word_leaderboard"):
         # redo this with pandas later
         smsg = message.content.split()
-        if len(smsg) == 2 and smsg[1].isdigit():
-            msglimit = int(smsg[1])
+        if len(smsg) == 3 and smsg[2].isdigit():
+            msglimit = int(smsg[2])
+            searchword = smsg[1]
             await message.channel.send("Loading...")
             peeps = [["N/A", 0]]
-            bahahas = ["baha", "bahaha", "bahahaha", "bahahahaha", "bahahahahaha" , "bahahahahahaha", "bahah", "bahahah", "bahahahah"]
             for chan in serv.text_channels:
                 perm = chan.permissions_for(serv.me)
                 if perm.read_message_history:
                     async for msg in chan.history(limit=msglimit):
-                        for bahaha in bahahas:
-                            if bahaha in msg.content and not msg.author.bot:
-                                found = 0
-                                for peep in peeps:
-                                    if msg.author.name == peep[0]:
-                                        peep[1] += 1
-                                        found = 1
-                                        break
-                                if found == 0:
-                                    peeps.append([msg.author.name, 0])
+                        if searchword in msg.content and not msg.author.bot:
+                            found = 0
+                            for peep in peeps:
+                                if msg.author.name == peep[0]:
+                                    peep[1] += 1
+                                    found = 1
+                                    break
+                            if found == 0:
+                                peeps.append([msg.author.name, 0])
                 print(chan)
             peeps.sort(key=baha_sort, reverse=True)
-            leaderboard = "**The Bahaha Leaderboard**```\nRank  | Name\n\n"
+            leaderboard = f"**The {searchword.capitalize()} Leaderboard**```\nRank  | Name\n\n"
             for count, peep in enumerate(peeps[:4]):
                 leaderboard += f"""[{count + 1}]   > {peep[0]}: {peep[1]}\n"""
             leaderboard += "```"
             await message.channel.send(leaderboard)
         else:
-            await message.channel.send("Usage: ``bahaha_leaderboard [no. of messages]``")
+            await message.channel.send("Usage: ``word_leaderboard [word] [no. of messages]``")
 
 
 token = os.environ.get("TOKEN")
