@@ -98,7 +98,7 @@ async def on_message(message):
                                         found = 1
                                         break
                                 if found == 0:
-                                    peeps.append([msg.author.name, 0])
+                                    peeps.append([msg.author.name, 1])
                 print(chan)
             peeps.sort(key=baha_sort, reverse=True)
             leaderboard = f"**The {leaderboard_name(searchwords)} Leaderboard**```\nRank  | Name\n\n"
