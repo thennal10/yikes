@@ -54,7 +54,7 @@ async def on_message(message):
         for i in range(len(new_message)):
             for key in trans_dict:
                 splitkey = key.split()
-                #don't ask
+                # don't ask
                 for j, skey in enumerate(splitkey):
                     if i + j >= len(new_message):
                         incl = False
@@ -77,10 +77,11 @@ async def on_message(message):
         await message.channel.send(new_message)
     elif message.content.startswith("word_leaderboard"):
         # redo this with pandas later
-        smsg = message.content.split()
-        if len(smsg) >= 3 and smsg[1].isdigit():
-            msglimit = int(smsg[1])
-            searchwords = smsg[2:]
+        spacedmsg = message.content.split()
+        actmsg = " ".join(spacedmsg[2:])
+        if len(spacedmsg) >= 3 and spacedmsg[1].isdigit():
+            msglimit = int(spacedmsg[1])
+            searchwords = actmsg.split(" + ")
             print(searchwords)
             await message.channel.send("Loading...")
             peeps = [["N/A", 0]]
@@ -106,7 +107,7 @@ async def on_message(message):
             leaderboard += "```"
             await message.channel.send(leaderboard)
         else:
-            await message.channel.send("Usage: ``word_leaderboard [no. of messages] [word1] [word2]...``")
+            await message.channel.send("Usage: ``word_leaderboard [no. of messages] [phrase1] + [phrase2]...``")
     elif message.content.startswith("score:"):
         num = 0
         for character in message.content[7:]:
