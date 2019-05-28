@@ -90,7 +90,7 @@ async def on_message(message):
                 if perm.read_message_history:
                     async for msg in chan.history(limit=msglimit):
                         for searchword in searchwords:
-                            if searchword in msg.content and not msg.author.bot:
+                            if searchword in msg.content.lower() and not msg.author.bot:
                                 found = 0
                                 for peep in peeps:
                                     if msg.author.name == peep[0]:
