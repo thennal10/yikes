@@ -115,6 +115,18 @@ async def on_message(message):
         num = (num % 10) + 1
         print(num)
         await message.channel.send(f"bout {num}/10")
+    elif message.content.startswith("strokify:"):
+        try:
+            iscap = False
+            outputmsg = list(message.content[9:])
+            for count, character in enumerate(outputmsg):
+                if character.isalpha():
+                    if iscap:
+                        outputmsg[count] = character.capitalize()
+                    iscap = not iscap
+            await message.channel.send("".join(outputmsg))
+        except:
+            await message.channel.send("Usage: ``strokify: [sentence]``")
 
 
 token = os.environ.get("TOKEN")
