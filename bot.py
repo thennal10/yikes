@@ -188,7 +188,7 @@ async def on_message(message):
         while row is not None:
             if row[0] == msplit[1]:
                 sql = """DELETE FROM customcommands WHERE command = %s;"""
-                data = (msplit[1])
+                data = msplit[1]
                 cur.execute(sql, data)
                 found = True
                 break
