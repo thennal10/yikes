@@ -173,7 +173,7 @@ async def on_message(message):
                     break
                 row = cur.fetchone()
             if not found:
-                await message.channel.send("Couldn't find the command!")
+                await message.channel.send("That command doesn't exist, you dumb fuck")
             cur.close()
         else:
             await message.channel.send("Usage: ``yi! [command]``")
@@ -194,6 +194,7 @@ async def on_message(message):
                 break
             row = cur.fetchone()
         if not found:
+            await message.channel.send("That command doesn't exist, you dumb fuck")
     elif message.content == "yikes!":
         embed = discord.Embed(title="**Yikes! at your service.**", description="Ping premed if anything breaks down.", color=9911100)
         embed.set_author(name="Someone called?")
