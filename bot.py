@@ -1,5 +1,6 @@
 import discord
 import os
+import psycopg2
 
 
 def baha_sort(l):
@@ -18,6 +19,15 @@ def leaderboard_name(l):
 client = discord.Client()
 print("Running!")
 
+DATABASE_URL = os.environ['DATABASE_URL']
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+
+commandlist = {"peachlator:": "What it says on the tin",
+               "word_leaderboard": "Creates a leaderboard based on a given word/phrase",
+               "score:": "Outputs a random score based on the given word/phrase",
+               "strokify:": "tUrNs GiVeN tExT iNtO tHiS"
+               "custom:": "Creates a simple input output command",
+               "yi!": "Calls a custom command"}
 
 @client.event
 async def on_message(message):
@@ -27,6 +37,7 @@ async def on_message(message):
 
     serv = message.guild
 
+    #commands
     if message.content.startswith("peachlator:"):
         # load dictionary
         trans_dict = {}
@@ -127,6 +138,48 @@ async def on_message(message):
             await message.channel.send("".join(outputmsg))
         except:
             await message.channel.send("Usage: ``strokify: [sentence]``")
+    elif message.content.startswith("custom:"):
+        msplit = message.content.split()
+        if len(msplit) == 3:
+
+            #SQL shit
+            sql = """INSERT INTO customcommands (command, output) VALUES (%s, %s);"""
+            data = (msplit[1], msplit[2])
+            cur = conn.cursor()
+            cur.execute(sql, data)
+            conn.commit()
+            cur.close()
+
+            await message.channel.send("Immortalized!")
+        else:
+            await message.channel.send("Usage: ``custom: [command] [link/text]``")
+    elif message.content.startswith("yi!"):
+        msplit = message.content.split()
+        if len(msplit) == 2:
+
+            #More SQL shit
+            sql = """SELECT command, output FROM customcommands;"""
+            cur = conn.cursor()
+            cur.execute(sql)
+            row = cur.fetchone()
+            found = False
+            while row is not None:
+                if row[0] == msplit[1]:
+                    await message.channel.send(row[1])
+                    found = True
+                    break
+                row = cur.fetchone()
+            if not found:
+                await message.channel.send("Couldn't find the command!")
+            cur.close()
+        else:
+            await message.channel.send("Usage: ``yi! [command]``")
+    elif message.content == "yikes!":
+        embed = discord.Embed(title="**Yikes! at your service.**", description="Ping premed if anything breaks down.", color=9911100)
+        embed.set_author(name="Someone called?")
+        for command in commandlist:
+            embed.add_field(name=f"**{command}**", value=commandlist[command], inline=True)
+        await message.channel.send(content=None, embed=embed)
 
 
 token = os.environ.get("TOKEN")
