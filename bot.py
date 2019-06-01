@@ -25,7 +25,7 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 commandlist = {"peachlator:": "What it says on the tin",
                "word_leaderboard": "Creates a leaderboard based on a given word/phrase",
                "score:": "Outputs a random score based on the given word/phrase",
-               "strokify:": "tUrNs GiVeN tExT iNtO tHiS"
+               "strokify:": "tUrNs GiVeN tExT iNtO tHiS",
                "custom:": "Creates a simple input output command",
                "yi!": "Calls a custom command"}
 
