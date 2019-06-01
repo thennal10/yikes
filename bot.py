@@ -177,6 +177,23 @@ async def on_message(message):
             cur.close()
         else:
             await message.channel.send("Usage: ``yi! [command]``")
+    elif message.content.startswith("remove:"):
+        msplit = message.content.split()
+        #Even more SQL
+        sql = """SELECT command, output FROM customcommands;"""
+        cur = conn.cursor()
+        cur.execute(sql)
+        row = cur.fetchone()
+        found = False
+        while row is not None:
+            if row[0] == msplit[1]:
+                sql = """DELETE FROM customcommands WHERE command = %s;"""
+                data = (msplit[1])
+                cur.execute(sql, data)
+                found = True
+                break
+            row = cur.fetchone()
+        if not found:
     elif message.content == "yikes!":
         embed = discord.Embed(title="**Yikes! at your service.**", description="Ping premed if anything breaks down.", color=9911100)
         embed.set_author(name="Someone called?")
