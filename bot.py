@@ -146,7 +146,11 @@ async def on_message(message):
             sql = """INSERT INTO customcommands (command, output) VALUES (%s, %s);"""
             data = (msplit[1], msplit[2])
             cur = conn.cursor()
-            cur.execute(sql, data)
+            try:
+                cur.execute(sql, data)
+            except:
+                await message.channel.send("Command already exists, or you fucking broke the bot. Congrats, asshole")
+                conn.rollback()
             conn.commit()
             cur.close()
 
