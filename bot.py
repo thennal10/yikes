@@ -148,13 +148,12 @@ async def on_message(message):
             cur = conn.cursor()
             try:
                 cur.execute(sql, data)
+                await message.channel.send("Immortalized!")
             except:
-                await message.channel.send("Command already exists, or you fucking broke the bot. Congrats, asshole")
+                await message.channel.send("Command already exists, or you fucking broke the bot. Congrats, asshole.")
                 conn.rollback()
             conn.commit()
             cur.close()
-
-            await message.channel.send("Immortalized!")
         else:
             await message.channel.send("Usage: ``custom: [command] [link/text]``")
     elif message.content.startswith("yi!"):
