@@ -187,18 +187,20 @@ async def on_message(message):
         found = False
         while row is not None:
             if row[0] == msplit[1]:
-                sql = f"""DELETE FROM customcommands WHERE command ='{msplit[1]}'';"""
+                sql = f"""DELETE FROM customcommands WHERE command ='{msplit[1]}';"""
                 cur.execute(sql)
                 found = True
+                await message.channel.send("Sucessfully removed command. Yay!")
                 break
             row = cur.fetchone()
         if not found:
             await message.channel.send("That command doesn't exist, you dumb fuck")
     elif message.content == "yikes!":
-        embed = discord.Embed(title="**Yikes! at your service.**", description="Ping premed if anything breaks down.", color=9911100)
-        embed.set_author(name="Someone called?")
+        embed = discord.Embed(title="**Yikes! at your service.**", description="What would you like for your order?\n\n", color=9911100)
+        embed.set_author(name="Someone called?", icon_url="https://cdn.discordapp.com/attachments/469524231244349452/584658974515920912/360fx360f.png")
+        embed.set_footer(text="Ping premed if anything breaks down", icon_url="https://cdn.discordapp.com/attachments/469524231244349452/584658974515920912/360fx360f.png")
         for command in commandlist:
-            embed.add_field(name=f"**{command}**", value=commandlist[command], inline=True)
+            embed.add_field(name=f"**{command}**", value=commandlist[command], inline=False)
         await message.channel.send(content=None, embed=embed)
 
 
