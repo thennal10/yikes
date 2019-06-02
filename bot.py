@@ -22,12 +22,15 @@ print("Running!")
 DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
-commandlist = {"peachlator:": "What it says on the tin",
-               "word_leaderboard": "Creates a leaderboard based on a given word/phrase",
-               "score:": "Outputs a random score based on the given word/phrase",
-               "strokify:": "tUrNs GiVeN tExT iNtO tHiS",
-               "custom:": "Creates a simple input output command",
-               "yi!": "Calls a custom command"}
+commandlist = {
+    "peachlator:": "What it says on the tin",
+    "word_leaderboard": "Creates a leaderboard based on a given word/phrase",
+    "score:": "Outputs a random score based on the given word/phrase",
+    "strokify:": "tUrNs GiVeN tExT iNtO tHiS",
+    "custom:": "Creates a simple input output command",
+    "yi!": "Calls a custom command",
+    "remove:": "Removes a custom command"
+    }
 
 @client.event
 async def on_message(message):
@@ -199,6 +202,7 @@ async def on_message(message):
         embed = discord.Embed(title="**Yikes! at your service.**", description="What would you like for your order?\n \n \n", color=9911100)
         embed.set_author(name="Someone called?", icon_url="https://cdn.discordapp.com/attachments/469524231244349452/584658974515920912/360fx360f.png")
         embed.set_footer(text="Ping premed if anything breaks down", icon_url="https://cdn.discordapp.com/attachments/469524231244349452/584658974515920912/360fx360f.png")
+        embed.add_field(name='\u200b', value='\u200b')  
         for command in commandlist:
             embed.add_field(name=f"**{command}**", value=commandlist[command], inline=False)
         await message.channel.send(content=None, embed=embed)
