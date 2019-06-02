@@ -199,7 +199,7 @@ async def on_message(message):
         if not found:
             await message.channel.send("That command doesn't exist, you dumb fuck")
     elif message.content == "yikes!":
-        embed = discord.Embed(title="**Yikes! at your service.**", description="What would you like for your order?\n \n \n", color=9911100, timestamp=datetime.utcnow())
+        embed = discord.Embed(title="**Yikes! at your service.**", description="What would you like for your order?\n \n \n", color=9911100)
         embed.set_author(name="Someone called?", icon_url="https://cdn.discordapp.com/attachments/469524231244349452/584658974515920912/360fx360f.png")
         embed.set_footer(text="Ping premed if anything breaks down.", icon_url="https://cdn.discordapp.com/attachments/469524231244349452/584658974515920912/360fx360f.png")  
         for command in commandlist:
