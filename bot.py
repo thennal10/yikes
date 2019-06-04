@@ -198,7 +198,7 @@ async def on_message(message):
             row = cur.fetchone()
         if not found:
             await message.channel.send("That command doesn't exist, you dumb fuck")
-    elif message.content.startswith("yi!list"):
+    elif message.content == "list!":
         msplit = message.content.split()
         #Even more SQL
         sql = """SELECT command, output FROM customcommands;"""
