@@ -207,7 +207,7 @@ async def on_message(message):
         row = cur.fetchone()
         listoutput = "**List of Custom Commands**\n```"
         while row is not None:
-            listoutput += f"""{row[0]} - {row[1]}\n"""
+            listoutput += f"""{row[0]}\n"""
             row = cur.fetchone()
         listoutput += "```"
         await message.channel.send(listoutput)
