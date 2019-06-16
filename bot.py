@@ -1,6 +1,8 @@
 import discord
 import os
 import psycopg2
+from pixivpy3 import *
+import random
 
 
 def baha_sort(l):
@@ -22,12 +24,20 @@ print("Running!")
 DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
+puser = os.environ['PIXIV_USERNAME']
+ppass = os.environ['PIXIV_PASSWORD']
+api = AppPixivAPI()
+api.login(puser, ppass)
+
 commandlist = {"peachlator:": "What it says on the tin",
                "word_leaderboard": "Creates a leaderboard based on a given word/phrase",
                "score:": "Outputs a random score based on the given word/phrase",
                "strokify:": "tUrNs GiVeN tExT iNtO tHiS",
                "custom:": "Creates a simple input output command",
-               "yi!": "Calls a custom command"}
+               "yi!": "Calls a custom command",
+               "remove:": "Removes a custom command",
+               "pixiv!": "Posts a random illustration from the weekly top 30 pixiv rankings"}
+
 
 @client.event
 async def on_message(message):
@@ -37,7 +47,7 @@ async def on_message(message):
 
     serv = message.guild
 
-    #commands
+    # commands
     if message.content.startswith("peachlator:"):
         # load dictionary
         trans_dict = {}
@@ -75,7 +85,7 @@ async def on_message(message):
                         break
                     incl = True
                 splitval = trans_dict[key].split()
-                #still need to add a case for when splitval > splitkey but eh
+                # still need to add a case for when splitval > splitkey but eh
                 if incl:
                     for k, val in enumerate(splitval):
                         new_message[i + k] = val
@@ -142,7 +152,7 @@ async def on_message(message):
         msplit = message.content.split()
         if len(msplit) == 3:
 
-            #SQL shit
+            # SQL shit
             sql = """INSERT INTO customcommands (command, output) VALUES (%s, %s);"""
             data = (msplit[1], msplit[2])
             cur = conn.cursor()
@@ -160,7 +170,7 @@ async def on_message(message):
         msplit = message.content.split()
         if len(msplit) == 2:
 
-            #More SQL shit
+            # More SQL shit
             sql = """SELECT command, output FROM customcommands;"""
             cur = conn.cursor()
             cur.execute(sql)
@@ -179,7 +189,7 @@ async def on_message(message):
             await message.channel.send("Usage: ``yi! [command]``")
     elif message.content.startswith("remove:"):
         msplit = message.content.split()
-        #Even more SQL
+        # Even more SQL
         sql = """SELECT command, output FROM customcommands;"""
         cur = conn.cursor()
         cur.execute(sql)
@@ -194,6 +204,29 @@ async def on_message(message):
             row = cur.fetchone()
         if not found:
             await message.channel.send("That command doesn't exist, you dumb fuck")
+    elif message.content == "pixiv!":
+        # get ranking: 1-30
+        # mode: [day, week, month, day_male, day_female, week_original, week_rookie, day_manga]
+        json_result = api.illust_ranking('week')
+
+        # download random illust in top 30 week rankings to 'dl' dir
+        directory = "dl"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        illust = random.choice(json_result.illusts)
+        image_url = illust.meta_single_page.get('original_image_url', illust.image_urls.large)
+
+        url_basename = os.path.basename(image_url)
+        extension = os.path.splitext(url_basename)[1]
+        name = "illust_id_%d_%s%s" % (illust.id, illust.title, extension)
+        api.download(image_url, path=directory, name=name)
+
+        f = open(f"dl/{name}", "rb")
+        outputfile = discord.File(fp=f)
+        try:
+            await message.channel.send(content=f"Source: <https://www.pixiv.net/member_illust.php?mode=medium&illust_id={illust.id}>", file=outputfile)
+        except:
+            await message.channel.send("BEEP BOOP FUCKING POOP THERE'S A BIG BAD ERROR. File was probably too big to upload, try again.")
     elif message.content == "yikes!":
         embed = discord.Embed(title="**Yikes! at your service.**", description="Ping premed if anything breaks down.", color=9911100)
         embed.set_author(name="Someone called?")
