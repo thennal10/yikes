@@ -36,6 +36,7 @@ commandlist = {"peachlator:": "What it says on the tin",
                "custom:": "Creates a simple input output command",
                "yi!": "Calls a custom command",
                "remove:": "Removes a custom command",
+               "list!": "Lists all custom commands",
                "pixiv!": "Posts a random illustration from the weekly top 30 pixiv rankings"}
 
 
@@ -204,6 +205,18 @@ async def on_message(message):
             row = cur.fetchone()
         if not found:
             await message.channel.send("That command doesn't exist, you dumb fuck")
+    elif message.content == "list!":
+        # EVEN MORE SQL
+        sql = """SELECT command, output FROM customcommands;"""
+        cur = conn.cursor()
+        cur.execute(sql)
+        row = cur.fetchone()
+        listoutput = "**List of Custom Commands**\n```"
+        while row is not None:
+            listoutput += f"""{row[0]}\n"""
+            row = cur.fetchone()
+        listoutput += "```"
+        await message.channel.send(listoutput)
     elif message.content == "pixiv!":
         # get ranking: 1-30
         # mode: [day, week, month, day_male, day_female, week_original, week_rookie, day_manga]
@@ -228,10 +241,11 @@ async def on_message(message):
         except:
             await message.channel.send("BEEP BOOP FUCKING POOP THERE'S A BIG BAD ERROR. File was probably too big to upload, try again.")
     elif message.content == "yikes!":
-        embed = discord.Embed(title="**Yikes! at your service.**", description="Ping premed if anything breaks down.", color=9911100)
-        embed.set_author(name="Someone called?")
+        embed = discord.Embed(title="**Yikes! at your service.**", description="What would you like for your order?\n \n \n", color=9911100)
+        embed.set_author(name="Someone called?", icon_url="https://cdn.discordapp.com/attachments/469524231244349452/584658974515920912/360fx360f.png")
+        embed.set_footer(text="Ping premed if anything breaks down.", icon_url="https://cdn.discordapp.com/attachments/469524231244349452/584658974515920912/360fx360f.png")
         for command in commandlist:
-            embed.add_field(name=f"**{command}**", value=commandlist[command], inline=True)
+            embed.add_field(name=f"**{command}**", value=commandlist[command], inline=False)
         await message.channel.send(content=None, embed=embed)
 
 
