@@ -37,7 +37,9 @@ commandlist = {"peachlator:": "What it says on the tin",
                "yi!": "Calls a custom command",
                "remove:": "Removes a custom command",
                "list!": "Lists all custom commands",
-               "pixiv!": "Posts a random illustration from the weekly top 30 pixiv rankings"}
+               "pixiv!": "Posts a random illustration from pixiv based on rankings. Additional parameters include gay,"
+                         "female (ranked by female member popularity), lennypika (nsfw) and big_gay (gay nsfw)"
+               }
 
 
 @client.event
@@ -217,29 +219,79 @@ async def on_message(message):
             row = cur.fetchone()
         listoutput += "```"
         await message.channel.send(listoutput)
-    elif message.content == "pixiv!":
+    elif message.content.startswith("pixiv!"):
+        msplit = message.content.split()
+        blacklist = ["漫画"]
+        whitelist = []
+        cont = True
         # get ranking: 1-30
         # mode: [day, week, month, day_male, day_female, week_original, week_rookie, day_manga]
-        json_result = api.illust_ranking('week')
+        if len(msplit) > 1:
+            if msplit[1] == "female":
+                json_result = api.illust_ranking('day_female')
+            elif msplit[1] == "lennypika":
+                json_result = api.illust_ranking('day_r18')
+            elif msplit[1] == "gay":
+                json_result = api.illust_ranking('day_female')
+                whitelist.append("腐向け")
+            elif msplit[1] == "big_gay":
+                json_result = api.illust_ranking('day_female_r18')
+                whitelist.append("腐向け")
+            else:
+                await message.channel.send(f"the fuck does {msplit[1:]} mean?")
+                cont = False
+        else:
+            json_result = api.illust_ranking('day')
 
-        # download random illust in top 30 week rankings to 'dl' dir
-        directory = "dl"
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        illust = random.choice(json_result.illusts)
-        image_url = illust.meta_single_page.get('original_image_url', illust.image_urls.large)
+        if cont:
+            # download random illust in top 30 week rankings to 'dl' dir
+            directory = "dl"
+            if not os.path.exists(directory):
+                os.makedirs(directory)
 
-        url_basename = os.path.basename(image_url)
-        extension = os.path.splitext(url_basename)[1]
-        name = "illust_id_%d_%s%s" % (illust.id, illust.title, extension)
-        api.download(image_url, path=directory, name=name)
+            # while loop is for if the first 30 results all have blacklisted tags
+            while True:
+                # dump usable illusts into an array
+                usable_illusts = []
+                for illust in json_result.illusts:
+                    if illust.type != "manga" and len(illust.meta_pages) == 0:
+                        usable = True
+                        whitelisted = False
+                        for tag in illust.tags:
+                            if tag.name in blacklist:
+                                usable = False
+                                break
+                            elif len(whitelist) != 0 and tag.name in whitelist:
+                                whitelisted = True
+                        if len(whitelist) != 0:
+                            if usable and whitelisted:
+                                usable_illusts.append(illust)
+                        elif usable:
+                            usable_illusts.append(illust)
+                if len(usable_illusts) == 0:
+                    print("couldn't find usable illust, redoing")
+                    next_qs = api.parse_qs(json_result.next_url)
+                    json_result = api.illust_ranking(**next_qs)
+                else:
+                    # dl a random illust
+                    illust = random.choice(usable_illusts)
+                    image_url = illust.meta_single_page.get('original_image_url', illust.image_urls.large)
+                    url_basename = os.path.basename(image_url)
+                    extension = os.path.splitext(url_basename)[1]
+                    name = "illust_id_%d_%s%s" % (illust.id, illust.title, extension)
+                    print(illust)
+                    try:
+                        api.download(image_url, path=directory, name=name)
+                        f = open(f"dl/{name}", "rb")
+                        outputfile = discord.File(fp=f)
+                        await message.channel.send(
+                            content=f"Source: <https://www.pixiv.net/member_illust.php?mode=medium&illust_id={illust.id}>",
+                            file=outputfile)
+                        break
+                    except:
+                        next_qs = api.parse_qs(json_result.next_url)
+                        json_result = api.illust_ranking(**next_qs)
 
-        f = open(f"dl/{name}", "rb")
-        outputfile = discord.File(fp=f)
-        try:
-            await message.channel.send(content=f"Source: <https://www.pixiv.net/member_illust.php?mode=medium&illust_id={illust.id}>", file=outputfile)
-        except:
-            await message.channel.send("BEEP BOOP FUCKING POOP THERE'S A BIG BAD ERROR. File was probably too big to upload, try again.")
     elif message.content == "yikes!":
         embed = discord.Embed(title="**Yikes! at your service.**", description="What would you like for your order?\n \n \n", color=9911100)
         embed.set_author(name="Someone called?", icon_url="https://cdn.discordapp.com/attachments/469524231244349452/584658974515920912/360fx360f.png")
