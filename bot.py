@@ -2,8 +2,9 @@ import discord
 import os
 import psycopg2
 from pixivpy3 import *
-import random
+from pybooru import Danbooru
 
+oldposts = []
 
 def baha_sort(l):
     return l[1]
@@ -17,7 +18,7 @@ def leaderboard_name(l):
             name += "/"
     return name
 
-
+danb = Danbooru('danbooru')
 client = discord.Client()
 print("Running!")
 
@@ -37,8 +38,8 @@ commandlist = {"peachlator:": "What it says on the tin",
                "yi!": "Calls a custom command",
                "remove:": "Removes a custom command",
                "list!": "Lists all custom commands",
-               "pixiv!": "Posts a random illustration from pixiv based on rankings. Additional parameters include gay,"
-                         "female (ranked by female member popularity), lennypika (nsfw) and big_gay (gay nsfw)"
+               "pixiv!": "Posts a random illustration from pixiv based on rankings. Use 'pixiv! help' to get list of modes"
+               "danbooru!: Posts top ranking illustrations from danbooru based on given tags. "
                }
 
 
@@ -221,28 +222,26 @@ async def on_message(message):
         await message.channel.send(listoutput)
     elif message.content.startswith("pixiv!"):
         msplit = message.content.split()
-        blacklist = ["漫画"]
-        whitelist = []
         cont = True
+        x = 0
+
+        if len(msplit) == 1:
+            msplit.append('day')
+        elif msplit[1] == "help":
+            await message.channel.send("**Usable modes:** ```day, week, month, day_male, day_female, week_original,"
+                                       " week_rookie, day_r18, day_male_r18, day_female_r18, week_r18, week_r18g```")
+            cont = False
+
         # get ranking: 1-30
         # mode: [day, week, month, day_male, day_female, week_original, week_rookie, day_manga]
-        if len(msplit) > 1:
-            if msplit[1] == "female":
-                json_result = api.illust_ranking('day_female')
-            elif msplit[1] == "lennypika":
-                json_result = api.illust_ranking('day_r18')
-            elif msplit[1] == "gay":
-                json_result = api.illust_ranking('day_female')
-                whitelist.append("腐向け")
-            elif msplit[1] == "big_gay":
-                json_result = api.illust_ranking('day_female_r18')
-                whitelist.append("腐向け")
-            else:
-                await message.channel.send(f"the fuck does {msplit[1:]} mean?")
+        json_result = api.illust_ranking(msplit[1])
+        print(json_result)
+        if cont:
+            try:
+                print(json_result.illusts)
+            except AttributeError:
+                await message.channel.send(f"The flying fuck is {msplit[1]}? Use ``pixiv! help`` to see the available modes")
                 cont = False
-        else:
-            json_result = api.illust_ranking('day')
-
         if cont:
             # download random illust in top 30 week rankings to 'dl' dir
             directory = "dl"
@@ -251,46 +250,74 @@ async def on_message(message):
 
             # while loop is for if the first 30 results all have blacklisted tags
             while True:
-                # dump usable illusts into an array
-                usable_illusts = []
-                for illust in json_result.illusts:
+                notfound = True
+                for count, illust in enumerate(json_result.illusts[x:]):
                     if illust.type != "manga" and len(illust.meta_pages) == 0:
-                        usable = True
-                        whitelisted = False
-                        for tag in illust.tags:
-                            if tag.name in blacklist:
-                                usable = False
-                                break
-                            elif len(whitelist) != 0 and tag.name in whitelist:
-                                whitelisted = True
-                        if len(whitelist) != 0:
-                            if usable and whitelisted:
-                                usable_illusts.append(illust)
-                        elif usable:
-                            usable_illusts.append(illust)
-                if len(usable_illusts) == 0:
-                    print("couldn't find usable illust, redoing")
+                        tempillust = illust
+                        x = x + 1
+                        print(x)
+                        notfound = False
+                        break
+                if notfound or x >= 29:
+                    print(json_result)
+                    x = 0
                     next_qs = api.parse_qs(json_result.next_url)
                     json_result = api.illust_ranking(**next_qs)
                 else:
-                    # dl a random illust
-                    illust = random.choice(usable_illusts)
+                    # dl the illust
+                    illust = tempillust
                     image_url = illust.meta_single_page.get('original_image_url', illust.image_urls.large)
                     url_basename = os.path.basename(image_url)
                     extension = os.path.splitext(url_basename)[1]
-                    name = "illust_id_%d_%s%s" % (illust.id, illust.title, extension)
+                    name = "illust_id_%d_%s_%s" % (illust.id, illust.title, extension)
                     print(illust)
+                    if os.path.isfile(f"dl/{name}"):
+                        x = x + 1
+                        print(x)
+                    else:
+                        try:
+                            api.download(image_url, path=directory, name=name)
+                            f = open(f"dl/{name}", "rb")
+                            outputfile = discord.File(fp=f)
+                            await message.channel.send(
+                                content=f"Source: <https://www.pixiv.net/member_illust.php?mode=medium&illust_id={illust.id}>",
+                                file=outputfile)
+                            break
+                        except:
+                            x = x + 1
+    elif message.content.startswith("danbooru!"):
+        msplit = message.content.split()
+        pg = 1
+        tag = ["order:score", "rating:safe"]
+        tag.extend(msplit[1:])
+
+        stag = " ".join(tag)
+        print(stag)
+        found = False
+        while True:
+            try:
+                postlist = danb.post_list(limit=100, page=pg, tags=stag)
+            except:
+                await  message.channel.send("U dun fucked up boi. Probably used more than one tag.")
+                break
+            if len(postlist) == 0:
+                await message.channel.send("Tag not found. Try again?")
+                break
+            for count, post in enumerate(postlist):
+                if post['id'] in oldposts:
+                    continue
+                else:
+                    oldposts.append(post['id'])
                     try:
-                        api.download(image_url, path=directory, name=name)
-                        f = open(f"dl/{name}", "rb")
-                        outputfile = discord.File(fp=f)
-                        await message.channel.send(
-                            content=f"Source: <https://www.pixiv.net/member_illust.php?mode=medium&illust_id={illust.id}>",
-                            file=outputfile)
-                        break
-                    except:
-                        next_qs = api.parse_qs(json_result.next_url)
-                        json_result = api.illust_ranking(**next_qs)
+                        await message.channel.send(post['large_file_url'])
+                    except KeyError:
+                        await  message.channel.send(post['file_url'])
+                    found = True
+                    break
+            if found:
+                break
+            else:
+                pg = pg + 1
 
     elif message.content == "yikes!":
         embed = discord.Embed(title="**Yikes! at your service.**", description="What would you like for your order?\n \n \n", color=9911100)
