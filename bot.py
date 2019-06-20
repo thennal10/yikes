@@ -3,8 +3,13 @@ import os
 import psycopg2
 from pixivpy3 import *
 from pybooru import Danbooru
+import praw
+#from dotenv import load_dotenv
 
+#load_dotenv()
 oldposts = []
+oldsubmissions = []
+
 
 def baha_sort(l):
     return l[1]
@@ -18,15 +23,19 @@ def leaderboard_name(l):
             name += "/"
     return name
 
-danb = Danbooru('danbooru')
-client = discord.Client()
-print("Running!")
-
 DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-
 puser = os.environ['PIXIV_USERNAME']
 ppass = os.environ['PIXIV_PASSWORD']
+client_id = os.environ['REDDIT_CLIENT_ID']
+client_secret = os.environ['REDDIT_CLIENT_SECRET']
+
+danb = Danbooru('danbooru')
+reddit = praw.Reddit(client_id=client_id,
+                     client_secret=client_secret,
+                     user_agent='yikes:v1 by u/thennal')
+
+client = discord.Client()
 api = AppPixivAPI()
 api.login(puser, ppass)
 
@@ -42,7 +51,7 @@ commandlist = {"peachlator:": "What it says on the tin",
                "danbooru!: Posts top ranking illustrations from danbooru based on given tags. "
                }
 
-
+print("Running!")
 @client.event
 async def on_message(message):
 
@@ -318,11 +327,90 @@ async def on_message(message):
                 break
             else:
                 pg = pg + 1
+    elif message.content.startswith("reddit!"):
+        msplit = message.content.split()
+        cont = True
+        if msplit[0] == "reddit!search":
+            searchmode = True
+        else:
+            searchmode = False
+
+        if len(msplit) <= 1:
+            await message.channel.send("Usage: ``reddit! [subreddit] [hot/top/new/controversial] [timeframe for top]``"
+                                       "\nor ``reddit!search [subreddit] [relevance/top/new] [search terms]``")
+            cont = False
+
+        subreddit = reddit.subreddit(msplit[1])
+
+        # check if inputs are valid
+        try:
+            if cont and subreddit != 'all':
+                reddit.subreddits.search_by_name(subreddit, exact=True)
+                subreddit.subreddit_type
+        except:
+            await message.channel.send("Not a valid subreddit.")
+            cont = False
+
+        if cont:
+            if searchmode:
+                if len(msplit) > 2:
+                    if msplit[2] == 'relevance':
+                        submission_list = subreddit.search(query=" ".join(msplit[3:]))
+                    elif msplit[2] == 'top':
+                        submission_list = subreddit.search(query=" ".join(msplit[3:]), sort='top')
+                    elif msplit[2] == 'new':
+                        submission_list = subreddit.search(query=" ".join(msplit[3:]), sort='new')
+                    else:
+                        submission_list = subreddit.search(query=" ".join(msplit[2:]))
+                else:
+                    submission_list = subreddit.search(query=" ".join(msplit[2:]))
+            else:
+                if len(msplit) > 2:
+                    if msplit[2] == 'hot':
+                        submission_list = subreddit.hot()
+                    elif msplit[2] == 'top':
+                        if len(msplit) > 3:
+                            timeframe = msplit[3]
+                        else:
+                            timeframe = 'day'
+                        try:
+                            submission_list = subreddit.top(timeframe)
+                        except ValueError:
+                            await message.channel.send("Not a valid timeframe.")
+                            cont = False
+
+                    elif msplit[2] == 'new':
+                        submission_list = subreddit.new()
+                    elif msplit[2] == 'controversial':
+                        submission_list = subreddit.controversial()
+                    else:
+                        await message.channel.send("Not a valid sort type.")
+                        cont = False
+                else:
+                    submission_list = subreddit.hot()
+
+        # go through submissions to find a suitable one
+        if cont:
+            found = False
+            for submission in submission_list:
+                if not submission.is_self:
+                    if submission not in oldsubmissions:
+                        await message.channel.send(submission.url)
+                        oldsubmissions.append(submission)
+                        found = True
+                        break
+            if not found:
+                await message.channel.send("Either the subreddit only has text posts, or you've been calling the "
+                                           "command too many times. Try a different subreddit or sorting mode, or just "
+                                           "wait a while.")
 
     elif message.content == "yikes!":
-        embed = discord.Embed(title="**Yikes! at your service.**", description="What would you like for your order?\n \n \n", color=9911100)
-        embed.set_author(name="Someone called?", icon_url="https://cdn.discordapp.com/attachments/469524231244349452/584658974515920912/360fx360f.png")
-        embed.set_footer(text="Ping premed if anything breaks down.", icon_url="https://cdn.discordapp.com/attachments/469524231244349452/584658974515920912/360fx360f.png")
+        embed = discord.Embed(title="**Yikes! at your service.**",
+                              description="What would you like for your order?\n \n \n", color=9911100)
+        embed.set_author(name="Someone called?",
+                         icon_url="https://cdn.discordapp.com/attachments/469524231244349452/584658974515920912/360fx360f.png")
+        embed.set_footer(text="Ping premed if anything breaks down.",
+                         icon_url="https://cdn.discordapp.com/attachments/469524231244349452/584658974515920912/360fx360f.png")
         for command in commandlist:
             embed.add_field(name=f"**{command}**", value=commandlist[command], inline=False)
         await message.channel.send(content=None, embed=embed)

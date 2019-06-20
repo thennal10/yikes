@@ -2,3 +2,4 @@ discord.py
 psycopg2-binary
 pixivpy
 pybooru
+praw
