@@ -4,7 +4,7 @@ import psycopg2
 import pixivpy3
 from pybooru import Danbooru
 import praw
-from commands import commands
+from commands import commands, customcommands, imagegrabber
 
 # from dotenv import load_dotenv
 # load_dotenv()
@@ -59,30 +59,30 @@ async def on_message(message):
         await message.channel.send(output)
 
     elif message.content.startswith("custom:"):
-        output = commands.custom(message, conn)
+        output = customcommands.custom(message, conn)
         await message.channel.send(output)
 
     elif message.content.startswith("yi!"):
-        output = commands.call_custom(message, conn)
+        output = customcommands.call_custom(message, conn)
         await message.channel.send(output)
 
     elif message.content.startswith("remove:"):
-        output = commands.remove(message, conn)
+        output = customcommands.remove(message, conn)
         await message.channel.send(output)
 
     elif message.content == "list!":
-        output = commands.cclist(conn)
+        output = customcommands.cclist(conn)
         await message.channel.send(output)
 
     elif message.content.startswith("pixiv!"):
-        await commands.pixiv(message, api, os, discord)
+        await imagegrabber.pixiv(message, api, os, discord)
 
     elif message.content.startswith("danbooru!"):
-        output = commands.danbooru(message, danb, oldposts)
+        output = imagegrabber.danbooru(message, danb, oldposts)
         await message.channel.send(output)
 
     elif message.content.startswith("reddit!"):
-        output = commands.reddit_get(message, reddit, oldsubmissions)
+        output = imagegrabber.reddit_get(message, reddit, oldsubmissions)
         await  message.channel.send(output)
 
     elif message.content == "yikes!":
