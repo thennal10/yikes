@@ -96,7 +96,7 @@ async def word_leaderboard(message, serv):
 def strokify(message):
     try:
         iscap = False
-        outputmsg = message.content[9:]
+        outputmsg = list(message.content[9:])
         for count, character in enumerate(outputmsg):
             if character.isalpha():
                 if iscap:
