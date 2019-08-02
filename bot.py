@@ -4,7 +4,7 @@ import psycopg2
 import pixivpy3
 from pybooru import Danbooru
 import praw
-from commands import commands, customcommands, imagegrabber
+from commands import commands, customcommands, imagegrabber, search
 
 # from dotenv import load_dotenv
 # load_dotenv()
@@ -83,7 +83,15 @@ async def on_message(message):
 
     elif message.content.startswith("reddit!"):
         output = imagegrabber.reddit_get(message, reddit, oldsubmissions)
-        await  message.channel.send(output)
+        await message.channel.send(output)
+
+    elif message.content.startswith("anime!"):
+        output = search.anisearch(message)
+        await message.channel.send(output)
+
+    elif message.content.startswith("manga!"):
+        output = search.mangasearch(message)
+        await message.channel.send(output)
 
     elif message.content == "yikes!":
         await commands.yikes(message, discord)

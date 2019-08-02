@@ -141,3 +141,4 @@ async def yikes(message, discord):
     for command in commandlist:
         embed.add_field(name=f"**{command}**", value=commandlist[command], inline=False)
     await message.channel.send(content=None, embed=embed)
+
