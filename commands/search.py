@@ -1,11 +1,15 @@
 import requests
-
+from jikanpy import Jikan
+jikan = Jikan()
 
 def anisearch(message):
     if len(message.content.split()) < 2:
         return "Usage: ``anime! [search]``"
 
     search = message.content[7:]
+    search_result = jikan.search('anime', search)
+    title = search_result['results'][0]['title']
+    result_url = search_result['results'][0]['url']
 
     query = '''
     query ($search: String) {
@@ -15,18 +19,17 @@ def anisearch(message):
     }
     '''
     variables = {
-        'search': search
+        'search': title
     }
     url = 'https://graphql.anilist.co'
 
     response = requests.post(url, json={'query': query, 'variables': variables})
-
     if response:
         # convert the response to a dict using json() and get the id
         anime_id = response.json()['data']['Media']['id']
-        return f"https://anilist.co/anime/{anime_id}"
+        return f"{result_url}\nhttps://anilist.co/anime/{anime_id}"
     else:
-        return "ERROR. ERROR. ERROR. PING PREMED SO HE CAN SACRIFICE A GOAT TO THE BOT GODS"
+        return f"{result_url}\nAnilist URL not found"
 
 
 def mangasearch(message):
@@ -34,6 +37,9 @@ def mangasearch(message):
         return "Usage: ``manga! [search]``"
 
     search = message.content[7:]
+    search_result = jikan.search('manga', search)
+    title = search_result['results'][0]['title']
+    result_url = search_result['results'][0]['url']
 
     query = '''
     query ($search: String) {
@@ -43,7 +49,7 @@ def mangasearch(message):
     }
     '''
     variables = {
-        'search': search
+        'search': title
     }
     url = 'https://graphql.anilist.co'
 
@@ -52,6 +58,6 @@ def mangasearch(message):
     if response:
         # convert the response to a dict using json() and get the id
         manga_id = response.json()['data']['Media']['id']
-        return f"https://anilist.co/manga/{manga_id}"
+        return f"{result_url}\nhttps://anilist.co/manga/{manga_id}"
     else:
-        return "ERROR. ERROR. ERROR. PING PREMED SO HE CAN SACRIFICE A GOAT TO THE BOT GODS"
+        return f"{result_url}\nAnilist URL not found"

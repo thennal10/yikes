@@ -4,3 +4,4 @@ pixivpy
 pybooru
 praw
 requests
+-e git://github.com/AWConant/jikanpy.git
