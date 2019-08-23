@@ -30,7 +30,7 @@ def peachlator(message):
         trans_dict[key.rstrip()] = value.rstrip()
 
     # replace words
-    new_message = message.content.split()
+    new_message = message.content.lower().split()
     if len(new_message) <= 1:
         new_message[0] = "Peachlator, at your service. Usage: ``peachlator: [text]``"
     else:
