@@ -30,7 +30,7 @@ def peachlator(message):
         trans_dict[key.rstrip()] = value.rstrip()
 
     # replace words
-    new_message = message.content.lower().split()
+    new_message = message.content.split()
     if len(new_message) <= 1:
         new_message[0] = "Peachlator, at your service. Usage: ``peachlator: [text]``"
     else:
@@ -43,11 +43,20 @@ def peachlator(message):
                 if i + j >= len(new_message):
                     incl = False
                     break
-                elif skey != new_message[i + j]:
+                elif skey != new_message[i + j].lower():
                     incl = False
                     break
                 incl = True
-            splitval = trans_dict[key].split()
+
+            #Handles capitalization
+            if new_message[i].isupper():
+                splitval = trans_dict[key].upper().split()
+            elif new_message[i][0].isupper():
+                print(trans_dict[key])
+                splitval = trans_dict[key].capitalize().split()
+            else:
+                splitval = trans_dict[key].split()
+
             # still need to add a case for when splitval > splitkey but eh
             if incl:
                 for k, val in enumerate(splitval):

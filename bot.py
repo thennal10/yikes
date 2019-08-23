@@ -6,8 +6,8 @@ from pybooru import Danbooru
 import praw
 from commands import commands, customcommands, imagegrabber, search
 
-# from dotenv import load_dotenv
-# load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 
 oldposts = []
