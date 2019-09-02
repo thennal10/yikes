@@ -4,14 +4,15 @@ import psycopg2
 import pixivpy3
 from pybooru import Danbooru
 import praw
-from commands import commands, customcommands, imagegrabber, search
+from commands import commands, customcommands, imagegrabber, search, scorepredictor
 
 #from dotenv import load_dotenv
 #load_dotenv()
 
-
 oldposts = []
 oldsubmissions = []
+modellist = [0]
+friendlistlist = [0]
 
 # initializing shit
 token = os.environ.get("TOKEN")
@@ -29,7 +30,7 @@ reddit = praw.Reddit(client_id=client_id,
 # connecting
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 api = pixivpy3.AppPixivAPI()
-api.login(puser, ppass)
+#api.login(puser, ppass)
 client = discord.Client()
 
 print("Running!")
@@ -91,6 +92,16 @@ async def on_message(message):
 
     elif message.content.startswith("manga!"):
         output = search.mangasearch(message)
+        await message.channel.send(output)
+
+    elif message.content.startswith("score predictor:"):
+        output, model, friendlist = scorepredictor.model_creator(message)
+        modellist[0] = model
+        friendlistlist[0] = friendlist
+        await message.channel.send(output)
+
+    elif message.content.startswith("predict:"):
+        output = scorepredictor.score_predictor(message, modellist[0], friendlistlist[0])
         await message.channel.send(output)
 
     elif message.content == "yikes!":

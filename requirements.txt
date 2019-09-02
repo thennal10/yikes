@@ -5,3 +5,7 @@ pybooru
 praw
 requests
 git+http://github.com/AWConant/jikanpy.git
+tqdm
+numpy
+sklearn
+jikanpy
