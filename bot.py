@@ -1,10 +1,11 @@
 import discord
 import os
+import time
 import psycopg2
 import pixivpy3
 from pybooru import Danbooru
 import praw
-from commands import commands, customcommands, imagegrabber, search, scorepredictor
+from commands import commands, customcommands, imagegrabber, search, scorepredictor, hungergames
 
 #from dotenv import load_dotenv
 #load_dotenv()
@@ -13,6 +14,7 @@ oldposts = []
 oldsubmissions = []
 modellist = [0]
 friendlistlist = [0]
+current_games = []
 
 # initializing shit
 token = os.environ.get("TOKEN")
@@ -43,7 +45,18 @@ async def on_message(message):
     serv = message.guild
 
     # commands
-    if message.content.startswith("peachlator:"):
+    if message.channel in current_games:
+        output = hungergames.game(message)
+        if isinstance(output, list):
+            for event in output:
+                await message.channel.send(event)
+                time.sleep(1.5)
+            if output[-1] == 'finish':
+                current_games.remove(message.channel)
+        else:
+            await message.channel.send(output)
+
+    elif message.content.startswith("peachlator:"):
         output = commands.peachlator(message)
         await message.channel.send(output)
 
@@ -102,6 +115,12 @@ async def on_message(message):
 
     elif message.content.startswith("predict:"):
         output = scorepredictor.score_predictor(message, modellist[0], friendlistlist[0])
+        await message.channel.send(output)
+
+    elif message.content == "hunger games start!":
+        print("yikes")
+        current_games.append(message.channel)
+        output = hungergames.initialize(message)
         await message.channel.send(output)
 
     elif message.content == "yikes!":
