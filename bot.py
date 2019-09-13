@@ -7,8 +7,8 @@ from pybooru import Danbooru
 import praw
 from commands import commands, customcommands, imagegrabber, search, scorepredictor, hungergames
 
-#from dotenv import load_dotenv
-#load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 oldposts = []
 oldsubmissions = []
@@ -30,7 +30,7 @@ reddit = praw.Reddit(client_id=client_id,
                      user_agent='yikes:v1 by u/thennal')
 
 # connecting
-conn = None #psycopg2.connect(DATABASE_URL, sslmode='require')
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 api = pixivpy3.AppPixivAPI()
 #api.login(puser, ppass)
 client = discord.Client()
