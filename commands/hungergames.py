@@ -675,7 +675,7 @@ def Day():
 
 
 def Night():
-    global day, tributes, events
+    global tributes, events
     events.append(f"**Night {day}**\n")
     i = 0
     while i < len(tributes):  # for each living tribute...
@@ -688,7 +688,6 @@ def Night():
 
         events.append(pickRandomNightAction(tributes[i], othertribs[rTrib]))
         i += 1
-    day += 1
 
 
 def Cannons():
@@ -713,7 +712,7 @@ def game(message):
         Day()  # Start a new day
         if len(tributes) <= 1:  # If there is only 1 tribute left
             final_stats = finish()
-            return final_stats
+            return events + final_stats
         Night()  # Go on to night
         Cannons()  # List all the tributes who died
         day += 1
