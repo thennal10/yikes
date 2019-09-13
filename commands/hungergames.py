@@ -669,8 +669,10 @@ def Day():
                 othertribs.append(tributes[j])
             j += 1
         rTrib = random.randint(0, len(othertribs) - 1)  # pick a random target tribute
+
+        tribute = tributes[i]
         events.append(pickRandomAction(tributes[i], othertribs[rTrib]))
-        if tributes[i] in tributes:
+        if tribute in tributes:
             i += 1
 
 
@@ -686,8 +688,9 @@ def Night():
 
         rTrib = random.randint(0, len(othertribs) - 1)  # pick a random target tribute
 
+        tribute = tributes[i]
         events.append(pickRandomNightAction(tributes[i], othertribs[rTrib]))
-        if tributes[i] in tributes:
+        if tribute in tributes:
             i += 1
 
 
