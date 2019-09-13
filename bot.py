@@ -30,7 +30,7 @@ reddit = praw.Reddit(client_id=client_id,
                      user_agent='yikes:v1 by u/thennal')
 
 # connecting
-conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+conn = None #psycopg2.connect(DATABASE_URL, sslmode='require')
 api = pixivpy3.AppPixivAPI()
 #api.login(puser, ppass)
 client = discord.Client()
