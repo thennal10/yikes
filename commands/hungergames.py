@@ -314,7 +314,7 @@ def pickRandomAction(tribute1, tribute2):
                             f" injured {strong.himher}self."
                     else:
                         return f"{str} remembers the words of {strong.hisher} old boxing coach, and on the brink of death, while the anime OP plays in" \
-                            f"the background, KO's {wk} in one final punch."
+                            f" the background, KO's {wk} in one final punch."
 
     elif num == 1: # supply/weapon encounter
         temp = random.randint(0, 10)
@@ -671,7 +671,7 @@ def Day():
         rTrib = random.randint(0, len(othertribs) - 1)  # pick a random target tribute
 
         tribute = tributes[i]
-        events.append(pickRandomAction(tributes[i], othertribs[rTrib]))
+        events.append(pickRandomAction(tribute, othertribs[rTrib]))
         if tribute in tributes:
             i += 1
 
@@ -689,7 +689,7 @@ def Night():
         rTrib = random.randint(0, len(othertribs) - 1)  # pick a random target tribute
 
         tribute = tributes[i]
-        events.append(pickRandomNightAction(tributes[i], othertribs[rTrib]))
+        events.append(pickRandomNightAction(tribute, othertribs[rTrib]))
         if tribute in tributes:
             i += 1
 
