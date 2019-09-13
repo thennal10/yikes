@@ -12,7 +12,7 @@ tributes = []
 dead = []
 deadthisday = []
 day = 1
-weapon_list = ['axe', 'cleaver', 'naked waifu figurine', 'pickaxe', 'broadsword', 'bow', 'blowdart', 'anime DVD',
+weapon_list = ['axe', 'cleaver', 'naked waifu figurine', 'broadsword', 'bow', 'blowdart', 'anime DVD',
                'dagger', 'giant screwdriver', 'wooden club', "peach's lost phone", 'explosives']
 rare_weapons_list = ['cursed sword', 'a fucking gun']
 
@@ -597,8 +597,7 @@ def pickRandomNightAction(tribute1, tribute2):
     elif num == 8:
         tribute1.asleep = False
         return f"{t1} stays awake all night as {tribute1.hisher} brain tortures {tribute1.himher} with memories of " \
-            f"that one awkward moment {tribute1.heshe} had " \
-            f"{random.choice(['in highschool', 'in a starbucks', f'while talking to {tribute1.hisher} crush'])}."
+            f"that one awkward moment {tribute1.heshe} had 3 years ago."
     elif num == 9:
         return f"{t1} practices {tribute1.hisher} " \
             f"{random.choice(['shadowboxing all night due to recently having watched Hajime no Ippo', 'spiking all night due to recently having watched Haikyuu'])}."
@@ -649,7 +648,7 @@ def pickRandomNightAction(tribute1, tribute2):
             f"games. God tells {t1} to shut the fuck up I'm trying to watch some Gundam here."
     elif num == 21:
         if tribute1.gender.lower() == "m":
-            return f"{t1} jacks off in a nearby bush to relieve steam and accidentally summons a demon when he moved " \
+            return f"{t1} jacks off in a nearby bush to relieve steam and accidentally summons a demon when he moves " \
                 f"his penis in a special pattern."
         else:
             return f"{t1} draws a face on a coconut and talks to it all night."
