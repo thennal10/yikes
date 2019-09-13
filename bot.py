@@ -7,8 +7,8 @@ from pybooru import Danbooru
 import praw
 from commands import commands, customcommands, imagegrabber, search, scorepredictor, hungergames
 
-from dotenv import load_dotenv
-load_dotenv()
+#from dotenv import load_dotenv
+#load_dotenv()
 
 oldposts = []
 oldsubmissions = []
