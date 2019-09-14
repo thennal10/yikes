@@ -228,10 +228,10 @@ def pickRandomAction(tribute1, tribute2):
                 deadthisday.append(weak)
                 deadthisday.append(strong)
                 if weak.weapon == 'explosives':
-                    return f"{wk} tries to defend {weak.himher}self using {weak.weapon} but blows both of them up in " \
+                    return f"{wk} tries to defend {weak.himher}self against {str} using {weak.weapon} but blows both of them up in " \
                         f"the process."
                 elif strong.weapon == 'explosives':
-                    return f"{str} tries to defend {strong.himher}self using {strong.weapon} but blows both of them up in " \
+                    return f"{str} tries to defend {strong.himher}self against {wk} using {strong.weapon} but blows both of them up in " \
                         f"the process."
 
             elif strong.weapon == 'axe' or strong.weapon == 'cleaver' or strong.weapon == 'broadsword':
@@ -656,7 +656,7 @@ def pickRandomNightAction(tribute1, tribute2):
 # ============================================================================
 
 def Day():
-    global day, tributes, events
+    global tributes, events
 
     events.append(f"**Day {day}**\n")  # say what day it is
     i = 0
@@ -667,12 +667,19 @@ def Day():
             if tributes[j] != tributes[i]:
                 othertribs.append(tributes[j])
             j += 1
+
         rTrib = random.randint(0, len(othertribs) - 1)  # pick a random target tribute
 
         tribute = tributes[i]
         events.append(pickRandomAction(tribute, othertribs[rTrib]))
+
+        if len(tributes) <= 1:  # If there is only 1 tribute left
+            return False
+
         if tribute in tributes:
             i += 1
+    return True
+
 
 
 def Night():
@@ -689,9 +696,13 @@ def Night():
 
         tribute = tributes[i]
         events.append(pickRandomNightAction(tribute, othertribs[rTrib]))
+
+        if len(tributes) <= 1:  # If there is only 1 tribute left
+            return False
+
         if tribute in tributes:
             i += 1
-
+    return True
 
 def Cannons():
     global deadthisday, events
@@ -704,19 +715,21 @@ def Cannons():
 # ===========================================================================
 
 def game(message):
-    global events, day
+    global events, day, tributes
     if initializing:
         return initialize(message)
     if message.content == 'next!':
         events = []
-        if len(tributes) <= 1:  # If there is only 1 tribute left
+
+        if not Day():
+            event_copy = events
             final_stats = finish()
-            return final_stats
-        Day()  # Start a new day
-        if len(tributes) <= 1:  # If there is only 1 tribute left
+            return event_copy + final_stats
+        if not Night():
+            event_copy = events
             final_stats = finish()
-            return events + final_stats
-        Night()  # Go on to night
+            return event_copy + final_stats
+
         Cannons()  # List all the tributes who died
         day += 1
         return events
