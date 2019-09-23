@@ -904,13 +904,13 @@ def pick_random_night_action(tribute1, tribute2):
 
     # num picks between three overarching scenarios
     if tribute2 == None:
-        scenario = random.randint(2, 24)  # skip tribute encounter scenarios
+        scenario = random.randint(2, 25)  # skip tribute encounter scenarios
     else:
         t2 = tribute2.name
         if tribute1.partner == tribute2:
             scenario = -1  # special scenario set for partners
         else:
-            scenario = random.randint(0, 24)
+            scenario = random.randint(0, 25)
 
     # If the tribute has supplies, it overrides all other scenarios
     if tribute1.inj:  # check if tribute is injured
@@ -1176,6 +1176,9 @@ def pick_random_night_action(tribute1, tribute2):
             return f"{t1} questions {tribute1.hisher} sanity."
         elif scenario == 24:
             return f"{t1} tries to cook some fish and sets the forest on fire."
+        elif scenario == 25:
+            tribute1.inj = True
+            return f"{t1} tries to cook some meat but sets {tribute1.himher}self on fire instead."
 
 
 def feast_fight(tribute1, tribute2):
