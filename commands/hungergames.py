@@ -707,7 +707,7 @@ def pick_random_action(tribute1, tribute2):
                     strong.inj = True
                     weak.inj = True
                     return f"{str} and {wk} brawl it out, but they seem evenly matched, and they both decide to flee" \
-                        f" when the chance came"
+                        f" when the chance comes."
                 else:
                     strong.inj = True
                     strong.kills += 1
@@ -796,7 +796,7 @@ def pick_random_action(tribute1, tribute2):
                 return f"{t1} recieves a supply drop containing a {new_weapon} from an unknown sponsor."
         else:
             return f"{t1} tests out {tribute1.hisher} {tribute1.weapon} against " \
-                f"{random.choice(['some wild boars', 'a scarecrow', 'an odd-looking boulder', 'an effigy of Donald Trump'])}"
+                f"{random.choice(['some wild boars', 'a scarecrow', 'an odd-looking boulder', 'an effigy of Donald Trump'])}."
 
     elif num >= 2: # environment encounter
         scenario = random.randint(0,23)
@@ -886,7 +886,6 @@ def pick_random_action(tribute1, tribute2):
                 kill(tribute1)
                 return f"{t1} accidentally awakens a sleeping bear in a cave, and gets mauled."
             else:
-                tribute1.inj = True
                 return f"{t1} accidentally awakens a sleeping bear in a cave, but {tribute1.heshe} " \
                     f"{random.choice([f'channels {tribute1.hisher} inner Takamura and KOs the beast in one strike.', 'talks it down and has a nice little tea party.', 'asserts dominance by pissing on it.'])}"
 
@@ -1560,7 +1559,7 @@ def Feast():
     global tributes, events, day
     for tribute in tributes:
         tribute.done = False
-    events.append("**The Feast**\nThe cornucopia is replenished with food, supplies, weapons.")
+    events.append("**The Feast**\n\nThe cornucopia is replenished with food, supplies, weapons.")
     return do_things(tributes, pick_random_feast_action)
 
 
