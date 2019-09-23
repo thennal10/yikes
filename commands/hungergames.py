@@ -1585,7 +1585,13 @@ def Night():
 
 def Cannons():
     global deadthisday, events
-    events.append(f"\n**{len(deadthisday)} cannon shots go off in the distance.**")
+    cannon_shots = len(deadthisday)
+    if cannon_shots == 0:
+        events.append(f"\n**No cannon shots are heard.**")
+    elif cannon_shots == 1:
+        events.append(f"\n**1 cannon shot goes off in the distance.**")
+    else:
+        events.append(f"\n**{cannon_shots} cannon shots go off in the distance.**")
     for i in range(len(deadthisday)):
         events.append(f"{deadthisday[i].name} - District {deadthisday[i].district}\n")
     deadthisday = []
