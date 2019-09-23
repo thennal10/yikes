@@ -12,10 +12,11 @@ dead = []
 deadthisday = []
 day = 1
 weapon_list = ['axe', 'cleaver', 'naked waifu figurine', 'broadsword', 'bow', 'blowdart', 'anime DVD', 'dagger',
-               'giant screwdriver', 'wooden club', 'explosives', 'scimitar', 'trident', 'mace']
-cleavers = ['axe', 'broadsword', 'cleaver', 'scimitar']
-stabbers = ['dagger', 'giant screwdriver', 'trident', 'naked waifu figurine']
-clubbers = ['wooden club', 'anime DVD', 'mace']
+               'giant screwdriver', 'wooden club', 'explosives', 'scimitar', 'trident', 'mace', 'katana', 'rapier',
+               'morning star', 'warhammer', 'halberd', 'spear', 'scythe']
+cleavers = ['axe', 'broadsword', 'cleaver', 'scimitar', 'katana', 'halberd', 'scythe']
+stabbers = ['dagger', 'giant screwdriver', 'trident', 'naked waifu figurine', 'rapier', 'spear']
+clubbers = ['wooden club', 'anime DVD', 'mace', 'morning star', 'warhammer']
 rare_weapons_list = ['cursed sword', 'a fucking gun']
 
 
