@@ -360,7 +360,7 @@ def pick_random_action(tribute1, tribute2):
                         tribute2.kills += 1
                         kill(tribute3)
                         return f"{t1} and {t2} spot {t3} from afar and hunts {tribute3.himher} down, but {t3} puts up" \
-                            f"quite a fight and leaves {t2} injured."
+                            f" quite a fight and leaves {t2} injured."
 
 
         # This God *does* play dice
@@ -1559,7 +1559,8 @@ def Feast():
     global tributes, events, day
     for tribute in tributes:
         tribute.done = False
-    events.append("**The Feast**\n\nThe cornucopia is replenished with food, supplies, weapons.")
+    events.append("**The Feast**")
+    events.append("The cornucopia is replenished with food, supplies, weapons.")
     return do_things(tributes, pick_random_feast_action)
 
 
