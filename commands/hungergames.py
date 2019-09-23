@@ -76,6 +76,27 @@ def initialize(message):
             return return_string
 
 
+
+def correct_grammar(input):
+    isplit = input.split()
+    olist = []
+    vowels = ['a', 'e', 'i', 'o', 'u']
+    consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm',
+                  'n', 'p', 'q', 'r', 's', 't', 'v', 'x', 'z', 'w', 'y']
+    for count, word in enumerate(isplit):
+        if word == 'a':
+            if isplit[count + 1][0] in vowels:
+                olist.append('an')
+            else:
+                olist.append(word)
+        elif word == 'an':
+            if isplit[count + 1][0] in consonants:
+                olist.append('a')
+            else:
+                olist.append(word)
+        else:
+            olist.append(word)
+    return " ".join(olist)
 # ===============================================================================
 
 def kill(tribute):
@@ -1577,27 +1598,34 @@ def game(message):
         random.shuffle(tributes)  # makes it more fair
         events = []
 
-        if day % 5 == 1 and day != 1:
+        if (day + 1) % 5 == 1 and day != 1:
             if not Feast():
                 event_copy = events
                 final_stats = finish()
                 return event_copy + final_stats
         # checks if game is finished
         if not Day():
+            for count, event in enumerate(events):
+                events[count] = correct_grammar(event)
             event_copy = events
             final_stats = finish()
             return event_copy + final_stats
         if not Night():
+            for count, event in enumerate(events):
+                events[count] = correct_grammar(event)
             event_copy = events
             final_stats = finish()
             return event_copy + final_stats
 
         Cannons()  # List all the tributes who died
         day += 1
+        for count, event in enumerate(events):
+            events[count] = correct_grammar(event)
         return events
+
     elif message.content == 'reset!':
         reset()
-        return ['Game reset. Use ``hunger games start!`` to start again', 'finish']
+        return ['Game reset. Use ``hunger games start!`` to start again', 'Finished!']
 
 def reset():
     global numOfDistricts, initializing, numOfTributes, events, tributes, dead, deadthisday, day
@@ -1615,10 +1643,10 @@ def finish():
     global numOfDistricts, events, tributes, dead
     the_end = []
     if len(tributes) > 0:
-        the_end.append(f"{tributes[0].name} from District {tributes[0].district} survived the Hunger Games!")
+        the_end.append(f"**{tributes[0].name} from District {tributes[0].district} survived the Hunger Games!**")
     else:
-        the_end.append("Everyone died! YAY!")
-    the_end.append("Order of death\n")
+        the_end.append("**Everyone died! YAY!**")
+    the_end.append("**Order of death**")
     for i in range(len(dead)):  # For each dead tribute
         the_end.append(f"{(numOfDistricts * 2) - i}: {dead[i].name}")  # List the name and time of death of the tribute.
     # Explanation of (numOfDistricts*2)-i
@@ -1628,7 +1656,7 @@ def finish():
     # i is the current position of this function in the array. The farther along it is, the higher the position of the
     # tribute, so the position and ranking have an inverse relationship.
 
-    the_end.append("Kills\n")
+    the_end.append("**Kills**")
     for i in range(len(dead)):  # For each dead tribute
         tributes.append(dead[i])
 
@@ -1648,8 +1676,7 @@ def finish():
 
     for i in range(len(killorder)):
         the_end.append(f"{killorder[i].kills} - {killorder[i].name}")
-    the_end.append(day)
-    the_end.append('finish')
+    the_end.append('Finished!')
 
     reset()
 
