@@ -50,7 +50,7 @@ async def on_message(message):
         if isinstance(output, list):
             for event in output:
                 await message.channel.send(event)
-                time.sleep(1.5)
+                time.sleep(3)
             if output[-1] == 'Finished!':
                 current_games.remove(message.channel)
         else:
