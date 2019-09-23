@@ -78,6 +78,7 @@ def initialize(message):
 
 
 def correct_grammar(input):
+    changed = False
     isplit = input.split()
     olist = []
     vowels = ['a', 'e', 'i', 'o', 'u']
@@ -87,16 +88,21 @@ def correct_grammar(input):
         if word == 'a':
             if isplit[count + 1][0] in vowels:
                 olist.append('an')
+                changed = True
             else:
                 olist.append(word)
         elif word == 'an':
             if isplit[count + 1][0] in consonants:
                 olist.append('a')
+                changed = True
             else:
                 olist.append(word)
         else:
             olist.append(word)
-    return " ".join(olist)
+    if not changed:
+        return input
+    else:
+        return " ".join(olist)
 # ===============================================================================
 
 def kill(tribute):
@@ -1024,7 +1030,7 @@ def pick_random_night_action(tribute1, tribute2):
         elif scenario == 8:
             if tribute1.gender.lower() == "m" and tribute2.gender.lower() == "m":
                 return f"{t1} fucks {t2} in the ass all night but their balls don't touch so they both maintain" \
-                    f"their heterosexuality for another night."
+                    f" their heterosexuality."
             else:
                 choice = random.choice(['past trauma', f'{tribute2.hisher} latent asexuality',
                                         f"{t1}'s fugly-ass face"])
@@ -1066,7 +1072,7 @@ def pick_random_night_action(tribute1, tribute2):
                     return f"{t2} spots {t1} spying on {tribute2.himher}, and chases {t1} off with {tribute2.hisher} " \
                         f"{tribute2.weapon}"
                 else:
-                    return f"{t2} and {t2} run into eachother, and decide to truce for the night."
+                    return f"{t1} and {t2} run into eachother, and decide to truce for the night."
 
         if scenario == 1:
             if not tribute2.asleep:
