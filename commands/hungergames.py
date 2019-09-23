@@ -786,20 +786,14 @@ def pick_random_action(tribute1, tribute2):
             tribute1.weapon = new_weapon
             return f"{t1} receives a supply drop containing a {new_weapon} from an unknown sponsor."
         elif scenario == 10:
-            temp = random.randint(0, 4)
-            if temp == 4:
-                new_weapon = random.choice(rare_weapons_list)
-                tribute1.weapon = new_weapon
-                if new_weapon == 'cursed sword':
-                    return f"After a lengthy set of obstacles and puzzles in an ancient stone temple, {t1} finally reaps" \
-                        f" the reward for {tribute1.hisher} effort; a {new_weapon}, embedded with unimaginable power."
-                elif new_weapon == 'a fucking gun':
-                    return  f"Breaking through a hidden safe with {tribute1.hisher} 1337 technical skills " \
-                        f"({tribute1.heshe} used a hammer), {t1} finds {new_weapon} stored compactly inside."
-            else:
-                new_weapon = random.choice(weapon_list)
-                tribute1.weapon = new_weapon
-                return f"{t1} recieves a supply drop containing a {new_weapon} from an unknown sponsor."
+            new_weapon = random.choice(rare_weapons_list)
+            tribute1.weapon = new_weapon
+            if new_weapon == 'cursed sword':
+                return f"After a lengthy set of obstacles and puzzles in an ancient stone temple, {t1} finally reaps" \
+                    f" the reward for {tribute1.hisher} effort; a {new_weapon}, embedded with unimaginable power."
+            elif new_weapon == 'a fucking gun':
+                return  f"Breaking through a hidden safe with {tribute1.hisher} 1337 technical skills " \
+                    f"({tribute1.heshe} used a hammer), {t1} finds {new_weapon} stored compactly inside."
         else:
             return f"{t1} tests out {tribute1.hisher} {tribute1.weapon} against " \
                 f"{random.choice(['some wild boars', 'a scarecrow', 'an odd-looking boulder', 'an effigy of Donald Trump'])}."
