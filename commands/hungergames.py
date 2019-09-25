@@ -28,7 +28,6 @@ class Tribute:
         self.inj = False  # set inj to false by default
         self.supplies = None
         self.weapon = None
-        self.partner = None
         self.done = False
         self.asleep = False
         self.kills = 0
@@ -54,6 +53,44 @@ class Tribute:
             self.heshe = "they"
             self.hesshes = "they've"
 
+    def calculate_strength(self):
+        score = 1
+        if self.weapon is not None:
+            score += 1
+        if not self.inj:
+            score += 1
+        return score
+
+
+class Party:
+
+    def __init__(self, tribute1, tribute2, tribute3=None, tribute4=None):
+        global tributes
+        self.trib1 = tribute1
+        self.trib2 = tribute2
+        self.trib3 = tribute3
+        self.trib4 = tribute4
+
+        tributes.remove(self.trib1)
+        tributes.remove(self.trib2)
+        tributes.insert(0, self)
+
+        self.t1 = tribute1.name
+        self.t2 = tribute2.name
+
+        self.done = False
+
+    def split(self):
+        global tributes
+        tributes.insert(0, self.trib1)
+        tributes.insert(0, self.trib2)
+        tributes.remove(self)
+
+    def calculate_strength(self):
+        score = self.trib1.calculate_strength()
+        score += self.trib2.calculate_strength()
+        return score
+
 
 def initialize(message):
     global tributes, numOfDistricts, numOfTributes, initializing
@@ -75,7 +112,6 @@ def initialize(message):
                 return_string += f"{tributes[j].name}, district {tributes[j].district}, {tributes[j].gender}\n"
             initializing = False
             return return_string
-
 
 
 def correct_grammar(input):
@@ -106,37 +142,60 @@ def correct_grammar(input):
         return " ".join(olist)
 # ===============================================================================
 
-def kill(tribute):
+
+def kill(tribute, party=None):
     global tributes, dead, deadthisday
-    tributes.remove(tribute)
-    dead.append(tribute)
-    deadthisday.append(tribute)
+    if party is not None:  # kill automatically splits the party, so make sure to regenerate it if need be
+        party.split()
+        if party.trib1 == tribute:
+            tributes.remove(tribute)
+            dead.append(tribute)
+            deadthisday.append(tribute)
+        if party.trib2 == tribute:
+            tributes.remove(tribute)
+            dead.append(tribute)
+            deadthisday.append(tribute)
+
+    else:
+        tributes.remove(tribute)
+        dead.append(tribute)
+        deadthisday.append(tribute)
 
 
 def pick_random_action(tribute1, tribute2):
     global tributes, dead, deadthisday
 
-    # make their names easier to access.
-    t1 = tribute1.name
-    t2 = "Placeholder. If you're seeing this, premed has fucked up somewhere, that fucking idiot."
     # num picks between three overarching scenarios
-
-    if tribute2 is None:
+    if type(tribute1) == Party:  # special scenario set for parties
+        num = -1
+    elif tribute2 is None:
+        tribute1.asleep = False
+        t1 = tribute1.name
         num = random.randint(1, 3)  # skip tribute encounter scenarios
     else:
+        tribute1.asleep = False
+        tribute2.asleep = False
+        t1 = tribute1.name
         t2 = tribute2.name
-        if tribute1.partner == tribute2:
-            num = -1
-        else:
-            num = random.randint(0, 3)
+        num = random.randint(0, 3)
 
-    if num == -1:  # partner tribute scenarios
+    if num == -1:  # party tribute scenarios
+        party = tribute1
+        t1 = party.t1
+        t2 = party.t2
+        trib1 = party.trib1
+        trib2 = party.trib2
+
+        #just reset their sleep states
+        trib1.asleep = False
+        trib2.asleep = False
+
         # check if these two chucklefucks are the only tributes alive
-        if len(tributes) == 2:
+        if len(tributes) == 1:
             scenario = random.randint(0, 2)
             if scenario == 0:
-                kill(tribute1)
-                kill(tribute2)
+                kill(trib1, party)
+                kill(trib2)
                 return f"As the game comes down to it's final day, {t1} and {t2} contemplate on what they should do." \
                     f" In the end, their bond is too strong; They try and pull the good ol' berry trick but " \
                     f"the producers ain't having it and the game ends a tragedy."
@@ -144,34 +203,34 @@ def pick_random_action(tribute1, tribute2):
                 output = f"As the game comes down to it's final day, {t1} and {t2} both know what must be done. " \
                     f"They make their way to the Cornucopia, and get ready for the final showdown.\n"
 
-                if tribute1.weapon is not None and tribute2.weapon is None:
-                    strong = tribute1
-                    weak = tribute2
-                elif tribute2.weapon is not None and tribute1.weapon is None:
-                    strong = tribute2
-                    weak = tribute1
-                elif tribute1.inj and not tribute2.inj:
-                    strong = tribute2
-                    weak = tribute1
-                elif tribute2.inj and not tribute1.inj:
-                    strong = tribute1
-                    weak = tribute2
+                if trib1.weapon is not None and trib2.weapon is None:
+                    strong = trib1
+                    weak = trib2
+                elif trib2.weapon is not None and trib1.weapon is None:
+                    strong = trib2
+                    weak = trib1
+                elif trib1.inj and not trib2.inj:
+                    strong = trib2
+                    weak = trib1
+                elif trib2.inj and not trib1.inj:
+                    strong = trib1
+                    weak = trib2
                 else:
-                    strong = tribute1
-                    weak = tribute2
+                    strong = trib1
+                    weak = trib2
 
                 str = strong.name
                 wk = weak.name
 
                 if strong.weapon == 'cursed sword':
-                    kill(strong)
+                    kill(strong, party)
                     output += f"As the fight starts, a purple light fills the sky as {str}'s cursed sword shatters and reveals it's " \
                         f"final form: A giant fucking Gundam emerges from the blinding light. Because of course it does.\n" \
                         f" As {str} prepares to become one with the robot, {strong.heshe} bids {wk} a final farewell" \
                         f" before flying off to the stars. {wk} just stands there amazed."
                     strong.name = 'Ascended ' + strong.name
                 elif weak.weapon == 'cursed sword':
-                    kill(weak)
+                    kill(weak, party)
                     output += f"As the fight starts, a purple light fills the sky as {wk}'s cursed sword shatters and reveals it's " \
                         f"final form; A giant fucking Gundam emerges from the blinding light. Because of course it does.\n" \
                         f" As {wk} prepares to become one with the robot, {weak.heshe} bids {str} a final farewell" \
@@ -181,18 +240,18 @@ def pick_random_action(tribute1, tribute2):
                 elif strong.weapon == 'a fucking gun' or weak.weapon == 'a fucking gun':
                     if strong.weapon == 'a fucking gun':
                         strong.kills += 1
-                        kill(weak)
+                        kill(weak, party)
                         output += f"{str} just straights up shoots {wk} in the head with {strong.weapon}. Kind of" \
                             f"anticlimactic really."
                     elif weak.weapon == 'a fucking gun':
                         weak.kills += 1
-                        kill(strong)
+                        kill(strong, party)
                         output += f"{wk} just straights up shoots {str} in the head with {weak.weapon}. Kind of" \
                             f"anticlimactic really."
 
                 elif strong.weapon in cleavers:
                     strong.kills += 1
-                    kill(weak)
+                    kill(weak, party)
                     if scenario > 7:
                         output += f"After a long battle, {str} savagely decapitates {wk} with {strong.hisher} {strong.weapon}."
                     else:
@@ -200,7 +259,7 @@ def pick_random_action(tribute1, tribute2):
 
                 elif strong.weapon in stabbers:
                     strong.kills += 1
-                    kill(weak)
+                    kill(weak, party)
                     if scenario > 7:
                         output += f"A final, well aimed stab by {str}'s {strong.weapon} ends {wk}'s life."
                     else:
@@ -209,26 +268,28 @@ def pick_random_action(tribute1, tribute2):
 
                 elif strong.weapon in clubbers:
                     strong.kills += 1
-                    kill(weak)
+                    kill(weak, party)
                     output += f"A ferocious battle commences, and {str} eventually smashes {wk}'s head in with " \
                         f"{strong.hisher} {strong.weapon}."
 
                 elif strong.weapon == 'bow' or strong.weapon == 'blowdart':
                     if strong.weapon == 'bow':
-                        kill(weak)
+                        strong.kills += 1
+                        kill(weak, party)
                         output += f"After a tactical battle of wits fully utilizing their surroudings, {str} finally " \
                             f"figures out where {wk} is hiding and manages to catch {weak.himher} in the throat with" \
                             f"an arrow."
                     if strong.weapon == 'blowdart':
-                        kill(weak)
+                        strong.kills += 1
+                        kill(weak, party)
                         output += f"After a tactical battle of wits fully utilizing their surroudings, {str} finally " \
                             f"figures out where {wk} is hiding and shoots out a poisoned dart. It barely pricks {wk}'s" \
                             f"skin, but it's enough: {weak.heshe} collapses soon after."
                 else:
-                    kill(weak)
+                    kill(weak, party)
                     kill(strong)
-                    output += f"In a magnificent display of manliness, {str} and {wk} fight it out to the death, with " \
-                        f"their fists, and in the end simultaneously collapse, with smiles on their faces."
+                    output += f"In a magnificent display of manliness, {str} and {wk} fight it out to the death with " \
+                        f"their fists, and in the end simultaneously collapse."
                 return output
 
         # RETAKE!
@@ -238,27 +299,28 @@ def pick_random_action(tribute1, tribute2):
         if num == 0:
             scenario = random.randint(0, 2)
 
-            tribute1.partner = None
-            tribute2.partner = None
+            party.split()
 
             if scenario == 0:
                 return f"{t1} and {t2} decide to split up and go their own ways in amicable terms while they still can."
             elif scenario == 1:
                 return f"{t1} and {t2} decide to split up to hunt for food. {t2} manages to snag a wild boar and " \
-                    f"makes {tribute2.hisher} way towards the rendezvous point, but {t1} is nowhere to be found.\n" \
+                    f"makes {trib2.hisher} way towards the rendezvous point, but {t1} is nowhere to be found.\n" \
                     f"{t1}, while chasing a rabbit, goes a little bit too far into the forest and finds " \
-                    f"{tribute1.himher}self lost in a labyrinth of trees."
+                    f"{trib1.himher}self lost in a labyrinth of trees."
             elif scenario == 2:
                 choice = random.choice([f'It contains simple words of farewell, fitting for {t2}.',
                                         'It contains a single word scrawled out with fresh ink - Goodbye.',
                                         f"It contains a heartfelt message thanking {t1} for their friendship.",
                                         f"Oh wait, it isn't a note, just the tissue that {t2} used for "
-                                        f"{tribute2.hisher} 'stress relief session' last night. Yikes."])
+                                        f"{trib2.hisher} 'stress relief session' last night. Yikes."])
                 return f"{t1} wakes up at dawn to find {t2} missing, and a note left behind; {choice}"
 
         # 3v1 always going to be unfair
         elif num == 1:
-            tribute3 = random.choice([x for x in tributes if (x != tribute1 and x != tribute2)])
+            tribute3 = random.choice([x for x in tributes if (x != party)])
+            if type(tribute3) == Party:
+                return f"SPECIAL SCENARIO SET TBD"
             t3 = tribute3.name
             scenario = random.randint(0, 2)
             if tribute3.weapon == 'cursed sword':
@@ -266,24 +328,24 @@ def pick_random_action(tribute1, tribute2):
 
                 if temp == 0:
                     tribute3.kills += 2
-                    kill(tribute1)
-                    kill(tribute2)
+                    kill(trib1, party)
+                    kill(trib2)
                     return f"{t1} and {t2} spot {t3} in the distance and tries to hunt {tribute3.himher} down, but {t3} uses the mystic" \
                         f" power of {tribute3.hisher} {tribute3.weapon} and banishes both {t1} and {t2} into the void."
 
                 elif temp == 1:
                     tribute3.kills += 2
                     tribute3.inj = True
-                    kill(tribute1)
-                    kill(tribute2)
+                    kill(trib1, party)
+                    kill(trib2)
                     return f"{t1} and {t2} spot {t3} in the distance and tries to hunt {tribute3.himher} down, but " \
                         f"{t3} scorches both of them to dust using the overwhelming power of {tribute3.hisher} " \
                         f"{tribute3.weapon}. However, the flames are fierce and {t3} injures {tribute3.himher}self in " \
                         f"the process."
 
                 elif temp == 2:
-                    kill(tribute1)
-                    kill(tribute2)
+                    kill(trib1, party)
+                    kill(trib2)
                     kill(tribute3)
                     choice = random.choice([f"After getting ganged on by {t1} and {t2}, {t3} tries using the full "
                                             f"potential of {tribute3.hisher} {tribute3.weapon}, but the influx of "
@@ -296,8 +358,8 @@ def pick_random_action(tribute1, tribute2):
                                             f" interrupted, dismembered everyone in the vicinity."])
                     return choice
             elif tribute3.weapon == 'a fucking gun':
-                kill(tribute1)
-                kill(tribute2)
+                kill(trib1, party)
+                kill(trib2)
                 if scenario == 0:
                     tribute3.weapon = None
                     return f"{t3} spots {t1} and {t2} nearby, and before they even have time to react, {t3} mows em " \
@@ -307,64 +369,64 @@ def pick_random_action(tribute1, tribute2):
                         f"down with {tribute3.hisher} gun."
 
             elif tribute3.weapon == 'explosives':
-                kill(tribute1)
-                kill(tribute2)
+                kill(trib1, party)
+                kill(trib2)
                 kill(tribute3)
                 return f"After getting ganged on by {t1} and {t2}, {t3} tries to defend {tribute3.himher}self using " \
                     f"{tribute3.weapon} but blows everyone up in the process."
-            elif ((tribute3.weapon is not None) and (tribute2.weapon is None) and (tribute1.weapon is None)) or (tribute1.inj and tribute2.inj):
-                if tribute1.inj:
-                    kill(tribute1)
-                    tribute2.inj = True
+            elif ((tribute3.weapon is not None) and (trib2.weapon is None) and (trib1.weapon is None)) or (trib1.inj and trib2.inj):
+                if trib1.inj:
+                    kill(trib1, party)
+                    trib2.inj = True
                     return f"{t3} covetly stalks {t1} and {t2} as they stumble around the arena, and when " \
                         f"{tribute3.heshe} feels the time is right, {t3} strikes; {tribute3.heshe} smashes {t1}'s face" \
                         f" in, but {t2} manages to escape, wounded."
-                elif tribute2.inj:
-                    kill(tribute2)
-                    tribute1.inj = True
+                elif trib2.inj:
+                    kill(trib2, party)
+                    trib1.inj = True
                     return f"{t3} covetly stalks {t1} and {t2} as they stumble around the arena, and when " \
                         f"{tribute3.heshe} feels the time is right, {t3} strikes; {tribute3.heshe} smashes {t2}'s face" \
                         f" in, but {t1} manages to escape, wounded."
                 else:
-                    tribute1.inj = True
-                    tribute2.inj = True
+                    trib1.inj = True
+                    trib2.inj = True
                     return f"{t3} covetly stalks {t1} and {t2} as they stumble around the arena, and when" \
                         f"{tribute3.heshe} feels the time is right, {t3} stikes; both {t1} and {t2} take quite" \
                         f" the beating, but they manage to escape, wounded."
             else:
                 if scenario == 0:
-                    tribute1.kills += 1
-                    tribute2.kills += 1
+                    trib1.kills += 1
+                    trib2.kills += 1
                     kill(tribute3)
                     return f"{t1} and {t2} spot {t3} from afar and hunts {tribute3.himher} down before " \
                         f"{tribute3.heshe} can escape."
                 elif scenario == 1:
-                    if tribute1.inj:
-                        tribute2.kills += 1
+                    if trib1.inj:
+                        trib2.kills += 1
                         tribute3.kills += 1
-                        kill(tribute1)
+                        kill(trib1, party)
                         kill(tribute3)
                         return f"{t1} and {t2} spot {t3} from afar and hunts {tribute3.himher} down, but {t3} puts up" \
                             f" quite a fight, and manages to take out a weakened {t1}."
                     else:
-                        tribute1.inj = True
-                        tribute1.kills += 1
-                        tribute2.kills += 1
+                        trib1.inj = True
+                        trib1.kills += 1
+                        trib2.kills += 1
                         kill(tribute3)
                         return f"{t1} and {t2} spot {t3} from afar and hunts {tribute3.himher} down, but {t3} puts up" \
                             f" quite a fight and leaves {t1} injured."
                 elif scenario == 2:
-                    if tribute2.inj:
-                        tribute1.kills += 1
+                    if trib2.inj:
+                        trib1.kills += 1
                         tribute3.kills += 1
-                        kill(tribute2)
+                        kill(trib2, party)
                         kill(tribute3)
                         return f"{t1} and {t2} spot {t3} from afar and hunts {tribute3.himher} down, but {t3} puts up" \
                             f" quite a fight, and manages to take out a weakened {t2}."
                     else:
-                        tribute2.inj = True
-                        tribute1.kills += 1
-                        tribute2.kills += 1
+                        trib2.inj = True
+                        trib1.kills += 1
+                        trib2.kills += 1
                         kill(tribute3)
                         return f"{t1} and {t2} spot {t3} from afar and hunts {tribute3.himher} down, but {t3} puts up" \
                             f" quite a fight and leaves {t2} injured."
@@ -379,18 +441,18 @@ def pick_random_action(tribute1, tribute2):
             elif scenario == 1:
                 return f"{t1} and {t2} hunt for other tributes."
             elif scenario == 2:
-                tribute1.inj = True
-                return f"{t1} falls in a ditch and {t2} laughs {tribute2.hisher} ass off while helping {t1} up."
+                trib1.inj = True
+                return f"{t1} falls in a ditch and {t2} laughs {trib2.hisher} ass off while helping {t1} up."
             elif scenario == 3:
-                if tribute1.inj and tribute2.inj:
-                    kill(tribute1)
-                    kill(tribute2)
+                if trib1.inj and trib2.inj:
+                    kill(trib1, party)
+                    kill(trib2)
                     return f"{t1} and {t2} both get killed by a giant bat while exploring a dark cave."
                 else:
                     return f"{t1} and {t2} take down a giant bat while exploring a dark cave."
             elif scenario == 4:
-                tribute1.inj = False
-                tribute2.inj = False
+                trib1.inj = False
+                trib2.inj = False
                 return f"{t1} and {t2} chance upon a magical hot springs, and a quick bath rejuvenates them both."
             elif scenario == 5:
                 return f"{t1} and {t2} pool their shroom knowledge together and manage to isolate and collect the ones " \
@@ -398,53 +460,53 @@ def pick_random_action(tribute1, tribute2):
             elif scenario == 6:
                 return f"{t1} and {t2} splits up to look for supplies."
             elif scenario == 7:
-                if tribute1.weapon is not None or tribute2.weapon is not None:
+                if trib1.weapon is not None or trib2.weapon is not None:
                     return f"{t1} and {t2} fend off a sudden attack by a savage bunny with a british accent."
                 else:
-                    injured = random.choice([tribute1, tribute2])
+                    injured = random.choice([trib1, trib2])
                     injured.inj = True
                     return f"{t1} and {t2} fend off a sudden attack by a savage bunny with a british accent, but" \
                         f" {injured.name} is wounded in the process."
             elif scenario == 8:
-                return f"{t2} almost steps on a landmine before {t1} pulls {tribute2.himher} out of the way."
+                return f"{t2} almost steps on a landmine before {t1} pulls {trib2.himher} out of the way."
             elif scenario == 9:
                 weapon = random.choice(weapon_list)
-                if tribute1.weapon is None and tribute2.weapon is None:
+                if trib1.weapon is None and trib2.weapon is None:
                     temp = random.randint(0,5)
                     if temp == 0:
-                        tribute1.weapon = weapon
-                        tribute2.weapon = weapon
+                        trib1.weapon = weapon
+                        trib2.weapon = weapon
                         return f"{t1} and {t2} find a chest with a {weapon} inside, and bicker over who gets to keep it," \
                             f" before finding another one hidden behind the chest."
                     elif temp < 5:
                         if temp < 3:
-                            tribute1.weapon = weapon
+                            trib1.weapon = weapon
                             return f"{t1} and {t2} find a {weapon} lying around, and bicker over who gets to keep it," \
                                 f"before {t2} gives in and lets {t1} hold on to it."
                         else:
-                            tribute2.weapon = weapon
+                            trib2.weapon = weapon
                             return f"{t1} and {t2} find a {weapon} lying around, and bicker over who gets to keep it," \
                                 f"before {t1} gives in and lets {t2} hold on to it."
                     elif temp == 5:
-                        if tribute1.inj:
-                            tribute1.kills += 1
-                            tribute1.weapon = weapon
-                            kill(tribute2)
+                        if trib1.inj:
+                            trib1.kills += 1
+                            trib1.weapon = weapon
+                            kill(trib2, party)
                             return f"{t1} and {t2} find a {weapon} lying around, and an argument over who gets to keep" \
                                 f" it heats up into a fight; {t1} ends up bashing {t2}'s skull in."
                         else:
-                            tribute2.kills += 1
-                            tribute2.weapon = weapon
-                            kill(tribute1)
+                            trib2.kills += 1
+                            trib2.weapon = weapon
+                            kill(trib1, party)
                             return f"{t1} and {t2} find a {weapon} lying around, and an argument over who gets to keep" \
                                 f" it heats up into a fight; {t2} ends up bashing {t1}'s skull in."
-                elif tribute1.weapon is None:
-                    tribute1.weapon = weapon
+                elif trib1.weapon is None:
+                    trib1.weapon = weapon
                     return f"{t1} and {t2} find a {weapon} while " \
                         f"{random.choice(['scavenging in a shed', 'exploring a derelict mansion', 'looting an oddly-placed chest'])}," \
                         f" and {t1} takes a liking to it."
-                elif tribute2.weapon is None:
-                    tribute2.weapon = weapon
+                elif trib2.weapon is None:
+                    trib2.weapon = weapon
                     return f"{t1} and {t2} find a {weapon} while " \
                         f"{random.choice(['scavenging in a shed', 'exploring a derelict mansion', 'looting an oddly-placed chest'])}," \
                         f" and {t2} takes a liking to it."
@@ -459,56 +521,56 @@ def pick_random_action(tribute1, tribute2):
                     return f"{t1} tries to catch a rabbit by chasing it while {t2} lays a trap for it; neither are" \
                         f"successful in their endeavours."
             elif scenario == 11:
-                if tribute1.supplies is None:
-                    tribute1.supplies = 'medkit'
-                if tribute2.supplies is None:
-                    tribute2.supplies = 'medkit'
-                tribute1.inj = False
-                tribute2.inj = False
+                if trib1.supplies is None:
+                    trib1.supplies = 'medkit'
+                if trib2.supplies is None:
+                    trib2.supplies = 'medkit'
+                trib1.inj = False
+                trib2.inj = False
                 return f"{t1} and {t2} chance upon a warehouse of medical supplies."
             elif scenario == 12:
                 return f"{t1} and {t2} can't find a decent source of water before they remember that one Bear Grylls meme," \
                     f" and they decide that watersports isn't all that degenerate of a kink anyway."
             elif scenario == 13:
                 return f"{t1} and {t2} find a river and decide to do some fishing; {t1} stumbles around without catching anything" \
-                    f" at all while {t2} catches buttloads with {tribute2.hisher} secret fishing technique passed down the" \
+                    f" at all while {t2} catches buttloads with {trib2.hisher} secret fishing technique passed down the" \
                     f" generations."
             elif scenario == 14:
                 return f"{t1} and {t2} find a mysterious book simply labeled 'Breaking Bad Coworker's Journal'. {t1} goes to" \
-                    f" read it but {t2} senses something very wrong and stops {t1} before {tribute1.heshe} opens it."
+                    f" read it but {t2} senses something very wrong and stops {t1} before {trib1.heshe} opens it."
             elif scenario == 15:
-                return f"{t1} throws a rock at {t2}'s head when {tribute2.heshe} reveals that {tribute2.heshe} gave " \
+                return f"{t1} throws a rock at {t2}'s head when {trib2.heshe} reveals that {trib2.heshe} gave " \
                     f"{random.choice(['Darling in the Franxx', 'Eromanga Sensei', 'Sword Art Online', 'Shobitch', 'Sakurasou'])} a 10" \
                     f" on MAL."
             elif scenario == 16:
-                tribute1.inj = True
-                tribute2.inj = True
-                return f"{t2} stands in the rain for 0.2 nanoseconds and catches a bad cold; {tribute2.heshe} spreads " \
+                trib1.inj = True
+                trib2.inj = True
+                return f"{t2} stands in the rain for 0.2 nanoseconds and catches a bad cold; {trib2.heshe} spreads " \
                     f"it to {t1} too."
             elif scenario == 17:
-                if tribute1.weapon is not None or tribute2.weapon is not None:
-                    tribute1.inj = True
-                    tribute2.inj = True
+                if trib1.weapon is not None or trib2.weapon is not None:
+                    trib1.inj = True
+                    trib2.inj = True
                     return f"{t1} and {t2} accidentally awaken a sleeping bear in a cave, but they manage to fight it off."
-                elif tribute1.inj or tribute2.inj:
-                    kill(tribute1)
-                    kill(tribute2)
+                elif trib1.inj or trib2.inj:
+                    kill(trib1, party)
+                    kill(trib2)
                     return f"{t1} and {t2} accidentally awaken a sleeping bear in a cave, and they both get mauled."
                 else:
                     return f"{t1} and {t2} accidentally awaken a sleeping bear in a cave, but they both manage to escape."
             elif scenario == 18:
-                if tribute1.inj:
-                    kill(tribute1)
+                if trib1.inj:
+                    kill(trib1, party)
                     return f"{t1} accidentally steps on a snake and gets bitten. Despite {t2}'s best efforts, " \
-                        f"{tribute1.heshe} dies of venom a few hours later."
+                        f"{trib1.heshe} dies of venom a few hours later."
                 else:
-                    tribute1.inj = True
-                    return f"{t1} accidentally steps on a snake and gets bitten. {t2} helps {tribute1.himher} through" \
+                    trib1.inj = True
+                    return f"{t1} accidentally steps on a snake and gets bitten. {t2} helps {trib1.himher} through" \
                         f" the ordeal and {t1} manages to mostly wear the venom off."
             elif scenario == 19:
                 choice = random.choice(['an enraged bull', 'a territorial rhino', 'a pack of wolves'])
-                if tribute2.inj:
-                    kill(tribute2)
+                if trib2.inj:
+                    kill(trib2, party)
                     return f"{t1} and {t2} accidentally end up walking right in front of {choice}, and while " \
                         f"{t1} manages to escape unscathed, {t2} isn't quite as lucky."
                 else:
@@ -535,25 +597,19 @@ def pick_random_action(tribute1, tribute2):
         elif scenario == 2:
             return f"{t1} covertly stalks {t2} through the bushes."
         elif scenario == 3:
-            tribute1.partner = tribute2
-            tribute2.partner = tribute1
-            tribute2.done = True
-            return f"{t1} and {t2} decide to stick together for the day and go hunting for supplies."
+            party = Party(tribute1, tribute2)
+            return f"{party.t1} and {party.t2} decide to stick together for the day and go hunting for supplies."
         elif scenario == 4:
             temp = random.randint(0, 9)
             if temp == 9:
                 tribute2.done = True
                 return f"{t1} and {t2} have hot, steamy, sweaty sex, then go about their separate ways."
             else:
-                tribute1.partner = tribute2
-                tribute2.partner = tribute1
-                tribute2.done = True
-                return f"{t1} and {t2} decide to team up and hunt other tributes."
+                party = Party(tribute1, tribute2)
+                return f"{party.t1} and {party.t2} decide to team up and hunt other tributes."
         elif scenario == 5:
-            tribute1.partner = tribute2
-            tribute2.partner = tribute1
-            tribute2.done = True
-            return f"{t1} and {t2} remember an anime-watching contract that they forged long ago, and in its honour, decide to team up."
+            party = Party(tribute1, tribute2)
+            return f"{party.t1} and {party.t2} remember an anime-watching contract that they forged long ago, and in its honour, decide to team up."
         # 6+ violent scenarios
         elif scenario > 5:
             tribute2.done = True
@@ -893,61 +949,66 @@ def pick_random_action(tribute1, tribute2):
 
 def pick_random_night_action(tribute1, tribute2):
     global tributes, dead, deadthisday
-    # make their names easier to access.
-    t1 = tribute1.name
-    t2 = "Placeholder. If you're seeing this, premed has fucked up somewhere, that fucking idiot."
 
-    # num picks between three overarching scenarios
-    if tribute2 == None:
+    # trib1 is set so I can easily screen for injuries
+    if type(tribute1) == Party:  # special scenario set for parties
+        trib1 = tribute1.trib1
+        trib2 = tribute1.trib2
+        t1 = trib1.name
+        t2 = trib2.name
+        party = tribute1
+        scenario = -1
+    elif tribute2 is None:
+        trib1 = tribute1
+        t1 = tribute1.name
         scenario = random.randint(2, 25)  # skip tribute encounter scenarios
     else:
+        trib1 = tribute1
+        t1 = tribute1.name
         t2 = tribute2.name
-        if tribute1.partner == tribute2:
-            scenario = -1  # special scenario set for partners
-        else:
-            scenario = random.randint(0, 25)
+        scenario = random.randint(0, 25)
 
     # If the tribute has supplies, it overrides all other scenarios
-    if tribute1.inj:  # check if tribute is injured
-        injured = tribute1
+    if trib1.inj:  # check if tribute is injured
+        injured = trib1
     else:
         injured = None
 
-    if tribute1.supplies is not None:  # check if tribute has supplies.
-        supplier = tribute1
+    if trib1.supplies is not None:  # check if tribute has supplies.
+        supplier = trib1
     else:
         supplier = None
 
-    if tribute1.partner is not None:  # redo if tribute has a partner
+    if scenario == -1:  # redo if tribute has a partner
 
-        if tribute2.inj:  # check if tribute is injured
-            injured = tribute2
+        if trib2.inj:  # check if tribute is injured
+            injured = trib2
 
-        if tribute2.supplies is not None:  # check if tribute has supplies.
-            supplier = tribute2
+        if trib2.supplies is not None:  # check if tribute has supplies.
+            supplier = trib2
 
-    if tribute1.supplies == 'weird amulet':  # weird amulet has custom outcomes
+    if trib1.supplies == 'weird amulet':  # weird amulet has custom outcomes
         temp = random.randint(0, 2)
         if temp == 0:
-            tribute1.supplies = None
-            if tribute1.partner is None:
-                return f"{t1} fiddles around with {tribute1.hisher} weird amulet, but nothing happens at all."
+            trib1.supplies = None
+            if scenario != -1:
+                return f"{t1} fiddles around with {trib1.hisher} weird amulet, but nothing happens at all."
             else:
                 return f"{t1} and {t2} fiddle around with the weird amulet, but nothing happens at all."
         elif temp == 1:
-            tribute1.supplies = None
-            tribute1.weapon = 'cursed sword'
-            if tribute1.partner is None:
-                return f"{t1} fiddles around with {tribute1.hisher} weird amulet, and in a sudden puff of purple smoke, " \
+            trib1.supplies = None
+            trib1.weapon = 'cursed sword'
+            if scenario != -1:
+                return f"{t1} fiddles around with {trib1.hisher} weird amulet, and in a sudden puff of purple smoke, " \
                     f"it transforms into a cursed sword."
             else:
                 return f"{t1} and {t2} fiddle around with the weird amulet, and in a sudden puff of purple smoke, " \
                     f"it transforms into a cursed sword."
         elif temp == 2:
-            tribute1.supplies = None
-            kill(tribute1)
-            if tribute1.partner is None:
-                return f"{t1} tries to get some sleep, when in a sudden puff of smoke, {tribute1.hisher} weird amulet" \
+            trib1.supplies = None
+            kill(trib1)
+            if scenario != -1:
+                return f"{t1} tries to get some sleep, when in a sudden puff of smoke, {trib1.hisher} weird amulet" \
                     f" randomly summons a winged monstrosity that dismembers {t1} before flying off into the night sky."
             else:
                 return f"{t1} and {t2} try to get some sleep, when in a sudden puff of smoke, the weird amulet" \
@@ -957,84 +1018,84 @@ def pick_random_night_action(tribute1, tribute2):
         if supplier.supplies == 'medkit':
             injured.inj = False
             supplier.supplies = None
-            if injured.partner is None:
-                return f"{t1} patches up {tribute1.hisher} injuries using a medkit {tribute1.heshe} had grabbed along the" \
+            if scenario != -1:
+                return f"{t1} patches up {trib1.hisher} injuries using a medkit {trib1.heshe} had grabbed along the" \
                 f"way."
             else:
                 if supplier != injured:
                     return f"{supplier.name} tends to {injured.name}'s injuries using a medkit."
                 else:
-                    if tribute1 == injured:
+                    if trib1 == injured:
                         return f"{t2} tends to {injured.name}'s injuries using a medkit."
                     else:
                         return f"{t1} tends to {injured.name}'s injuries using a medkit."
         elif supplier.supplies == 'herbs':
             injured.inj = False
             supplier.supplies = None
-            if injured.partner is None:
-                return f"{t1} patches up {tribute1.hisher} injuries using the medicinal herbs {tribute1.heshe} had " \
+            if scenario != -1:
+                return f"{t1} patches up {trib1.hisher} injuries using the medicinal herbs {trib1.heshe} had " \
                 f"collected along the way."
             else:
                 if supplier != injured:
                     return f"{supplier.name} tends to {injured.name}'s injuries using a some herbs {supplier.heshe} had " \
                         f"grabbed along the way."
                 else:
-                    if tribute1 == injured:
-                        return f"{t2} tends to {injured.name}'s injuries using a some herbs {tribute2.heshe} had " \
+                    if trib1 == injured:
+                        return f"{t2} tends to {injured.name}'s injuries using a some herbs {trib2.heshe} had " \
                         f"grabbed along the way."
                     else:
-                        return f"{t1} tends to {injured.name}'s injuries using a some herbs {tribute1.heshe} had " \
+                        return f"{t1} tends to {injured.name}'s injuries using a some herbs {trib1.heshe} had " \
                         f"grabbed along the way."
 
-    tribute1.asleep = False
+    trib1.asleep = False
 
     #isolate scenarios where tributes have partner
     if scenario == -1:
         # REROLL!
         scenario = random.randint(0, 10)
         if scenario == 0:
-            tribute1.asleep = True
-            tribute2.asleep = True
+            trib1.asleep = True
+            trib2.asleep = True
             return f"{t1} and {t2} tell old tales and bond over a campfire."
         elif scenario == 1:
             return f"{t1} and {t2} sleep in shifts throughout the night."
         elif scenario == 2:
-            tribute1.asleep = True
-            tribute2.asleep = True
+            trib1.asleep = True
+            trib2.asleep = True
             return f"{t1} and {t2} huddle up for warmth."
         elif scenario == 3:
-            tribute1.asleep = True
-            tribute2.asleep = True
-            return f"{t1} discreetly and implicitly confesses {tribute1.hisher} love to {t2}, but {t2} is " \
+            trib1.asleep = True
+            trib2.asleep = True
+            return f"{t1} discreetly and implicitly confesses {trib1.hisher} love to {t2}, but {t2} is " \
                 f"{random.choice(['denser than a black hole', 'as dense as a harem mc'])}, and never realizes it."
         elif scenario == 4:
-            tribute1.asleep = True
-            tribute2.asleep = True
+            trib1.asleep = True
+            trib2.asleep = True
             return f"{t1} and {t2} fall asleep admiring the beauty of the star-lit sky."
         elif scenario == 5:
             return f"{t1} and {t2} set up a campfire and cheerfully sing anime OPs all night."
         elif scenario == 6:
-            tribute2.asleep = True
-            tribute1.asleep = True
-            return f"{t1} convinces {t2} to snuggle with {tribute1.himher}."
+            trib2.asleep = True
+            trib1.asleep = True
+            return f"{t1} convinces {t2} to snuggle with {trib1.himher}."
         elif scenario == 7:
-            tribute2.asleep = True
-            tribute1.asleep = True
+            trib2.asleep = True
+            trib1.asleep = True
             return f"{t1} and {t2} reveal their deepest fears and insecurities to each other, and they cry themselves" \
                 f" to sleep while snuggling."
         elif scenario == 8:
-            if tribute1.gender.lower() == "m" and tribute2.gender.lower() == "m":
+            if trib1.gender.lower() == "m" and trib2.gender.lower() == "m":
                 return f"{t1} fucks {t2} in the ass all night but their balls don't touch so they both maintain" \
                     f" their heterosexuality."
             else:
-                choice = random.choice(['past trauma', f'{tribute2.hisher} latent asexuality',
+                choice = random.choice(['past trauma', f'{trib2.hisher} latent asexuality',
                                         f"{t1}'s fugly-ass face"])
-                return f"{t1} tries to make a move on {t2}, but {tribute2.heshe} respectfully declines, citing" \
+                return f"{t1} tries to make a move on {t2}, but {trib2.heshe} respectfully declines, citing" \
                     f" {choice}"
         elif scenario == 9:
-            tribute1.kills += 1
-            kill(tribute2)
-            return f"{t1} reveals {tribute1.hisher} true colors and murders {t2} in {tribute2.hisher} sleep."
+            trib1.kills += 1
+            kill(trib2, party)
+            return f"{t1} reveals {trib1.hisher} true colors and murders {t2} in {trib2.hisher} sleep."
         elif scenario == 10:
             temp = random.randint(0, 4)
             if temp == 4:
@@ -1047,8 +1108,8 @@ def pick_random_night_action(tribute1, tribute2):
             else:
                 return f"{t1} and {t2} contemplate the meaning of life over a campfire."
         elif scenario == 11:
-            tribute1.inj = True
-            tribute2.inj = True
+            trib1.inj = True
+            trib2.inj = True
             return f"{t1} and {t2} are attacked by a swarm of bats."
         elif scenario == 12:
             return f"{t1} leaves cooking dinner up to {t2} and ends up having to gulp down " \
@@ -1243,148 +1304,202 @@ def feast_fight(tribute1, tribute2):
 
 def pick_random_feast_action(tribute1, tribute2):
     global tributes, dead, deadthisday, events
-    t1 = tribute1.name
-    t2 = "Placeholder. If you're seeing this, premed has fucked up somewhere, that fucking idiot."
 
-    if tribute2 is None:
-        num = 0 # skip tribute encounter scenarios
+    if type(tribute1) == Party:  # special scenario set for parties
+        num = -1
+        party = tribute1
+        trib1 = party.trib1
+        trib2 = party.trib2
+        t1 = trib1.name
+        t2 = trib2.name
+    elif tribute2 is None:
+        t1 = tribute1.name
+        num = 0  # skip tribute encounter scenarios
     else:
+        t1 = tribute1.name
         t2 = tribute2.name
-        if tribute1.weapon is not None and tribute1.supplies is not None:
-            num = 1
-        else:
-            num = random.randint(0, 1)
+        num = random.randint(0, 1)
 
-        if tribute1.partner == tribute2:
-            num = -1
-
-    # Makes it so that all injured tributes will not participate
-    if tribute1.partner is not None:
-        if tribute1.inj or tribute2.inj:
-            return f"{t1} and {tribute2.name} decide not to go to the feast."
+    # injured tributes only have a 50% chance of participating
+    inj_participate = random.choice([True, False])
+    if type(tribute1) == Party:
+        if (trib1.inj or trib2.inj) and not inj_participate:
+            tribute1.done = True
+            return f"{t1} and {t2} decide not to go to the feast."
     else:
-        if tribute1.inj:
+        if tribute1.inj and not inj_participate:
+            tribute1.done
             return f"{t1} decides not to go to the feast."
 
-
     # special scenarios for tributes with guns and cursed swords
-    if tribute1.weapon == 'cursed sword' and num != -1:
+    if num != -1 and tribute1.weapon == 'cursed sword':
         if tribute1.supplies is None:
             tribute1.supplies = 'medkit'
         return f"{t1} uses the power of {tribute1.hisher} {tribute1.weapon} to open portals and grab supplies from" \
             f" miles away."
-    elif tribute2 is not None:
-        if (tribute1.weapon == 'cursed sword' or tribute2.weapon == 'cursed sword') and num == -1:
-            if tribute1.supplies is None:
-                tribute1.supplies = 'medkit'
-            if tribute2.supplies is None:
-                tribute2.supplies = 'medkit'
+    elif num == -1 and (trib1.weapon == 'cursed sword' or trib2.weapon == 'cursed sword'):
+        if trib1.supplies is None:
+            trib1.supplies = 'medkit'
+        if trib2.supplies is None:
+            trib2.supplies = 'medkit'
 
-            if tribute1.weapon == 'cursed sword':
-                return f"{t1} and {t2} use the power of {t1}'s {tribute1.weapon} to open portals and grab supplies from" \
-                    f" miles away."
-            elif tribute2.weapon == 'cursed sword':
-                return f"{t1} and {t2} use the power of {t2}'s {tribute2.weapon} to open portals and grab supplies from" \
-                    f" miles away."
+        if trib1.weapon == 'cursed sword':
+            return f"{t1} and {t2} use the power of {t1}'s {trib1.weapon} to open portals and grab supplies from" \
+                f" miles away."
+        elif trib2.weapon == 'cursed sword':
+            return f"{t1} and {t2} use the power of {t2}'s {trib2.weapon} to open portals and grab supplies from" \
+                f" miles away."
 
-    if tribute1.weapon == 'a fucking gun' and num != -1:
+    if  num != -1 and tribute1.weapon == 'a fucking gun':
         if tribute1.supplies is None:
             tribute1.supplies = 'medkit'
         return f"A single gunshot freezes all the tributes in place as {t1} casually strolls in waving" \
             f" {tribute1.hisher} gun around, picks up some supplies, and walks away."
-    elif tribute2 is not None:
-        if (tribute1.weapon == 'a fucking gun' or tribute2.weapon == 'a fucking gun') and num == -1:
-            if tribute1.supplies is None:
-                tribute1.supplies = 'medkit'
-            if tribute2.supplies is None:
-                tribute2.supplies = 'medkit'
+    elif num == -1 and (trib1.weapon == 'a fucking gun' or trib2.weapon == 'a fucking gun'):
+        if trib1.supplies is None:
+            trib1.supplies = 'medkit'
+        if trib2.supplies is None:
+            trib2.supplies = 'medkit'
 
-            if tribute1.weapon == 'a fucking gun':
-                return f"A single gunshot freezes all the tributes in place as {t1} casually strolls in waving" \
-                    f" {tribute1.hisher} gun around with {t2} behind {tribute1.himher}, as they pick up some supplies," \
-                    f" and proceed walk away."
-            elif tribute2.weapon == 'a fucking gun':
-                return f"A single gunshot freezes all the tributes in place as {t1} casually strolls in waving" \
-                    f" {tribute1.hisher} gun around with {t2} behind {tribute1.himher}, as they pick up some supplies," \
-                    f" and proceed walk away."
+        if trib1.weapon == 'a fucking gun':
+            return f"A single gunshot freezes all the tributes in place as {t1} casually strolls in waving" \
+                f" {trib1.hisher} gun around with {t2} behind {trib1.himher}, as they pick up some supplies," \
+                f" and proceed walk away."
+        elif trib2.weapon == 'a fucking gun':
+            return f"A single gunshot freezes all the tributes in place as {t1} casually strolls in waving" \
+                f" {trib1.hisher} gun around with {t2} behind {trib1.himher}, as they pick up some supplies," \
+                f" and proceed walk away."
+
     if num == -1:
         # if neither tribute needs supplies or weapons
-        if ((tribute1.weapon is not None) and (tribute2.weapon is not None) and
-                (tribute1.supplies is not None) and (tribute2.supplies is not None)):
+        if ((trib1.weapon is not None) and (trib2.weapon is not None) and
+                (trib1.supplies is not None) and (trib2.supplies is not None)):
             scenario = 1
-        elif tribute1.weapon is None and tribute2.weapon is None:
+        elif trib1.weapon is None and trib2.weapon is None:
             scenario = 0
         else:
             scenario = random.randint(0, 1)
 
         if scenario == 0:  # scavenging time
-            if tribute1.weapon is None and tribute2.weapon is not None:
-                tribute1.weapon = random.choice(weapon_list)
-                choice = random.choice([f'wedges free a {tribute1.weapon} stuck on a podium',
-                                        f'grabs a {tribute1.weapon} sticking up in the ground',
-                                        f"grabs a {tribute1.weapon} lying near a decaying corpse"])
-                return f"{t2} wards malevolent tributes off with {tribute2.hisher} {tribute2.weapon} while {t1} {choice}."
+            if trib1.weapon is None and trib2.weapon is not None:
+                trib1.weapon = random.choice(weapon_list)
+                choice = random.choice([f'wedges free a {trib1.weapon} stuck on a podium',
+                                        f'grabs a {trib1.weapon} sticking up in the ground',
+                                        f"grabs a {trib1.weapon} lying near a decaying corpse"])
+                return f"{t2} wards malevolent tributes off with {trib2.hisher} {trib2.weapon} while {t1} {choice}."
 
-            elif tribute1.weapon is not None and tribute2.weapon is None:
-                tribute2.weapon = random.choice(weapon_list)
-                choice = random.choice([f'wedges free a {tribute1.weapon} stuck on a podium',
-                                        f'grabs a {tribute1.weapon} sticking up in the ground',
-                                        f"grabs a {tribute1.weapon} lying near a decaying corpse"])
+            elif trib1.weapon is not None and trib2.weapon is None:
+                trib2.weapon = random.choice(weapon_list)
+                choice = random.choice([f'wedges free a {trib1.weapon} stuck on a podium',
+                                        f'grabs a {trib1.weapon} sticking up in the ground',
+                                        f"grabs a {trib1.weapon} lying near a decaying corpse"])
 
-                return f"{t1} wards malevolent tributes off with {tribute1.hisher} {tribute1.weapon} while {t1} {choice}."
+                return f"{t1} wards malevolent tributes off with {trib1.hisher} {trib1.weapon} while {t1} {choice}."
 
-            elif tribute1.supplies is None or tribute2.supplies is None:  # either of them doesn't have supplies
+            elif trib1.supplies is None or trib2.supplies is None:  # either of them doesn't have supplies
                 choice = random.choice(['hidden behind a podium', "from a dead tribute's bag"])
                 # check and set both of their supplies to medkits
-                if tribute1.supplies is None:
-                    tribute1.supplies = 'medkit'
-                elif tribute2.supplies is None:
-                    tribute2.supplies = 'medkit'
+                if trib1.supplies is None:
+                    trib1.supplies = 'medkit'
+                elif trib2.supplies is None:
+                    trib2.supplies = 'medkit'
 
-                if tribute1.weapon is not None:
-                    return f"{t1} wards malevolent tributes off with {tribute1.hisher} {tribute1.weapon} while {t2}" \
+                if trib1.weapon is not None:
+                    return f"{t1} wards malevolent tributes off with {trib1.hisher} {trib1.weapon} while {t2}" \
                         f" snags a medkit {choice}."
-                elif tribute2.weapon is not None:
-                    return f"{t2} wards malevolent tributes off with {tribute2.hisher} {tribute2.weapon} while {t1}" \
+                elif trib2.weapon is not None:
+                    return f"{t2} wards malevolent tributes off with {trib2.hisher} {trib2.weapon} while {t1}" \
                         f" snags a medkit {choice}."
                 else:
                     temp = random.randint(0, 2)
                     if temp == 0:
                         return f"{t1} and {t2} hide in the foliage and lay low until they manage to snag a medkit {choice}."
                     else:
-                        if tribute1.supplies is not None:
-                            tribute1.supplies = None
-                        elif tribute2.supplies is not None:
-                            tribute2.supplies = None
+                        if trib1.supplies is not None:
+                            trib1.supplies = None
+                        elif trib2.supplies is not None:
+                            trib2.supplies = None
                         return f"Another tribute manages to steal {t1} and {t2}'s supplies, and as the bloodshed" \
                             f" continues, they decide to cut their losses and retreat."
             else:  # they both have supplies but neither has weapons
                 temp = random.randint(0, 2)
                 if temp == 0:
-                    tribute1.weapon = random.choice(weapon_list)
-                    tribute2.weapon = random.choice(weapon_list)
+                    trib1.weapon = random.choice(weapon_list)
+                    trib2.weapon = random.choice(weapon_list)
                     return f"{t1} and {t2} work together to find weapons in the bloodshed and manage to scavenge a" \
-                    f" {tribute1.weapon} and a {tribute2.weapon} respectively."
+                    f" {trib1.weapon} and a {trib2.weapon} respectively."
                 else:
-                    tribute1.inj = True
-                    tribute2.inj = True
+                    trib1.inj = True
+                    trib2.inj = True
                     return f"{t1} and {t2} are both wounded while fighting through the bloodshed and decide to" \
                         f" retreat while they still can."
 
         elif scenario == 1:  # teaming up is basically cheating tbh
             other_tribs = [trib for trib in tributes if not trib.done]
-
+            other_parties = [trib for trib in other_tribs if type(trib) == Party]
             # Decides how many tributes the pair get to kill. Triple kill only reserved for pairs with two weapons.
-            if len(other_tribs) >= 3 and (tribute1.weapon is not None and tribute2.weapon is not None):
-                temp = 3
-            elif len(other_tribs) >= 2:
-                temp = 2
-            elif len(other_tribs) >= 1:
-                temp = random.randint(0, 1)
+            if len(other_parties) == 0:
+                if len(other_tribs) >= 3 and (trib1.weapon is not None and trib2.weapon is not None):
+                    temp = 3
+                elif len(other_tribs) >= 2:
+                    temp = 2
+                elif len(other_tribs) >= 1:
+                    temp = random.randint(0, 1)
+                else:
+                    temp = 0
             else:
-                temp = 0
+                temp = -1
 
-            if temp == 0:
+            if temp == -1:  # party vs party
+                party2 = random.choice(other_parties)
+                t3 = party2.trib1.name
+                t4 = party2.trib2.name
+                score = 0
+                enemy_score = 0
+                if trib1.weapon is not None:
+                    score += 1
+                if trib2.weapon is not None:
+                    score += 1
+                if not trib1.inj:
+                    score += 1
+                if not trib2.inj:
+                    score += 1
+
+                if party2.trib1.weapon is not None:
+                    enemy_score += 1
+                if party2.trib2.weapon is not None:
+                    enemy_score += 1
+                if not party2.trib1.inj:
+                    enemy_score += 1
+                if not party2.trib2.inj:
+                    enemy_score += 1
+
+                if score >= enemy_score:
+                    trib1.kills += 1
+                    trib2.kills += 1
+                    trib1.inj = True
+                    trib2.inj = True
+                    kill(party2.trib1, party2)
+                    kill(party2.trib2)
+                    choice = random.choice(['bishounen looks', 'shounen mc-esque training', 'instinct and skills',
+                                            'tactical brilliance', 'fighting sense', 'buldging biceps', 'Dempsey Roll'])
+                    return f"{t1} and {t2} fight it out with {t3} and {t4}, but {t1}'s {choice} proves to be too" \
+                        f" strong to handle; {t3} and {t4} both get dismembered, though {t1} and {t2} come out the" \
+                        f" exchange with wounds as well."
+                else:
+                    party2.trib1.kills += 1
+                    party2.trib2.kills += 1
+                    kill(trib1, party)
+                    kill(trib2)
+                    trib1.inj = True
+                    trib2.inj = True
+                    choice = random.choice(['bishounen looks', 'shounen mc-esque training', 'instinct and skills',
+                                            'tactical brilliance', 'fighting sense', 'buldging biceps', 'Dempsey Roll'])
+                    return f"{t3} and {t4} fight it out with {t1} and {t2}, but {t4}'s {choice} proves to be too" \
+                        f" strong to handle; {t1} and {t2} both get dismembered, though {t3} and {t4} come out the" \
+                        f" exchange with wounds as well."
+
+            elif temp == 0:
                 return_output = random.choice([f"{t1} and {t2} hide it out and observe the bloodbath from a distance,"
                                                f" but after an arrow whizzes by, they decide to flee while they still"
                                                f" have a chance.",
@@ -1401,9 +1516,9 @@ def pick_random_feast_action(tribute1, tribute2):
 
                 trib1_kill = random.choice([True, False])
                 if trib1_kill:
-                    tribute1.kills += 1
+                    trib1.kills += 1
                 else:
-                    tribute2.kills += 1
+                    trib2.kills += 1
                 kill(tribute3)
 
                 return f"{t1} and {t2} fight together and skewer {tribute3.name} in the bloodshed."
@@ -1411,8 +1526,8 @@ def pick_random_feast_action(tribute1, tribute2):
                 tribute3 = other_tribs[0]
                 tribute4 = other_tribs[1]
 
-                tribute1.kills += 1
-                tribute2.kills += 1
+                trib1.kills += 1
+                trib2.kills += 1
                 kill(tribute3)
                 kill(tribute4)
 
@@ -1425,11 +1540,11 @@ def pick_random_feast_action(tribute1, tribute2):
 
                 trib1_kill = random.choice([True, False])
                 if trib1_kill:
-                    tribute1.kills += 2
-                    tribute2.kills += 1
+                    trib1.kills += 2
+                    trib2.kills += 1
                 else:
-                    tribute2.kills += 2
-                    tribute1.kills += 1
+                    trib2.kills += 2
+                    trib1.kills += 1
                 kill(tribute3)
                 kill(tribute4)
                 kill(tribute5)
@@ -1480,7 +1595,7 @@ def pick_random_feast_action(tribute1, tribute2):
             if tribute1.weapon == 'explosives':
                 kill(tribute1)
                 kill(tribute2)
-                random_trib_list = [trib for trib in tributes if not trib.done]
+                random_trib_list = [trib for trib in tributes if not trib.done and type(trib) == Tribute]
                 if len(random_trib_list) > 0:
                     random_trib = random.choice(random_trib_list)
                     kill(random_trib)
@@ -1519,6 +1634,8 @@ def pick_random_feast_action(tribute1, tribute2):
                     f" the {tribute1.weapon}."
 
 
+def pick_random_bloodbath_action(tribute1, tribute2):
+    return True
 # ============================================================================
 
 
@@ -1529,31 +1646,31 @@ def do_things(tributes_list, pick_action_function):
     # state of the list, which is why I make a shallow copy at the start and iterate through that
     tributes_list_copy = tributes_list.copy()
     for tribute in tributes_list_copy:
-        # Check if the tribute has been yeeted out from the original list
-        if tribute not in tributes_list:
+        # Check if the tribute has been yeeted out from the original list and whether the tribute has already
+        # participated in an event
+        if tribute not in tributes_list or tribute.done:
             continue
-
         # Check if a tribute has a partner, and they're alive: if so, pair em up, else choose a random one
-        if tribute.partner is not None and tribute.partner in tributes:
-            rTrib = tribute.partner
-            rTrib.done = True
+        if type(tribute) == Party:
+            rTrib = None
+            tribute.done = True
+            events.append(pick_action_function(tribute, rTrib))
+
         else:
-            tribute.partner = None  # just for when the partner has died
-            othertribs = [trib for trib in tributes_list if (trib != tribute and not trib.done and trib.partner is None)]  # yay for list comprehension
+            othertribs = [trib for trib in tributes_list if (trib != tribute and not trib.done and type(trib) != Party)]  # yay for list comprehension
 
             if len(othertribs) == 0:  # if there isn't anyone suitable, set it to none
                 rTrib = None
             else:  # otherwise, pick a random tribute
                 rTrib = random.choice(othertribs)
 
-        if tribute.done:  # check if the tribute has already participated in an event
-            continue
-
-        tribute.done = True
-        events.append(pick_action_function(tribute, rTrib))
+            tribute.done = True
+            events.append(pick_action_function(tribute, rTrib))
 
         # If there is only 1 tribute left, yeet out
-        if len(tributes) <= 1:
+        if len(tributes) == 0:
+            return False
+        elif len(tributes) == 1 and type(tributes[0]) != Party:
             return False
 
     return True
@@ -1565,6 +1682,7 @@ def Feast():
         tribute.done = False
     events.append("**The Feast**")
     events.append("The cornucopia is replenished with food, supplies, weapons.")
+
     return do_things(tributes, pick_random_feast_action)
 
 
@@ -1608,18 +1726,21 @@ def game(message):
         random.shuffle(tributes)  # makes it more fair
         events = []
 
-        if (day + 1) % 5 == 1 and day != 1:
+        # Day, Night and Feast return False (check do_things) if they detect a winner or if everyone dies
+
+        if day % 7 == 0:
             if not Feast():
                 event_copy = events
                 final_stats = finish()
                 return event_copy + final_stats
-        # checks if game is finished
+
         if not Day():
             for count, event in enumerate(events):
                 events[count] = correct_grammar(event)
             event_copy = events
             final_stats = finish()
             return event_copy + final_stats
+
         if not Night():
             for count, event in enumerate(events):
                 events[count] = correct_grammar(event)
