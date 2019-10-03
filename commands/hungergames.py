@@ -1468,7 +1468,8 @@ def correct_grammar(input):
 
 
 # ===============================================================================
-#aDD SPECIAL SCENArioS SFOR GUNS
+
+
 # sorts encounters to their respective functions
 def sorting_hat(tribute1, tribute2):
     if type(tribute1) == Tribute:
@@ -1728,6 +1729,7 @@ def two_v_one(party, tribute3):
                                         f" interrupted, dismembered everyone in the vicinity."])
                 return choice
         elif tribute3.weapon == 'gun':
+            tribute3.kills += 2
             kill(trib1, party)
             kill(trib2)
             if scenario == 0:
@@ -1938,6 +1940,80 @@ def two_v_two(party1, party2):
 
     score_st = strong.calculate_strength()
     score_wk = weak.calculate_strength()
+
+    cs_boi = None
+    g_boi = None
+    for boi in [strong1, strong2, weak1, weak2]:
+        if boi.weapon == "cursed sword":
+            cs_boi = boi
+            cb = boi.name
+            break
+        elif boi.weapon == "gun":
+            g_boi = boi
+            gb = boi.name
+            break
+
+    if cs_boi is not None:
+        temp = random.randint(0, 2)
+        choice = random.choice(['traversing a desert', 'walking through the woods' , 'hunting for supplies'])
+        if temp == 0:
+            cs_boi.kills += 2
+            if cs_boi in [strong1, strong2]:
+                kill(weak1, weak)
+                kill(weak2)
+            else:
+                kill(strong1, strong)
+                kill(strong2)
+            return f"{st1} and {st2} encounter {wk1} and {wk2} while {choice}. A fight ensues, but it doesn't last" \
+                f" long - {cb} uses the mystical power of {cs_boi.hisher} {cs_boi.weapon} and banishes his opponents" \
+                f" into the void."
+
+        elif temp == 1:
+            cs_boi.kills += 2
+            cs_boi.inj = True
+            if cs_boi in [strong1, strong2]:
+                kill(weak1, weak)
+                kill(weak2)
+            else:
+                kill(strong1, strong)
+                kill(strong2)
+            return f"{st1} and {st2} encounter {wk1} and {wk2} while {choice}. {cb} tells {cs_boi.hisher} buddy to" \
+                f" step back, before using the overwhelming power of {cs_boi.hisher} {cs_boi.weapon} to" \
+                f" summon a blazing inferno and scorch {cs_boi.hisher} enemies. However, the flames are fierce and" \
+                f" {cb} injures {cs_boi.himher}self in blaze."
+
+        elif temp == 2:
+            kill(strong1, strong)
+            kill(strong2)
+            kill(weak1, weak)
+            kill(weak2)
+            choice = random.choice([f"{st1} and {st2} encounter {wk1} and {wk2} while {choice}. {cb} tries unleashing"
+                                    f" the full potential of {cs_boi.hisher} {cs_boi.weapon}, but the influx of"
+                                    f" power is too much for {cs_boi.himher} to control and everyone in the vicinity"
+                                    f" gets obliterated in a massive explosion.",
+                                    f"{st1} and {st2} encounter {wk1} and {wk2} while {choice}. {cb} uses"
+                                    f" {cs_boi.hisher} {cs_boi.weapon} to summon an eldritch monstrosity from the"
+                                    f" otherworld to fight for {cs_boi.himher}. However, the monstrosity was in the"
+                                    f" middle of watching Gundam when it was summoned, and in its rage at being"
+                                    f" interrupted, dismembered everyone in the vicinity."])
+            return choice
+    elif g_boi is not None:
+        g_boi.kills += 2
+        if g_boi in [strong1, strong2]:
+            kill(weak1, weak)
+            kill(weak2)
+        else:
+            kill(strong1, strong)
+            kill(strong2)
+        if random.choice([True, False]):
+            g_boi.weapon = None
+            return f"{st1} and {st2} chance into {wk1} and {wk2}. What follows is less of a fight and more of a" \
+                f" massacre, as {gb} mows down {g_boi.hisher} enemies using {g_boi.hisher} gun - though" \
+                f" {g_boi.heshe} runs out of bullets in the process."
+        else:
+            return f"{st1} and {st2} chance into {wk1} and {wk2}. What follows is less of a fight and more of a" \
+                f" massacre, as {gb} mows down {g_boi.hisher} enemies using {g_boi.hisher} gun."
+
     if (score_st - score_wk) > 1:  # big difference between their abilities
         kill(weak1, weak)
         kill(weak2)
@@ -2042,7 +2118,87 @@ def three_v_two(party1, party2):
 
     score1 = party1.calculate_strength()
     score2 = party2.calculate_strength()
-    #
+
+    cs_boi = None
+    g_boi = None
+    for boi in [trib1, trib2, trib3, trib4, trib5]:
+        if boi.weapon == "cursed sword":
+            cs_boi = boi
+            cb = boi.name
+            break
+        elif boi.weapon == "gun":
+            g_boi = boi
+            gb = boi.name
+            break
+
+    if cs_boi is not None:
+        temp = random.randint(0, 2)
+        choice = random.choice(['traversing a desert', 'walking through the woods', 'hunting for supplies'])
+        if temp == 0:
+            cs_boi.kills += 2
+            if cs_boi in [trib1, trib2, trib3]:
+                kill(trib4, party2)
+                kill(trib5)
+            else:
+                cs_boi.kills += 1
+                kill(trib1, party1)
+                kill(trib2)
+                kill(trib3)
+            return f"{t1}, {t2} and {t3} encounter {t4} and {t5} while {choice}. A fight ensues, but it doesn't last" \
+                f" long - {cb} uses the mystical power of {cs_boi.hisher} {cs_boi.weapon} and banishes his opponents" \
+                f" into the void."
+
+        elif temp == 1:
+            cs_boi.kills += 2
+            cs_boi.inj = True
+            if cs_boi in [trib1, trib2, trib3]:
+                kill(trib4, party2)
+                kill(trib5)
+            else:
+                cs_boi.kills += 1
+                kill(trib1, party1)
+                kill(trib2)
+                kill(trib3)
+            return f"{t1}, {t2} and {t3} encounter {t4} and {t5} while {choice}. {cb} tells {cs_boi.hisher} buddies to" \
+                f" step back, before using the overwhelming power of {cs_boi.hisher} {cs_boi.weapon} to" \
+                f" summon a blazing inferno and scorch {cs_boi.hisher} enemies. However, the flames are fierce and" \
+                f" {cb} injures {cs_boi.himher}self in blaze."
+
+        elif temp == 2:
+            kill(trib1, party1)
+            kill(trib2)
+            kill(trib3)
+            kill(trib4, party2)
+            kill(trib5)
+            choice = random.choice([f"{t1}, {t2} and {t3} encounter {t4} and {t5} while {choice}. {cb} tries unleashing"
+                                    f" the full potential of {cs_boi.hisher} {cs_boi.weapon}, but the influx of"
+                                    f" power is too much for {cs_boi.himher} to control and everyone in the vicinity"
+                                    f" gets obliterated in a massive explosion.",
+                                    f"{t1}, {t2} and {t3} encounter {t4} and {t5} while {choice}. {cb} uses"
+                                    f" {cs_boi.hisher} {cs_boi.weapon} to summon an eldritch monstrosity from the"
+                                    f" otherworld to fight for {cs_boi.himher}. However, the monstrosity was in the"
+                                    f" middle of watching Gundam when it was summoned, and in its rage at being"
+                                    f" interrupted, dismembered everyone in the vicinity."])
+            return choice
+    elif g_boi is not None:
+        g_boi.kills += 2
+        if g_boi in [trib1, trib2, trib3]:
+            kill(trib4, party2)
+            kill(trib5)
+        else:
+            g_boi.kills += 1
+            kill(trib1, party1)
+            kill(trib2)
+            kill(trib3)
+        if random.choice([True, False]):
+            g_boi.weapon = None
+            return f"{t1}, {t2} and {t3} chance into {t4} and {t5}. What follows is less of a fight and more of a" \
+                f" massacre, as {gb} mows down {g_boi.hisher} enemies using {g_boi.hisher} gun - though" \
+                f" {g_boi.heshe} runs out of bullets in the process."
+        else:
+            return f"{t1}, {t2} and {t3} chance into {t4} and {t5}. What follows is less of a fight and more of a" \
+                f" massacre, as {gb} mows down {g_boi.hisher} enemies using {g_boi.hisher} gun."
+
     if score1 < score2:
         kill(trib1, party1)
         kill(trib2)
@@ -2061,7 +2217,8 @@ def three_v_two(party1, party2):
             verb = "couple good punches"
         return f"{t1}, {t2} and {t3} spot {t4} and {t5} sharpening their weapons in the distance. Injured and" \
             f" exhausted, they try to stealthily escape without alerting {t4} and {t5}, but {t2} steps on a branch" \
-            f" and they end up having to fight it out. {t4} takes out {t2} and {t3} with a {verb}, and {t5} does not heed {t1}'s plead to spare {trib1.hisher} life."
+            f" and they end up having to fight it out. {t4} takes out {t2} and {t3} with a {verb}, and {t5} does not" \
+            f" heed {t1}'s plead to spare {trib1.hisher} life."
     if score1 == score2:
         trib4.inj = True
         trib5.inj = True
@@ -2121,9 +2278,90 @@ def three_v_three(party1, party2):
     score1 = strong.calculate_strength()
     score2 = weak.calculate_strength()
 
+    cs_boi = None
+    g_boi = None
+    for boi in [strong1, strong2, strong3, weak1, weak2, weak3]:
+        if boi.weapon == "cursed sword":
+            cs_boi = boi
+            cb = boi.name
+            break
+        elif boi.weapon == "gun":
+            g_boi = boi
+            gb = boi.name
+            break
+
+    if cs_boi is not None:
+        temp = random.randint(0, 2)
+        choice = random.choice(['traversing a desert', 'walking through the woods', 'hunting for supplies'])
+        if temp == 0:
+            cs_boi.kills += 3
+            if cs_boi in [strong1, strong2, strong3]:
+                kill(weak1, weak)
+                kill(weak2)
+                kill(weak3)
+            else:
+                kill(strong1, strong)
+                kill(strong2)
+                kill(strong3)
+            return f"{st1}, {st2} and {st3} encounter {wk1}, {wk2} and {wk3} while {choice}. A fight ensues, but it doesn't last" \
+                f" long - {cb} uses the mystical power of {cs_boi.hisher} {cs_boi.weapon} and banishes his opponents" \
+                f" into the void."
+
+        elif temp == 1:
+            cs_boi.inj = True
+            cs_boi.kills += 3
+            if cs_boi in [strong1, strong2, strong3]:
+                kill(weak1, weak)
+                kill(weak2)
+                kill(weak3)
+            else:
+                kill(strong1, strong)
+                kill(strong2)
+                kill(strong3)
+            return f"{st1}, {st2} and {st3} encounter {wk1}, {wk2} and {wk3} while {choice}. {cb} tells {cs_boi.hisher} buddies to" \
+                f" step back, before using the overwhelming power of {cs_boi.hisher} {cs_boi.weapon} to" \
+                f" summon a blazing inferno and scorch {cs_boi.hisher} enemies. However, the flames are fierce and" \
+                f" {cb} injures {cs_boi.himher}self in blaze."
+
+        elif temp == 2:
+            kill(weak1, weak)
+            kill(weak2)
+            kill(weak3)
+            kill(strong1, strong)
+            kill(strong2)
+            kill(strong3)
+            choice = random.choice([f"{st1}, {st2} and {st3} encounter {wk1}, {wk2} and {wk3} while {choice}. {cb} tries unleashing"
+                                    f" the full potential of {cs_boi.hisher} {cs_boi.weapon}, but the influx of"
+                                    f" power is too much for {cs_boi.himher} to control and everyone in the vicinity"
+                                    f" gets obliterated in a massive explosion.",
+                                    f"{st1}, {st2} and {st3} encounter {wk1}, {wk2} and {wk3} while {choice}. {cb} uses"
+                                    f" {cs_boi.hisher} {cs_boi.weapon} to summon an eldritch monstrosity from the"
+                                    f" otherworld to fight for {cs_boi.himher}. However, the monstrosity was in the"
+                                    f" middle of watching Gundam when it was summoned, and in its rage at being"
+                                    f" interrupted, dismembered everyone in the vicinity."])
+            return choice
+    elif g_boi is not None:
+        g_boi.kills += 3
+        if g_boi in [strong1, strong2, strong3]:
+            kill(weak1, weak)
+            kill(weak2)
+            kill(weak3)
+        else:
+            kill(strong1, strong)
+            kill(strong2)
+            kill(strong3)
+        if random.choice([True, False]):
+            g_boi.weapon = None
+            return f"{st1}, {st2} and {st3} chance into {wk1}, {wk2} and {wk3}. What follows is less of a fight and more of a" \
+                f" massacre, as {gb} mows down {g_boi.hisher} enemies using {g_boi.hisher} gun - though" \
+                f" {g_boi.heshe} runs out of bullets in the process."
+        else:
+            return f"{st1}, {st2} and {st3} chance into {wk1}, {wk2} and {wk3}. What follows is less of a fight and more of a" \
+                f" massacre, as {gb} mows down {g_boi.hisher} enemies using {g_boi.hisher} gun."
+
+
     choose = random.choice(['frolicking in the woods', 'fishing by the riverside',
                             'loudly debating the efficacy of alternate medicine'])
-
     if even:
         strong1.inj = True
         strong2.inj = True
@@ -2195,7 +2433,7 @@ def compare_strength(trib1, trib2):
 
     return strong, weak, even
 
-
+#FIX THE FEAST
 def feast_fight(tribute1, tribute2):
     t1 = tribute1.name
     t2 = tribute2.name
