@@ -1684,7 +1684,7 @@ def two_v_one(party, tribute3):
 
     party.done = True
     tribute3.done = True
-    num = random.randint(0, 4)  # decides if it's a fight or if they're joining up
+    num = random.randint(0, 1)  # decides if it's a fight or if they're joining up
     scenario = random.randint(0, 2)
     if num == 0:
         party.add_tribute(tribute3)
