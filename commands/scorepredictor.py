@@ -26,17 +26,21 @@ def get_user(username):
 
 # Finds and compares friend scores of an anime; outputs a single number based on an equation
 def find_anime(anime_id, friends):
-    score_list = []
+    numerator = 0
+    denominator = 0
     for friend in friends:
         for anime in friend.list:
             if anime['mal_id'] == anime_id:
                 score = anime['score']
                 if score != 0:
-                    score_list.append(score)
-    if len(score_list) < 20:
-        for i in range(20 - len(score_list)):
-            score_list.append(0)
-    return score_list
+                    affinity = (friend.affinity/100) + 2
+                    numerator += score*affinity
+                    denominator += affinity
+    try:
+        final_score = numerator/denominator
+    except ZeroDivisionError:
+        final_score = 0
+    return final_score
 
 
 # creates a list of MALfriend objects based on the given user's friend list
@@ -50,7 +54,8 @@ def friendlist_creator(username):
         while attempts < 5:
             try:
                 friend_animelist = get_user(username=friend['username'])
-                friendlist.append(MALfriend(friend['username'], friend_animelist))
+                affinity, shared = 100, 1#af.calculate_affinity(friend['username'], service="MyAnimeList")
+                friendlist.append(MALfriend(friend['username'], friend_animelist, affinity))
                 break
             except Exception as e:
                 print(e)
@@ -68,12 +73,12 @@ def model_creator(message):
     X, y = [], []
     for anime in user:
         if anime['score'] != 0:
-            score_list = find_anime(anime['mal_id'], friendlist)
-            if score_list != 0:
-                X.append(score_list)
+            final_score = find_anime(anime['mal_id'], friendlist)
+            if final_score != 0:
+                X.append(final_score)
                 y.append(anime['score'])
 
-    X = np.array(X)
+    X = np.array(X).reshape(-1, 1)
     print(X.shape)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20)
 
