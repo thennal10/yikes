@@ -1461,12 +1461,20 @@ class Party:
 def initialize(message):
     global tributes, numOfDistricts, numOfTributes, initializing
     if message.content == 'hunger games start!':
-        return "Enter number of districts"
+        return "Enter number of districts:"
     else:
-        if numOfDistricts == 0:
-            numOfDistricts = int(message.content)
-            return f"Name tribute #{numOfTributes}\n"
+        if numOfDistricts == 0:  # not set yet
+            try:
+                if int(message.content) == 0:  # oh you sneaky little bastard
+                    return f"Please input a non-zero integer."
+                numOfDistricts = int(message.content)
+            except ValueError:  # yeets out if it doesn't an actual number
+                return f"Please input a number."
+
+            return f"Name tribute #{numOfTributes}\n"  # if everything goes well, go on to name the tributes
         elif numOfTributes < numOfDistricts * 2:
+            if message.content[-2:] not in [' m', ' i', ' f']:
+                return f"Not a valid name. Format is ``Name m/f/i``"
             tributes.append(Tribute(message.content, ceil(numOfTributes / 2)))
             numOfTributes += 1
             return f"Name tribute #{numOfTributes}\n"
@@ -1474,7 +1482,6 @@ def initialize(message):
             tributes.append(Tribute(message.content, ceil(numOfTributes / 2)))
             return_string = ""
             for j in range(len(tributes)):
-                # Print their name, district, and gender. This is mainly for debugging purposes.
                 return_string += f"{tributes[j].name}, district {tributes[j].district}, {tributes[j].gender}\n"
             initializing = False
             return return_string
