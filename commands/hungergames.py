@@ -155,8 +155,8 @@ class Tribute:
                         return  f"{t1} chances upon an ominous book on a pedestal, with decaying corpses scattered" \
                             f" around it. {t1} picks it up and reads the title — 'Breaking Bad Coworker's Journal'." \
                             f" {self.heshe} immediately drops it; {self.heshe}'s one of the few that know what those" \
-                            f" words imply. But after a bit of pondering, {self.heshe} picks it back up. {self.heshe}" \
-                            f" can *use* this."
+                            f" words imply. But after a bit of pondering, {self.heshe} picks it back up." \
+                            f" {self.heshe.capitalize()} can *use* this."
                 else:
                     if temp == 1:
                         return f"{t1} chances upon an ominous book on a pedestal, with decaying corpses scattered" \
@@ -214,9 +214,9 @@ class Tribute:
             elif scenario == 10:
                 if self.inj:
                     kill(self)
-                    return f"{t1} accidentally steps in front of an angry moose. {self.heshe} tries to talk it down" \
-                        f" and almost succeeds, but they eventually broach the subject of politics, and the" \
-                        f" conservative moose doesn't take kindly to {t1}'s liberal leanings."
+                    return f"{t1} accidentally steps in front of an angry moose. {self.heshe.capitalize()} tries to" \
+                        f" talk it down and almost succeeds, but they eventually broach the subject of politics, and" \
+                        f" the conservative moose doesn't take kindly to {t1}'s liberal leanings."
                 else:
                     self.inj = True
                     return f"{t1} gets attacked and injured by a toxic horse, but manages to shoo it away by" \
@@ -415,7 +415,7 @@ class Tribute:
                     return f"{t1} remembers that one Primitive Technology video {self.heshe} saw and fastens a makeshift " \
                         f"{weapon} from a stick and a sharpened rock."
             elif scenario == 20:
-                return f"{t1} prays to God, and asks Him to let {self.himher} survive for another day. God tells " \
+                return f"{t1} prays to God, and asks Him to let {t1} survive for another day. God tells " \
                     f"{t1} to shut the FUCK UP I'M TRYIN TO WATCH SOME GUNDAM HERE"
             elif scenario == 21:
                 if self.gender.lower() == "m":
@@ -1154,7 +1154,7 @@ class Party:
                             f" {trib3.hisher} misery."
                     else:
                         trib3.inj = True
-                        return f"{t3} {choice}, but with the help of {t1} and {t2}, {trib3.heshe} amanges to survive"
+                        return f"{t3} {choice}, but with the help of {t1} and {t2}, {trib3.heshe} manages to survive"
 
     def pick_random_night_action(self):
         global day
@@ -1481,32 +1481,20 @@ def initialize(message):
 
 
 def correct_grammar(input):
-    changed = False
-    isplit = input.split()
-    olist = []
+    isplit = input.split(" ")
     vowels = ['a', 'e', 'i', 'o', 'u']
     consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm',
                   'n', 'p', 'q', 'r', 's', 't', 'v', 'x', 'z', 'w', 'y']
     for count, word in enumerate(isplit):
+        if word == 'they' and isplit[count + 1][-1] == 's':
+            isplit[count + 1] = isplit[count + 1].rstrip('s')
         if word == 'a':
             if isplit[count + 1][0] in vowels:
-                olist.append('an')
-                changed = True
-            else:
-                olist.append(word)
+                isplit[count] = "an"
         elif word == 'an':
             if isplit[count + 1][0] in consonants:
-                olist.append('a')
-                changed = True
-            else:
-                olist.append(word)
-        else:
-            olist.append(word)
-    if not changed:
-        return input
-    else:
-        return " ".join(olist)
-
+                isplit[count] = "a"
+    return " ".join(isplit)
 
 # ===============================================================================
 
@@ -1667,7 +1655,7 @@ def one_v_one(tribute1, tribute2):
                 strong.kills += 1
                 kill(weak)
                 if scenario > 7:
-                    return f"{str} brutally smashes {wk}'s head in with {strong.hisher} {strong.weapon}"
+                    return f"{str} brutally smashes {wk}'s head in with {strong.hisher} {strong.weapon}."
                 else:
                     return f"A single swing of {str}'s {strong.weapon} is enough to take out {wk}."
 
@@ -2718,15 +2706,17 @@ def finish():
         the_end.append(f"**{tributes[0].name} from District {tributes[0].district} survived the Hunger Games!**")
     else:
         the_end.append("**Everyone died! YAY!**")
-    the_end.append("**Order of death**")
+    death_order = "**Order of death**\n"
     for cont, tribute in enumerate(dead):  # For each dead tribute
-        the_end.append(f"{((numOfTributes) - cont) - 1}: {tribute.name}")  # List the name and time of death of the tribute.
+        death_order += f"{((numOfTributes) - cont) - 1}: {tribute.name}\n"  # List the name and time of death of the tribute.
+    the_end.append(death_order)
 
-    the_end.append("**Kills**")
-    dead.sort(key=lambda trib: trib.kills, reverse=True)
-    for tribute in dead:
-        the_end.append(f"{tribute.name} - {tribute.kills}")
-
+    all_tribs = tributes + dead
+    all_tribs.sort(key=lambda trib: trib.kills, reverse=True)
+    kill_string = "**Kills**\n"
+    for tribute in all_tribs:
+        kill_string += f"{tribute.name} - {tribute.kills}\n"
+    the_end.append(kill_string)
     the_end.append("Finished!")
     reset()
 
