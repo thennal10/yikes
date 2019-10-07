@@ -76,9 +76,10 @@ async def on_message(message):
         output = customcommands.custom(message, conn)
         await message.channel.send(output)
 
-    elif message.content.startswith("yi!"):
-        output = customcommands.call_custom(message, conn)
-        await message.channel.send(output)
+    elif message.content.startswith("!"):
+        output, noise = customcommands.call_custom(message, conn)
+        if not noise:
+            await message.channel.send(output)
 
     elif message.content.startswith("remove:"):
         output = customcommands.remove(message, conn)

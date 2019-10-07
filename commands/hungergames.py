@@ -2,6 +2,7 @@
 from math import ceil
 import random
 
+
 numOfDistricts = 0  # set the number of districts
 initializing = True
 numOfTributes = 1
@@ -11,6 +12,7 @@ tributes = []
 dead = []
 deadthisday = []
 day = 1
+rare_weapons_spawned = False
 weapon_list = ['axe', 'cleaver', 'naked waifu figurine', 'broadsword', 'bow', 'blowdart', 'anime DVD', 'dagger',
                'giant screwdriver', 'wooden club', 'scimitar', 'trident', 'mace', 'katana', 'rapier',
                'morning star', 'warhammer', 'halberd', 'spear', 'scythe', 'hatchet']
@@ -18,7 +20,7 @@ cleavers = ['axe', 'broadsword', 'cleaver', 'scimitar', 'katana', 'halberd', 'sc
 stabbers = ['dagger', 'giant screwdriver', 'trident', 'naked waifu figurine', 'rapier', 'spear']
 clubbers = ['wooden club', 'anime DVD', 'mace', 'morning star', 'warhammer']
 ranged = ['bow', 'blowdart']
-rare_weapons_list = ['cursed sword', 'gun']
+rare_weapons_list = ['cursed sword', "Breaking Bad Coworker's Journal"]
 
 
 class Tribute:
@@ -60,11 +62,13 @@ class Tribute:
             score += 1
         if not self.inj:
             score += 1
+        if self.weapon in rare_weapons_list:
+            score = 999
         return score
 
     # Time for some long ass methods
     def pick_random_action(self):
-        global tributes, dead, deadthisday
+        global tributes, dead, deadthisday, rare_weapons_spawned
 
         t1 = self.name
         # num picks between three overarching scenarios
@@ -139,14 +143,31 @@ class Tribute:
                 self.weapon = new_weapon
                 return f"{t1} receives a supply drop containing a {new_weapon} from an unknown sponsor."
             elif scenario == 10:
-                new_weapon = random.choice(rare_weapons_list)
-                self.weapon = new_weapon
-                if new_weapon == 'cursed sword':
-                    return f"After a lengthy set of obstacles and puzzles in an ancient stone temple, {t1} finally reaps" \
-                        f" the reward for {self.hisher} effort; a {new_weapon}, embedded with unimaginable power."
-                elif new_weapon == 'gun':
-                    return  f"Breaking through a hidden safe with {self.hisher} 1337 technical skills " \
-                        f"({self.heshe} used a hammer), {t1} finds a {new_weapon} stored compactly inside."
+                temp = random.randint(0, 2)
+                if not rare_weapons_spawned and temp == 0:
+                    rare_weapons_spawned = True
+                    new_weapon = random.choice(rare_weapons_list)
+                    self.weapon = new_weapon
+                    if new_weapon == 'cursed sword':
+                        return f"After a lengthy set of obstacles and puzzles in an ancient stone temple, {t1} finally reaps" \
+                            f" the reward for {self.hisher} effort; a {new_weapon}, embedded with unimaginable power."
+                    elif new_weapon == "Breaking Bad Coworker's Journal":
+                        return  f"{t1} chances upon an ominous book on a pedestal, with decaying corpses scattered" \
+                            f" around it. {t1} picks it up and reads the title — 'Breaking Bad Coworker's Journal'." \
+                            f" {self.heshe} immediately drops it; {self.heshe}'s one of the few that know what those" \
+                            f" words imply. But after a bit of pondering, {self.heshe} picks it back up. {self.heshe}" \
+                            f" can *use* this."
+                else:
+                    if temp == 1:
+                        return f"{t1} chances upon an ominous book on a pedestal, with decaying corpses scattered" \
+                            f" around it. {t1} picks it up and reads the title — 'Breaking Bad Coworker's Journal'." \
+                            f" {t1} obliviously proceeds to read it, and barely a page in, {self.heshe} starts" \
+                            f" repeatedly bashing {self.hisher} head on a nearby tree trunk until {self.heshe}" \
+                            f" dies of a cerebral hemorrhage."
+                    choice = random.choice(['ancient stone temple' , 'mysterious book on a pedestal'])
+                    return f"{t1} spots an {choice} in the distance, but gets some really bad vibes and decides to" \
+                        f" avoid it altogether."
+
             else:
                 return f"{t1} tests out {self.hisher} {self.weapon} against " \
                     f"{random.choice(['some wild boars', 'a scarecrow', 'an odd-looking boulder', 'an effigy of Donald Trump'])}."
@@ -191,9 +212,15 @@ class Tribute:
                 kill(self)
                 return f"{t1} steps on a landmine and gets yeeted into the stratosphere."
             elif scenario == 10:
-                kill(self)
-                return f"{t1} chances upon a small book simply titled 'Breaking Bad Coworker's Journal'. After reading a" \
-                    f" couple pages, {self.heshe} promptly decides to jump off a cliff and commit suicide."
+                if self.inj:
+                    kill(self)
+                    return f"{t1} accidentally steps in front of an angry moose. {self.heshe} tries to talk it down" \
+                        f" and almost succeeds, but they eventually broach the subject of politics, and the" \
+                        f" conservative moose doesn't take kindly to {t1}'s liberal leanings."
+                else:
+                    self.inj = True
+                    return f"{t1} gets attacked and injured by a toxic horse, but manages to shoo it away by" \
+                        f" shouting gay things at it."
             elif scenario == 11:
                 self.inj = True
                 return f"{t1}'s dumb ass falls into a hole and breaks {self.hisher} leg."
@@ -244,6 +271,7 @@ class Tribute:
             elif scenario == 24:
                 kill(self)
                 return f"{t1} tries to take a bath in a lake but gets eaten by a stealthy crocodile instead."
+
     def pick_random_night_action(self):
         global tributes, dead, deadthisday
 
@@ -257,13 +285,11 @@ class Tribute:
         else:
             scenario = random.randint(0, 25)
             tribute2 = random.choice(other_tributes)
-            t2 = tribute2.name
 
         if self.supplies == 'weird amulet':  # weird amulet has custom outcomes
             temp = random.randint(0, 2)
-            if temp == 0:  # continue onward as if nothing happened at all
-                pass
-            elif temp == 1:
+
+            if temp == 1 and not rare_weapons_spawned:
                 self.supplies = None
                 self.weapon = 'cursed sword'
                 return f"{t1} fiddles around with {self.hisher} weird amulet, and in a sudden puff of purple smoke, " \
@@ -288,6 +314,7 @@ class Tribute:
 
         # Isolate trib encounter scenarios
         if scenario == 0 or scenario == 1:
+            t2 = tribute2.name
             if scenario == 0:
                 tribute2.done = True
                 if tribute2.asleep:
@@ -420,9 +447,9 @@ class Tribute:
         else:
             num = random.randint(0, 1)
             tribute2 = random.choice(other_tributes)
-            t2 = tribute2.name
 
         if num == 0:  # tribute encounter
+            t2 = tribute2.name
             scenario = random.randint(0, 7)
 
             if scenario == 0:
@@ -543,6 +570,88 @@ class Tribute:
                            f"{t1} grabs a backpack and runs for it, not realizing the backpack is empty."]
                 return random.choice(choices)
 
+    def pick_random_showdown_action(self):
+        other_tributes = [trib for trib in tributes if trib != self]
+        tribute2 = random.choice(other_tributes)
+
+        strong, weak, even = compare_strength(self, tribute2)
+
+        st = strong.name
+        wk = weak.name
+
+        if strong.weapon == "cursed sword":
+            if st == "The Harbinger":
+                strong.kills += 1
+                kill(weak)
+                choice = random.choice([f"{st} telekinetically yeets {wk} into the stratosphere.",
+                                        f"{st} atomizes {wk} in a single blast of unearthly energy.",
+                                        f"{st} burns {wk} to ashes by just looking at {weak.himher}.",
+                                        f"A single snap of {st}'s fingers vaporizes {wk}."])
+                return choice
+            strong.name = "The Harbinger"
+            return f"{st} points the cursed sword to the sky as {strong.heshe} and gives in to its whisperings:" \
+                f" White light emanates from {st}'s every orifice as {strong.heshe} is possessed by an otherworldy" \
+                f" entity. A single phrase booms over the arena as the possession nears completion:" \
+                f" '*Assuming direct control.*'"
+        elif strong.weapon == "Breaking Bad Coworker's Journal":
+            strong.name = f"Satan"
+            for trib in other_tributes:
+                strong.kills += 1
+                kill(trib)
+            return f"{st} causally strolls to the center of the Cornucopia. Thinking {strong.himher} to be easy" \
+                f" pickings, the other tributes approach armed, but they are stopped by a sudden force field" \
+                f" enveloped around {st}, as {strong.heshe} opens The {strong.weapon} and starts reading it:" \
+                f" skipping several chapters, pages, paragraphs, words, and even characters in a random, seemingly" \
+                f" incomprehensible order. As {strong.heshe} continues, however, dread fills the tributes hearts;" \
+                f" {st} transforms into a demonic figure, reminiscent of the Devil himself. Moments later," \
+                f" they all start moaning in agony, slowly evaporated by a sudden wave of hellish heat."
+        elif strong.weapon in cleavers:
+            strong.kills += 1
+            kill(weak)
+            if even:
+                strong.inj = True
+                return f"{st} savagely decapitates {wk} with {strong.hisher} {strong.weapon}, though {strong.heshe}" \
+                    f" gets injured in the process"
+            else:
+                return f"{st} cuts {wk} down with {strong.hisher} {strong.weapon} in a single stroke."
+
+        elif strong.weapon in stabbers:
+            strong.kills += 1
+            kill(weak)
+            if even:
+                strong.inj = True
+                return f"After a drawn-out fight, {st} manages to catch {wk} in the throat with {strong.hisher}" \
+                    f" {strong.weapon} and scores a kill."
+            else:
+                return f"A well aimed stab by {st}'s {strong.weapon} ends {wk}'s miserable life."
+
+        elif strong.weapon in clubbers:
+            strong.kills += 1
+            kill(weak)
+            if even:
+                strong.inj = True
+                return f"{st} brutally smashes {wk}'s head in with {strong.hisher} {strong.weapon}, though" \
+                    f" {strong.heshe} gets injured in the process."
+            else:
+                return f"A single swing of {st}'s {strong.weapon} is enough to take out {wk}."
+
+        elif strong.weapon in ranged:
+            strong.kills += 1
+            kill(weak)
+            if strong.weapon == 'bow':
+                return f"A single well-aimed arrow fired from {st}'s bow is enough to end {wk}'s life."
+            if strong.weapon == 'blowdart':
+                return f"{st} uses a dart coated with a rare vicious poison to take {wk} out."
+        else:
+            strong.kills += 1
+            kill(weak)
+            if even:
+                strong.inj = True
+                return f"A fistfight between {st} and {wk} devolves into quite a brutal affair, and while {st} comes" \
+                    f" out victorious, {strong.heshe} is left debilitated."
+            else:
+                return f"{st} brutally dismembers {wk} with {strong.hisher} bare hands."
+
 
 class Party:
 
@@ -569,6 +678,7 @@ class Party:
         self.done = False
 
     def split(self):
+        # note: post-split tributes are not done. Intentional, but just something to keep in mind for further use
         global tributes
         tributes.insert(0, self.trib1)
         tributes.insert(0, self.trib2)
@@ -617,79 +727,7 @@ class Party:
                     output = f"As the game comes down to it's final day, {t1} and {t2} both know what must be done. " \
                         f"They make their way to the Cornucopia, and get ready for the final showdown.\n"
 
-                    strong, weak, even = compare_strength(trib1, trib2)
-
-                    str = strong.name
-                    wk = weak.name
-
-                    if strong.weapon == 'cursed sword':
-                        kill(strong, self)
-                        output += f"As the fight starts, a purple light fills the sky as {str}'s cursed sword shatters and reveals it's " \
-                            f"final form: A giant fucking Gundam emerges from the blinding light. Because of course it does.\n" \
-                            f" As {str} prepares to become one with the robot, {strong.heshe} bids {wk} a final farewell" \
-                            f" before flying off to the stars. {wk} just stands there amazed."
-                        strong.name = 'Ascended ' + strong.name
-                    elif weak.weapon == 'cursed sword':
-                        kill(weak, self)
-                        output += f"As the fight starts, a purple light fills the sky as {wk}'s cursed sword shatters and reveals it's " \
-                            f"final form; A giant fucking Gundam emerges from the blinding light. Because of course it does.\n" \
-                            f" As {wk} prepares to become one with the robot, {weak.heshe} bids {str} a final farewell" \
-                            f" before flying off to the stars. {str} just stands there amazed."
-                        strong.name = 'Ascended ' + weak.name
-
-                    elif strong.weapon == 'gun' or weak.weapon == 'gun':
-                        if strong.weapon == 'gun':
-                            strong.kills += 1
-                            kill(weak, self)
-                            output += f"{str} just straights up shoots {wk} in the head with {strong.hisher} gun." \
-                                f" Kind of anticlimactic really."
-                        elif weak.weapon == 'gun':
-                            weak.kills += 1
-                            kill(strong, self)
-                            output += f"{wk} just straights up shoots {str} in the head with {weak.hisher} gun." \
-                                f" Kind of anticlimactic really."
-
-                    elif strong.weapon in cleavers:
-                        strong.kills += 1
-                        kill(weak, self)
-                        if scenario > 7:
-                            output += f"After a long battle, {str} savagely decapitates {wk} with {strong.hisher} {strong.weapon}."
-                        else:
-                            output += f"{str}, without hesitation, cuts {wk} down with {strong.hisher} {strong.weapon} in a single stroke."
-
-                    elif strong.weapon in stabbers:
-                        strong.kills += 1
-                        kill(weak, self)
-                        if scenario > 7:
-                            output += f"A final, well aimed stab by {str}'s {strong.weapon} ends {wk}'s life."
-                        else:
-                            output += f"After a drawn-out fight, {str} manages to catch {wk} in the throat with {strong.hisher}" \
-                                f" {strong.weapon} and ends {wk}'s life."
-
-                    elif strong.weapon in clubbers:
-                        strong.kills += 1
-                        kill(weak, self)
-                        output += f"A ferocious battle commences, and {str} eventually smashes {wk}'s head in with " \
-                            f"{strong.hisher} {strong.weapon}."
-
-                    elif strong.weapon == 'bow' or strong.weapon == 'blowdart':
-                        if strong.weapon == 'bow':
-                            strong.kills += 1
-                            kill(weak, self)
-                            output += f"After a tactical battle of wits fully utilizing their surroundings, {str} finally " \
-                                f"figures out where {wk} is hiding and manages to catch {weak.himher} in the throat with" \
-                                f"an arrow."
-                        if strong.weapon == 'blowdart':
-                            strong.kills += 1
-                            kill(weak, self)
-                            output += f"After a tactical battle of wits fully utilizing their surroundings, {str} finally " \
-                                f"figures out where {wk} is hiding and shoots out a poisoned dart. It barely pricks {wk}'s" \
-                                f"skin, but it's enough: {weak.heshe} collapses soon after."
-                    else:
-                        kill(weak, self)
-                        kill(strong)
-                        output += f"In a magnificent display of manliness, {str} and {wk} fight it out to the death with " \
-                            f"their fists, and in the end simultaneously collapse."
+                    output += one_v_one_final_showdown(trib1, trib2, self)
                     return output
 
             # 2v1 is always going to be unfair
@@ -822,8 +860,10 @@ class Party:
                         f" at all while {t2} catches buttloads with {trib2.hisher} secret fishing technique passed down the" \
                         f" generations."
                 elif scenario == 14:
-                    return f"{t1} and {t2} find a mysterious book simply labeled 'Breaking Bad Coworker's Journal'. {t1} goes to" \
-                        f" read it but {t2} senses something very wrong and stops {t1} before {trib1.heshe} opens it."
+                    choice = random.choice(['Darling in the Franxx', 'Eromanga Sensei', 'Sword Art Online', 'Shobitch',
+                                            'Sakurasou'])
+                    return f"{t1} offers {t2} nitro for watching the entirety of {choice}. {t2} knows better, and" \
+                        f" flatly refuses."
                 elif scenario == 15:
                     choice = random.choice(['Darling in the Franxx', 'Eromanga Sensei', 'Sword Art Online', 'Shobitch',
                                             'Sakurasou'])
@@ -1046,9 +1086,11 @@ class Party:
                         f" up catching even more fish than {t2}, but ends up tripping over the bucket and sets all" \
                         f" {trib3.hisher} catches free."
                 elif scenario == 14:
-                    return f"{t1}, {t2} and {t3} find a mysterious book simply labeled 'Breaking Bad Coworker's" \
-                        f" Journal'. {t1} goes to read it but {t3} senses something very wrong and stops {t1} before" \
-                        f" {trib1.heshe} opens it."
+                    choice = random.choice(['Darling in the Franxx', 'Eromanga Sensei', 'Sword Art Online', 'Shobitch',
+                                            'Sakurasou'])
+                    return f"{t1} offers {t3} nitro for watching the entirety of {choice}. {t3} immediately tries" \
+                        f" accept the contract, nitro addict {trib3.heshe} is, but {t2} knows better, and convinces" \
+                        f" {t3} to turn down the deal."
                 elif scenario == 15:
                     choice = random.choice(['Darling in the Franxx', 'Eromanga Sensei', 'Sword Art Online', 'Shobitch',
                                             'Sakurasou'])
@@ -1115,7 +1157,7 @@ class Party:
                         return f"{t3} {choice}, but with the help of {t1} and {t2}, {trib3.heshe} amanges to survive"
 
     def pick_random_night_action(self):
-
+        global day
         trib1 = self.trib1
         trib2 = self.trib2
         trib3 = self.trib3
@@ -1124,11 +1166,11 @@ class Party:
 
 
         if self.type == 2:
+            # next up, check for supplies
             if trib1.supplies == 'weird amulet' or trib2.supplies == 'weird amulet':  # weird amulet has custom outcomes
                 temp = random.randint(0, 2)
-                if temp == 0: # continue onward as if nothing happened
-                    pass
-                elif temp == 1:
+
+                if temp == 1 and not rare_weapons_spawned:
                     if trib1.supplies == 'weird amulet':
                         sworded = trib1
                     elif trib2.supplies == 'weird amulet':
@@ -1249,9 +1291,8 @@ class Party:
                             trib3.supplies == 'weird amulet')
             if weird_amulet:  # weird amulet has custom outcomes
                 temp = random.randint(0, 2)
-                if temp == 0: # continue onward as if nothing happened
-                    pass
-                elif temp == 1:
+
+                if temp == 1 and rare_weapons_spawned:
                     if trib1.supplies == 'weird amulet':
                         sworded = trib1
                     elif trib2.supplies == 'weird amulet':
@@ -1541,7 +1582,6 @@ def one_v_one(tribute1, tribute2):
 
         str = strong.name
         wk = weak.name
-
         if strong.weapon == 'cursed sword' or weak.weapon == 'cursed sword':
             temp = random.randint(0, 2)
             if temp == 0:
@@ -1580,27 +1620,16 @@ def one_v_one(tribute1, tribute2):
                         f"otherworld to fight for {strong.himher}, but the monstrosity was in the middle of watching " \
                         f"Gundam when it was summoned, and in its rage at being interrupted, dismembered both {str} and {wk}."
 
-        elif strong.weapon == 'gun' or weak.weapon == 'gun':
-            temp = random.randint(0, 2)
-            if strong.weapon == 'gun':
-                strong.kills += 1
-                kill(weak)
-                if temp == 2:
-                    strong.weapon = None
-                    return f"{str} just straights up shoots {wk} in the head with {strong.hisher} gun, but runs " \
-                        f"out of bullets in the process."
-                else:
-                    return f"{str} just straights up shoots {wk} in the head with {strong.weapon}."
-            elif weak.weapon == 'gun':
-                weak.kills += 1
-                kill(strong)
-                if temp == 2:
-                    weak.weapon = None
-                    return f"{wk} just straights up shoots {str} in the head with {weak.hisher} gun, but runs " \
-                        f"out of bullets in the process."
-                else:
-                    return f"{wk} just straights up shoots {str} in the head with {weak.weapon}."
-
+        elif strong.weapon == "Breaking Bad Coworker's Journal":
+            strong.kills += 1
+            kill(weak)
+            choice = random.choice([f"{wk} falls down to the ground, seized by unimaginable agony.",
+                                    f"a swarm of locusts explode out of {wk}'s every orifice, leaving behind the flaky"
+                                    f" husk that used to be {weak.hisher} body.",
+                                    f"{wk} transforms into an amorphous green blob, unable to move, feel, or even"
+                                    f" scream."])
+            return f"As {wk} approaches {strong.himher}, {str} pulls out The {strong.weapon} and flashes it" \
+                f" open in front of {wk}. Two seconds later, {choice}"
 
         elif strong.weapon in cleavers:
             if even:
@@ -1728,36 +1757,37 @@ def two_v_one(party, tribute3):
                                         f"middle of watching Gundam when it was summoned, and in its rage at being"
                                         f" interrupted, dismembered everyone in the vicinity."])
                 return choice
-        elif tribute3.weapon == 'gun':
+        elif tribute3.weapon == "Breaking Bad Coworker's Journal":
             tribute3.kills += 2
             kill(trib1, party)
             kill(trib2)
-            if scenario == 0:
-                tribute3.weapon = None
-                return f"{t3} spots {t1} and {t2} nearby, and before they even have time to react, {t3} mows em " \
-                    f"down with {tribute3.hisher} gun - though {tribute3.heshe} runs out of bullets in the process."
-            else:
-                return f"{t3} spots {t1} and {t2} nearby, and before they even have time to react, {t3} mows em " \
-                    f"down with {tribute3.hisher} gun."
-
+            choice = random.choice(['traversing a desert', 'walking through the woods', 'hunting for supplies'])
+            subchoice = random.choice([f"{t1} and {t2} both fall down to the ground, seized by unimaginable agony.",
+                                       f"a swarm of locusts explode out of {t1} and {t2}'s every orifice, leaving behind"
+                                       f" the two flaky husks that used to be their bodies.",
+                                       f"{t1} and {t2} transform into amorphous green blobs, unable to move, feel, or"
+                                       f" even scream."])
+            return f"{t3} encounter {t1} and {t2} while {choice}. However, before {t1} and {t2} can even" \
+                f" draw their weapons, {t3} pulls out The {tribute3.weapon} and flashes it open in front of them." \
+                f" Two seconds later, {subchoice}"
         elif ((tribute3.weapon is not None) and (trib2.weapon is None) and (trib1.weapon is None)) or (
                 trib1.inj and trib2.inj):
             if trib1.inj:
                 kill(trib1, party)
                 trib2.inj = True
-                return f"{t3} covetly stalks {t1} and {t2} as they stumble around the arena, and when " \
+                return f"{t3} covertly stalks {t1} and {t2} as they stumble around the arena, and when " \
                     f"{tribute3.heshe} feels the time is right, {t3} strikes; {tribute3.heshe} smashes {t1}'s face" \
                     f" in, but {t2} manages to escape, wounded."
             elif trib2.inj:
                 kill(trib2, party)
                 trib1.inj = True
-                return f"{t3} covetly stalks {t1} and {t2} as they stumble around the arena, and when " \
+                return f"{t3} covertly stalks {t1} and {t2} as they stumble around the arena, and when " \
                     f"{tribute3.heshe} feels the time is right, {t3} strikes; {tribute3.heshe} smashes {t2}'s face" \
                     f" in, but {t1} manages to escape, wounded."
             else:
                 trib1.inj = True
                 trib2.inj = True
-                return f"{t3} covetly stalks {t1} and {t2} as they stumble around the arena, and when" \
+                return f"{t3} covertly stalks {t1} and {t2} as they stumble around the arena, and when" \
                     f"{tribute3.heshe} feels the time is right, {t3} stikes; both {t1} and {t2} take quite" \
                     f" the beating, but they manage to escape, wounded."
         else:
@@ -1852,19 +1882,20 @@ def three_v_one(party, tribute4):
                                     f"middle of watching Gundam when it was summoned, and in its rage at being"
                                     f" interrupted, dismembered everyone in the vicinity."])
             return choice
-    elif tribute4.weapon == 'gun':
+    elif tribute4.weapon == "Breaking Bad Coworker's Journal":
         tribute4.kills += 3
         kill(trib1, party)
         kill(trib2)
         kill(trib3)
-        ran_out_of_ammo = random.choice([True, False])
-        if ran_out_of_ammo:
-            tribute4.weapon = None
-            return f"{t4} spots {t1}, {t2} and {t3} nearby, and before they even have time to react, {t4} mows em " \
-                f"down with {tribute4.hisher} gun - though {tribute4.heshe} runs out of bullets in the process."
-        else:
-            return f"{t4} spots {t1}, {t2} and {t3} nearby, and before they even have time to react, {t4} mows em " \
-                f"down with {tribute4.hisher} gun."
+        choice = random.choice(['traversing a desert', 'walking through the woods', 'hunting for supplies'])
+        subchoice = random.choice([f"{t1}, {t2} and {t3} both fall down to the ground, seized by unimaginable agony.",
+                                   f"a swarm of locusts explode out of {t1}, {t2} and {t3}'s every orifice, leaving"
+                                   f" behind the three flaky husks that used to be their bodies.",
+                                   f"{t1}, {t2}, and {t3} transform into amorphous green blobs, unable to move, feel,"
+                                   f" or even scream."])
+        return f"{t4} encounter {t1}, {t2} and {t3} while {choice}. However, before they can even" \
+            f" draw their weapons, {t4} pulls out The {tribute4.weapon} and flashes it open in front of them." \
+            f" Two seconds later, {subchoice}"
 
     if party.calculate_strength() <= tribute4.calculate_strength():
         tribute4.inj = True
@@ -1872,44 +1903,44 @@ def three_v_one(party, tribute4):
             f" the wounds, but {t4} jumps down a tall cliff and manages to lose them, though {tribute4.heshe}" \
             f" injures {tribute4.himher} leg in the process."
     else:
-        if trib1.weapon is not None:
+        if trib1.weapon is not None and trib1.weapon not in rare_weapons_list:
             trib1.kills += 1
             kill(tribute4)
-            if trib1.weapon in cleavers or trib1.weapon == 'cursed sword':
+            if trib1.weapon in cleavers:
                 verb = "skewers"
             elif trib1.weapon in stabbers:
                 verb = "guts"
             elif trib1.weapon in clubbers:
                 verb = "pulverizes"
-            elif trib1.weapon in ranged or trib1.weapon == 'gun':
+            elif trib1.weapon in ranged:
                 verb = "executes"
             return f"{t1}, {t2} and {t3} chance upon {t4} {choice}. While {t4} tries to escape, {t2} and {t3} manage" \
                 f" to catch {tribute4.himher} and holds {tribute4.himher} down while {t1} {verb} {t4} with" \
                 f" {trib1.hisher} {trib1.weapon}"
-        elif trib2.weapon is not None:
+        elif trib2.weapon is not None and trib2.weapon not in rare_weapons_list:
             trib2.kills += 1
             kill(tribute4)
-            if trib2.weapon in cleavers or trib2.weapon == 'cursed sword':
+            if trib2.weapon in cleavers:
                 verb = "skewers"
             elif trib2.weapon in stabbers:
                 verb = "guts"
             elif trib2.weapon in clubbers:
                 verb = "pulverizes"
-            elif trib2.weapon in ranged or trib2.weapon == 'gun':
+            elif trib2.weapon in ranged:
                 verb = "executes"
             return f"{t1}, {t2} and {t3} chance upon {t4} {choice}. While {t4} tries to escape, {t1} and {t3} manage" \
                 f" to catch {tribute4.himher} and holds {tribute4.himher} down while {t2} {verb} {t4} with" \
                 f" {trib2.hisher} {trib2.weapon}"
-        elif trib3.weapon is not None:
+        elif trib3.weapon is not None and trib3.weapon not in rare_weapons_list:
             trib3.kills += 1
             kill(tribute4)
-            if trib3.weapon in cleavers or trib3.weapon == 'cursed sword':
+            if trib3.weapon in cleavers:
                 verb = "skewers"
             elif trib3.weapon in stabbers:
                 verb = "guts"
             elif trib3.weapon in clubbers:
                 verb = "pulverizes"
-            elif trib3.weapon in ranged or trib3.weapon == 'gun':
+            elif trib3.weapon in ranged:
                 verb = "executes"
             return f"{t1}, {t2} and {t3} chance upon {t4} {choice}. While {t4} tries to escape, {t1} and {t2} manage" \
                 f" to catch {tribute4.himher} and holds {tribute4.himher} down while {t3} {verb} {t4} with" \
@@ -1942,15 +1973,15 @@ def two_v_two(party1, party2):
     score_wk = weak.calculate_strength()
 
     cs_boi = None
-    g_boi = None
-    for boi in [strong1, strong2, weak1, weak2]:
+    bbc_boi = None
+    for boi in [strong1, strong2]:
         if boi.weapon == "cursed sword":
             cs_boi = boi
             cb = boi.name
             break
-        elif boi.weapon == "gun":
-            g_boi = boi
-            gb = boi.name
+        elif boi.weapon == "Breaking Bad Coworker's Journal":
+            bbc_boi = boi
+            bbc = boi.name
             break
 
     if cs_boi is not None:
@@ -1958,25 +1989,17 @@ def two_v_two(party1, party2):
         choice = random.choice(['traversing a desert', 'walking through the woods' , 'hunting for supplies'])
         if temp == 0:
             cs_boi.kills += 2
-            if cs_boi in [strong1, strong2]:
-                kill(weak1, weak)
-                kill(weak2)
-            else:
-                kill(strong1, strong)
-                kill(strong2)
+            kill(weak1, weak)
+            kill(weak2)
             return f"{st1} and {st2} encounter {wk1} and {wk2} while {choice}. A fight ensues, but it doesn't last" \
-                f" long - {cb} uses the mystical power of {cs_boi.hisher} {cs_boi.weapon} and banishes his opponents" \
-                f" into the void."
+                f" long - {cb} uses the mystical power of {cs_boi.hisher} {cs_boi.weapon} and banishes" \
+                f" {cs_boi.hisher} opponents into the void."
 
         elif temp == 1:
             cs_boi.kills += 2
             cs_boi.inj = True
-            if cs_boi in [strong1, strong2]:
-                kill(weak1, weak)
-                kill(weak2)
-            else:
-                kill(strong1, strong)
-                kill(strong2)
+            kill(weak1, weak)
+            kill(weak2)
             return f"{st1} and {st2} encounter {wk1} and {wk2} while {choice}. {cb} tells {cs_boi.hisher} buddy to" \
                 f" step back, before using the overwhelming power of {cs_boi.hisher} {cs_boi.weapon} to" \
                 f" summon a blazing inferno and scorch {cs_boi.hisher} enemies. However, the flames are fierce and" \
@@ -1997,22 +2020,20 @@ def two_v_two(party1, party2):
                                     f" middle of watching Gundam when it was summoned, and in its rage at being"
                                     f" interrupted, dismembered everyone in the vicinity."])
             return choice
-    elif g_boi is not None:
-        g_boi.kills += 2
-        if g_boi in [strong1, strong2]:
-            kill(weak1, weak)
-            kill(weak2)
-        else:
-            kill(strong1, strong)
-            kill(strong2)
-        if random.choice([True, False]):
-            g_boi.weapon = None
-            return f"{st1} and {st2} chance into {wk1} and {wk2}. What follows is less of a fight and more of a" \
-                f" massacre, as {gb} mows down {g_boi.hisher} enemies using {g_boi.hisher} gun - though" \
-                f" {g_boi.heshe} runs out of bullets in the process."
-        else:
-            return f"{st1} and {st2} chance into {wk1} and {wk2}. What follows is less of a fight and more of a" \
-                f" massacre, as {gb} mows down {g_boi.hisher} enemies using {g_boi.hisher} gun."
+    elif bbc_boi is not None:
+        bbc_boi.kills += 2
+        kill(weak1, weak)
+        kill(weak2)
+        choice = random.choice(['traversing a desert', 'walking through the woods', 'hunting for supplies'])
+        subchoice = random.choice([f"{wk1} and {wk2} both fall down to the ground, seized by unimaginable agony.",
+                                   f"a swarm of locusts explode out of {wk1} and {wk2}'s every orifice, leaving behind"
+                                   f" the two flaky husks that used to be their bodies.",
+                                   f"{wk1} and {wk2} transform into amorphous green blobs, unable to move, feel, or"
+                                   f" even scream."])
+        return f"{st1} and {st2} encounter {wk1} and {wk2} while {choice}. However, before {wk1} and {wk2} can even" \
+            f" draw their weapons, {bbc} pulls out The {bbc_boi.weapon} and flashes it open in front of them." \
+            f" Two seconds later, {subchoice}"
+
 
     if (score_st - score_wk) > 1:  # big difference between their abilities
         kill(weak1, weak)
@@ -2120,15 +2141,15 @@ def three_v_two(party1, party2):
     score2 = party2.calculate_strength()
 
     cs_boi = None
-    g_boi = None
+    bbc_boi = None
     for boi in [trib1, trib2, trib3, trib4, trib5]:
         if boi.weapon == "cursed sword":
             cs_boi = boi
             cb = boi.name
             break
-        elif boi.weapon == "gun":
-            g_boi = boi
-            gb = boi.name
+        elif boi.weapon == "Breaking Bad Coworker's Journal":
+            bbc_boi = boi
+            bbc = boi.name
             break
 
     if cs_boi is not None:
@@ -2180,24 +2201,33 @@ def three_v_two(party1, party2):
                                     f" middle of watching Gundam when it was summoned, and in its rage at being"
                                     f" interrupted, dismembered everyone in the vicinity."])
             return choice
-    elif g_boi is not None:
-        g_boi.kills += 2
-        if g_boi in [trib1, trib2, trib3]:
+    elif bbc_boi is not None:
+        bbc_boi.kills += 2
+        choice = random.choice(['traversing a desert', 'walking through the woods', 'hunting for supplies'])
+        if bbc_boi in [trib1, trib2, trib3]:
             kill(trib4, party2)
             kill(trib5)
+            subchoice = random.choice([f"{t4} and {t5} both fall down to the ground, seized by unimaginable agony.",
+                                       f"a swarm of locusts explode out of {t4} and {t5}'s every orifice, leaving"
+                                       f" behind the two flaky husks that used to be their bodies.",
+                                       f"{t4} and {t5} transform into amorphous green blobs, unable to move, feel,"
+                                       f" or even scream."])
+            return f"{t1}, {t2} and {t3} encounter {t4} and {t5} while {choice}. However, before {t4} and {t5} can" \
+                f" even draw their weapons, {bbc} pulls out The {bbc_boi.weapon} and flashes it open in front of" \
+                f" them. Two seconds later, {subchoice}"
         else:
-            g_boi.kills += 1
+            bbc_boi.kills += 1
             kill(trib1, party1)
             kill(trib2)
             kill(trib3)
-        if random.choice([True, False]):
-            g_boi.weapon = None
-            return f"{t1}, {t2} and {t3} chance into {t4} and {t5}. What follows is less of a fight and more of a" \
-                f" massacre, as {gb} mows down {g_boi.hisher} enemies using {g_boi.hisher} gun - though" \
-                f" {g_boi.heshe} runs out of bullets in the process."
-        else:
-            return f"{t1}, {t2} and {t3} chance into {t4} and {t5}. What follows is less of a fight and more of a" \
-                f" massacre, as {gb} mows down {g_boi.hisher} enemies using {g_boi.hisher} gun."
+            subchoice = random.choice([f"{t1}, {t2} and {t3} fall down to the ground, seized by unimaginable agony.",
+                                       f"a swarm of locusts explode out of {t1}, {t2} and {t3}'s every orifice, leaving"
+                                       f" behind the three flaky husks that used to be their bodies.",
+                                       f"{t1}, {t2} and {t3} transform into amorphous green blobs, unable to move, feel,"
+                                       f" or even scream."])
+            return f"{t1}, {t2} and {t3} encounter {t4} and {t5} while {choice}. However, before {t1}, {t2}, and {t3}" \
+                f" can even draw their weapons, {bbc} pulls out The {bbc_boi.weapon} and flashes it open in front of" \
+                f" them. Two seconds later, {subchoice}"
 
     if score1 < score2:
         kill(trib1, party1)
@@ -2279,15 +2309,15 @@ def three_v_three(party1, party2):
     score2 = weak.calculate_strength()
 
     cs_boi = None
-    g_boi = None
+    bbc_boi = None
     for boi in [strong1, strong2, strong3, weak1, weak2, weak3]:
         if boi.weapon == "cursed sword":
             cs_boi = boi
             cb = boi.name
             break
-        elif boi.weapon == "gun":
-            g_boi = boi
-            gb = boi.name
+        elif boi.weapon == "Breaking Bad Coworker's Journal":
+            bbc_boi = boi
+            bbc = boi.name
             break
 
     if cs_boi is not None:
@@ -2340,25 +2370,20 @@ def three_v_three(party1, party2):
                                     f" middle of watching Gundam when it was summoned, and in its rage at being"
                                     f" interrupted, dismembered everyone in the vicinity."])
             return choice
-    elif g_boi is not None:
-        g_boi.kills += 3
-        if g_boi in [strong1, strong2, strong3]:
-            kill(weak1, weak)
-            kill(weak2)
-            kill(weak3)
-        else:
-            kill(strong1, strong)
-            kill(strong2)
-            kill(strong3)
-        if random.choice([True, False]):
-            g_boi.weapon = None
-            return f"{st1}, {st2} and {st3} chance into {wk1}, {wk2} and {wk3}. What follows is less of a fight and more of a" \
-                f" massacre, as {gb} mows down {g_boi.hisher} enemies using {g_boi.hisher} gun - though" \
-                f" {g_boi.heshe} runs out of bullets in the process."
-        else:
-            return f"{st1}, {st2} and {st3} chance into {wk1}, {wk2} and {wk3}. What follows is less of a fight and more of a" \
-                f" massacre, as {gb} mows down {g_boi.hisher} enemies using {g_boi.hisher} gun."
-
+    elif bbc_boi is not None:
+        bbc_boi.kills += 3
+        kill(weak1, weak)
+        kill(weak2)
+        kill(weak3)
+        choice = random.choice(['traversing a desert', 'walking through the woods', 'hunting for supplies'])
+        subchoice = random.choice([f"{st1}, {st2} and {st3} fall down to the ground, seized by unimaginable agony.",
+                                   f"a swarm of locusts explode out of {st1}, {st2} and {st3}'s every orifice, leaving"
+                                   f" behind the three flaky husks that used to be their bodies.",
+                                   f"{st1}, {st2} and {st3} transform into amorphous green blobs, unable to move, feel,"
+                                   f" or even scream."])
+        return f"{st1}, {st2} and {st3} encounter {wk1}, {wk2} and {wk3} while {choice}. However, before {wk1}," \
+            f" {wk2}, and {wk3} can even draw their weapons, {bbc} pulls out The {bbc_boi.weapon} and flashes it" \
+            f" open in front of them. Two seconds later, {subchoice}"
 
     choose = random.choice(['frolicking in the woods', 'fishing by the riverside',
                             'loudly debating the efficacy of alternate medicine'])
@@ -2394,6 +2419,72 @@ def three_v_three(party1, party2):
         return f"{st1}, {st2} and {st3} encounter {wk1}, {wk2}, and {wk3} {choose}. After a long, drawn out fight," \
             f" {st1} and {strong1.hisher} allies manage to come out victorious, though sacrifices are inevitable:" \
             f" {injured} is left wounded."
+
+
+def one_v_one_final_showdown(trib1, trib2, party=None):
+    scenario = random.randint(0, 9)
+    strong, weak, even = compare_strength(trib1, trib2)
+
+    str = strong.name
+    wk = weak.name
+
+    if strong.weapon == 'cursed sword':
+        kill(strong, party)
+        strong.name = 'Ascended ' + strong.name
+        return f"As the fight starts, a purple light fills the sky as {str}'s cursed sword shatters and reveals its " \
+            f"final form: A giant fucking Gundam, emerging from the blinding light. Because of course it is.\n" \
+            f" As {str} prepares to become one with the robot, {strong.heshe} bids {wk} a final farewell" \
+            f" before flying off to the stars. {wk} just stands there amazed."
+
+    elif strong.weapon == "Breaking Bad Coworker's Journal":
+        weak.kills += 1
+        kill(strong, party)
+        return f"{str} readies {strong.himher}self for unleashing full power of The" \
+            f" {strong.weapon}, but falters at the last second: {strong.heshe} can't bear the" \
+            f" thought of putting {wk} through such torture, and tells {wk} to just take" \
+            f" {strong.hisher} life instead. {wk} somberly complies, and chops off {str}'s head" \
+            f" as painlessly as possible."
+    elif strong.weapon in cleavers:
+        strong.kills += 1
+        kill(weak, party)
+        if scenario > 4:
+            return f"After a long battle, {str} savagely decapitates {wk} with {strong.hisher} {strong.weapon}."
+        else:
+            return f"{str}, without hesitation, cuts {wk} down with {strong.hisher} {strong.weapon} in a single stroke."
+
+    elif strong.weapon in stabbers:
+        strong.kills += 1
+        kill(weak, party)
+        if scenario > 4:
+            return f"A final, well aimed stab by {str}'s {strong.weapon} ends {wk}'s life."
+        else:
+            return f"After a drawn-out fight, {str} manages to catch {wk} in the throat with {strong.hisher}" \
+                f" {strong.weapon} and ends {wk}'s life."
+
+    elif strong.weapon in clubbers:
+        strong.kills += 1
+        kill(weak, party)
+        return f"A ferocious battle commences, and {str} eventually smashes {wk}'s head in with " \
+            f"{strong.hisher} {strong.weapon}."
+
+    elif strong.weapon == 'bow' or strong.weapon == 'blowdart':
+        if strong.weapon == 'bow':
+            strong.kills += 1
+            kill(weak, party)
+            return f"After a tactical battle of wits fully utilizing their surroundings, {str} finally " \
+                f"figures out where {wk} is hiding and manages to catch {weak.himher} in the throat with" \
+                f"an arrow."
+        if strong.weapon == 'blowdart':
+            strong.kills += 1
+            kill(weak, party)
+            return f"After a tactical battle of wits fully utilizing their surroundings, {str} finally " \
+                f"figures out where {wk} is hiding and shoots out a poisoned dart. It barely pricks {wk}'s" \
+                f"skin, but it's enough: {weak.heshe} collapses soon after."
+    else:
+        kill(weak, party)
+        kill(strong)
+        return f"In a magnificent display of manliness, {str} and {wk} fight it out to the death with " \
+            f"their fists, and in the end simultaneously collapse."
 
 
 def kill(tribute, party=None):
@@ -2433,64 +2524,6 @@ def compare_strength(trib1, trib2):
 
     return strong, weak, even
 
-#FIX THE FEAST
-def feast_fight(tribute1, tribute2):
-    t1 = tribute1.name
-    t2 = tribute2.name
-    temp = random.randint(0, 9)
-
-    if tribute1.weapon in cleavers:
-        if temp == 0:
-            tribute2.inj = True
-            return f"{t1} tries to cleave {t2} in two but {t2} manages to escape with {tribute2.hisher} life, albeit" \
-                f" injured."
-        else:
-            tribute1.kills += 1
-            kill(tribute2)
-            if temp > 4:
-                return f"{t1} savagely decapitates {t2} with {tribute1.hisher} {tribute1.weapon}."
-            else:
-                return f"{t1} cuts {t2} down with {tribute1.hisher} {tribute1.weapon} in a single stroke."
-
-    elif tribute1.weapon in stabbers:
-        if temp == 0:
-            tribute2.inj = True
-            return f"{t1} stabs {t2} in the gut with a {tribute1.weapon}, but {t2} manages to push " \
-                f"{tribute1.himher} off and run away."
-        else:
-            tribute1.kills += 1
-            kill(tribute2)
-            if temp > 4:
-                return f"A well aimed stab by {t1}'s {tribute1.weapon} ends {t2}'s miserable life."
-            else:
-                return f"After a drawn-out fight, {t1} manages to catch {t2} in the throat with {tribute1.hisher}" \
-                    f" {tribute1.weapon} and scores a kill."
-
-    elif tribute1.weapon in clubbers:
-        if temp == 0:
-            tribute2.inj = True
-            return f"{t1} tries to club {t2} with {tribute1.hisher} {tribute1.weapon}, but {t2} blocks and dodges," \
-                f" before making a run for it the first chance {tribute2.heshe} gets."
-        else:
-            tribute1.kills += 1
-            kill(tribute2)
-            if temp > 4:
-                return f"{t1} brutally smashes {t2}'s head in with {tribute1.hisher} {tribute1.weapon}"
-            else:
-                return f"A single swing of {t1}'s {tribute1.weapon} is enough to take out {t2}."
-
-    elif tribute1.weapon == 'bow' or tribute1.weapon == 'blowdart':
-        if tribute1.weapon == 'bow':
-            tribute1.kills += 1
-            kill(tribute2)
-            return f"A single well-aimed arrow fired from {t1}'s bow is enough to end {t2}'s life."
-        if tribute1.weapon == 'blowdart':
-            tribute1.kills += 1
-            kill(tribute1)
-            return f"{t1} uses a dart coated with a rare vicious poison to take {t2} out."
-
-
-
 
 # ============================================================================
 
@@ -2512,7 +2545,6 @@ def do_things(tributes_list, trib_pick_action_function, party_pick_action_functi
             events.append(party_pick_action_function(tribute))
         else:
             events.append(trib_pick_action_function(tribute))
-        #events.append(pick_action_function(tribute))
 
         # If there is only 1 tribute left, yeet out
         if len(tributes) == 0:
@@ -2523,14 +2555,54 @@ def do_things(tributes_list, trib_pick_action_function, party_pick_action_functi
     return True
 
 
-def Feast():
+# the only arena function that doesn't use do_things
+def Showdown():
     global tributes, events, day
-    for tribute in tributes:
-        tribute.done = False
-    events.append("**The Feast**")
-    events.append("The cornucopia is replenished with food, supplies, weapons.")
 
-    return do_things(tributes)
+    events.append(f"**Day {day}**")
+    events.append("The darkness gives way to glistening rays of a the morning star, as the final day arrives. Each"
+                  " tribute reminisces about the games, their lives before everything went to hell, and the fleeting"
+                  " friendships they formed.")
+
+    # split up all teams, because fuck you I ain't coding another set of sorting hat functions for this shit
+    tributes_copy = tributes.copy()  # because split() adds in an additional tribute.
+    for tribute in tributes_copy:
+        if type(tribute) == Tribute:
+            events.append(f"{tribute.name} sets off alone.")
+        elif tribute.type == 2:
+            events.append(f"{tribute.trib1.name} and {tribute.trib2.name} say their farewells as they split up, and"
+                          f" set off alone.")
+            tribute.split()
+        elif tribute.type == 3:
+            events.append(f"{tribute.trib1.name}, {tribute.trib2.name} and {tribute.trib3.name} say their farewells"
+                          f" as they split up, and set off alone.")
+            tribute.split()
+    events.append("**The Final Bloodbath**")
+    events.append("As the force field accelerates ever closer to the center of the arena, the remaining tributes"
+                  " reach the Cornucopia for one last showdown.")
+
+    # custom set if there's only two tributes left
+    if len(tributes) == 2:
+        events.append(one_v_one_final_showdown(tributes[0], tributes[1]))
+        return True
+
+    rare_wep_dude = [trib for trib in tributes if trib.weapon in rare_weapons_list]
+    if len(rare_wep_dude) > 0:
+        events.append(rare_wep_dude[0].pick_random_showdown_action())
+    # it's a deathmatch, bois
+    while len(tributes) > 1:
+        tributes_list_copy = tributes.copy()
+        for tribute in tributes_list_copy:
+            # Check if the tribute has been yeeted out from the original list and whether the tribute has already
+            # participated in an event
+            if tribute not in tributes:
+                continue
+
+            # just a check for an fringe case
+            if len(tributes) == 1:
+                break
+
+            events.append(tribute.pick_random_showdown_action())
 
 
 def Bloodbath():
@@ -2545,6 +2617,8 @@ def Day():
         tribute.done = False
         tribute.asleep = False
     events.append(f"**Day {day}**\n")  # say what day it is
+    if day == 19:
+        events.append(f"The force fields seems to pick up pace.")
     return do_things(tributes, Tribute.pick_random_action, Party.pick_random_action)
 
 
@@ -2553,6 +2627,9 @@ def Night():
     for tribute in tributes:
         tribute.done = False
     events.append(f"**Night {day}**\n")
+    if day == 19:
+        events.append(f"The tributes start to realize what's going on, as the game begins to spiral down to its"
+                      f" inevitable conclusion.")
     return do_things(tributes, Tribute.pick_random_night_action, Party.pick_random_night_action)
 
 
@@ -2580,14 +2657,15 @@ def game(message):
         random.shuffle(tributes)  # makes it more fair
         events = []
 
+
+        #  Special case if the game goes on too long
+        if day == 20:
+           Showdown()
+           event_copy = events
+           final_stats = finish()
+           return event_copy + final_stats
+
         # Day, Night, Feast and Bloodbath return False (check do_things) if they detect a winner or if everyone dies
-
-        # if day % 7 == 0:
-        #     if not Feast():
-        #         event_copy = events
-        #         final_stats = finish()
-        #         return event_copy + final_stats
-
         # Yes, technically the game could be over before even the first day. Deal with it.
         if day == 1 and not Bloodbath():
             for count, event in enumerate(events):
@@ -2621,7 +2699,7 @@ def game(message):
         return ['Game reset. Use ``hunger games start!`` to start again', 'Finished!']
 
 def reset():
-    global numOfDistricts, initializing, numOfTributes, events, tributes, dead, deadthisday, day
+    global numOfDistricts, initializing, numOfTributes, events, tributes, dead, deadthisday, day, rare_weapons_spawned
     numOfDistricts = 0
     initializing = True
     numOfTributes = 1
@@ -2630,6 +2708,7 @@ def reset():
     dead = []
     deadthisday = []
     day = 1
+    rare_weapons_spawned = False
 
 
 def finish():

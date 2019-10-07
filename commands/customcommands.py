@@ -21,23 +21,19 @@ def custom(message, conn):
 
 
 def call_custom(message, conn):
-    msplit = message.content.split()
-    if len(msplit) == 2:
+    msg = message[1:]
+    # More SQL shit
+    sql = """SELECT command, output FROM customcommands;"""
+    cur = conn.cursor()
+    cur.execute(sql)
+    row = cur.fetchone()
 
-        # More SQL shit
-        sql = """SELECT command, output FROM customcommands;"""
-        cur = conn.cursor()
-        cur.execute(sql)
+    while row is not None:
+        if row[0] == msg:
+            cur.close()
+            return row[1], False
         row = cur.fetchone()
-
-        while row is not None:
-            if row[0] == msplit[1]:
-                cur.close()
-                return row[1]
-            row = cur.fetchone()
-        return "That command doesn't exist, you dumb fuck. Use ``list!`` for a list of existing commands"
-    else:
-        return "Usage: ``yi! [command]``"
+    return "Command not found", True
 
 
 def remove(message, conn):
