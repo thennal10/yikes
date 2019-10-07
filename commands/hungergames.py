@@ -325,7 +325,7 @@ class Tribute:
                     if tribute2.weapon is not None:
                         self.inj = True
                         return f"{t2} spots {t1} spying on {tribute2.himher}, and chases {t1} off with {tribute2.hisher} " \
-                            f"{tribute2.weapon}"
+                            f"{tribute2.weapon}."
                     else:
                         return f"{t1} and {t2} run into eachother, and decide to truce for the night."
 
@@ -611,7 +611,7 @@ class Tribute:
             if even:
                 strong.inj = True
                 return f"{st} savagely decapitates {wk} with {strong.hisher} {strong.weapon}, though {strong.heshe}" \
-                    f" gets injured in the process"
+                    f" gets injured in the process."
             else:
                 return f"{st} cuts {wk} down with {strong.hisher} {strong.weapon} in a single stroke."
 
@@ -1154,7 +1154,7 @@ class Party:
                             f" {trib3.hisher} misery."
                     else:
                         trib3.inj = True
-                        return f"{t3} {choice}, but with the help of {t1} and {t2}, {trib3.heshe} manages to survive"
+                        return f"{t3} {choice}, but with the help of {t1} and {t2}, {trib3.heshe} manages to survive."
 
     def pick_random_night_action(self):
         global day
@@ -1260,7 +1260,7 @@ class Party:
                     choice = random.choice(['past trauma', f'{trib2.hisher} latent asexuality',
                                             f"{t1}'s fugly-ass face"])
                     return f"{t1} tries to make a move on {t2}, but {trib2.heshe} respectfully declines, citing" \
-                        f" {choice}"
+                        f" {choice}."
             elif scenario == 9:
                 trib1.kills += 1
                 kill(trib2, self)
@@ -1904,7 +1904,7 @@ def three_v_one(party, tribute4):
                 verb = "executes"
             return f"{t1}, {t2} and {t3} chance upon {t4} {choice}. While {t4} tries to escape, {t2} and {t3} manage" \
                 f" to catch {tribute4.himher} and holds {tribute4.himher} down while {t1} {verb} {t4} with" \
-                f" {trib1.hisher} {trib1.weapon}"
+                f" {trib1.hisher} {trib1.weapon}."
         elif trib2.weapon is not None and trib2.weapon not in rare_weapons_list:
             trib2.kills += 1
             kill(tribute4)
@@ -1918,7 +1918,7 @@ def three_v_one(party, tribute4):
                 verb = "executes"
             return f"{t1}, {t2} and {t3} chance upon {t4} {choice}. While {t4} tries to escape, {t1} and {t3} manage" \
                 f" to catch {tribute4.himher} and holds {tribute4.himher} down while {t2} {verb} {t4} with" \
-                f" {trib2.hisher} {trib2.weapon}"
+                f" {trib2.hisher} {trib2.weapon}."
         elif trib3.weapon is not None and trib3.weapon not in rare_weapons_list:
             trib3.kills += 1
             kill(tribute4)
@@ -1932,7 +1932,7 @@ def three_v_one(party, tribute4):
                 verb = "executes"
             return f"{t1}, {t2} and {t3} chance upon {t4} {choice}. While {t4} tries to escape, {t1} and {t2} manage" \
                 f" to catch {tribute4.himher} and holds {tribute4.himher} down while {t3} {verb} {t4} with" \
-                f" {trib3.hisher} {trib3.weapon}"
+                f" {trib3.hisher} {trib3.weapon}."
         else:
             trib1.kills += 1
             kill(tribute4)
@@ -2041,7 +2041,7 @@ def two_v_two(party1, party2):
             choice = random.choice([f"{st1} and {st2} encounter {wk1} and {wk2} while traversing a desert. After a"
                                     f" duel in the searing heat, {st1} gains the upper hand over {wk1} and manages to"
                                     f" skewer {weak1.himher}. {st1} and {st2} proceed to make quick work of {wk2}, both"
-                                    f" coming out the exchange with barely a scrape",
+                                    f" coming out the exchange with barely a scrape.",
                                     f"{st1} and {st2} spot {wk1} and {wk2} in the thick of a jungle. {st1} manages"
                                     f" to get the drop on {wk2} and cuts {weak2.himher} down before {weak2.heshe} can"
                                     f" even react. {wk1} tries to escape, but a hidden {st2} makes quick work of"
