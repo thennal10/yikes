@@ -21,7 +21,7 @@ def custom(message, conn):
 
 
 def call_custom(message, conn):
-    msg = message[1:]
+    msg = message.content[1:]
     # More SQL shit
     sql = """SELECT command, output FROM customcommands;"""
     cur = conn.cursor()

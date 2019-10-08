@@ -1398,7 +1398,7 @@ class Party:
                 trib2.asleep = True
                 return f"{t1} discreetly and implicitly confesses {trib1.hisher} love to {t2}, but {t2} is " \
                     f"{random.choice(['denser than a black hole', 'as dense as a harem mc'])}, and never realizes" \
-                    f" it, while {t3} just facepalms."
+                    f" it, while {t3} just facepalms in the distance."
             elif scenario == 4:
                 trib1.asleep = True
                 trib2.asleep = True

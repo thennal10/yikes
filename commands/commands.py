@@ -132,13 +132,19 @@ async def yikes(message, discord):
                    "score:": "Outputs a random score based on the given word/phrase",
                    "strokify:": "tUrNs GiVeN tExT iNtO tHiS",
                    "custom:": "Creates a simple input output command",
-                   "yi!": "Calls a custom command",
+                   "!": "Calls a custom command",
                    "remove:": "Removes a custom command",
                    "list!": "Lists all custom commands",
                    "pixiv!": "Posts a random illustration from pixiv based on rankings. Use 'pixiv! help' to get list of modes",
                    "danbooru!": "Posts top ranking illustrations from danbooru based on given tags.",
                    "reddit!": "Posts a reddit submission based on given parameters",
-                   "reddit!search": "Posts the results from a reddit search query based on given parameters"
+                   "reddit!search": "Posts the results from a reddit search query based on given parameters",
+                   "anime!": "Brings up the mal/anilist of an anime",
+                   "manga!": "Brings up the mal/anilist of a manga",
+                   "score predictor:": "Trains a model to predict scores based on",
+                   "predict:": "Predicts score based on a trained model",
+                   "source!": "Finds a source for a given image url, if it exists",
+                   "hunger games start!": "Starts a hunger games simulation"
                    }
 
     embed = discord.Embed(title="**Yikes! at your service.**",

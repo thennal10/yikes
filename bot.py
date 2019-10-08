@@ -5,7 +5,7 @@ import psycopg2
 import pixivpy3
 from pybooru import Danbooru
 import praw
-from commands import commands, customcommands, imagegrabber, search, scorepredictor, hungergames
+from commands import commands, customcommands, imagegrabber, search, scorepredictor, hungergames, sourcefinder
 
 #from dotenv import load_dotenv
 #load_dotenv()
@@ -32,7 +32,7 @@ reddit = praw.Reddit(client_id=client_id,
 # connecting
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 api = pixivpy3.AppPixivAPI()
-#api.login(puser, ppass)
+api.login(puser, ppass)
 client = discord.Client()
 
 print("Running!")
@@ -118,6 +118,10 @@ async def on_message(message):
         output = scorepredictor.score_predictor(message, modellist[0], friendlistlist[0])
         await message.channel.send(output)
 
+    elif message.content.startswith("source!"):
+        output = sourcefinder.source_from_message(message)
+        await message.channel.send(output)
+
     elif message.content == "hunger games start!":
         print("yikes")
         current_games.append(message.channel)
@@ -126,5 +130,12 @@ async def on_message(message):
 
     elif message.content == "yikes!":
         await commands.yikes(message, discord)
+
+    else:
+        if "source" not in message.content.lower():
+            for attachment in message.attachments:
+                output = sourcefinder.sauce_finder(attachment.url)
+                if output != 0:
+                    await message.channel.send(output)
 
 client.run(token)
