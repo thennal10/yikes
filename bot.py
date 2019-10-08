@@ -14,7 +14,7 @@ oldposts = []
 oldsubmissions = []
 modellist = [0]
 friendlistlist = [0]
-current_games = []
+current_game_channel = None
 
 # initializing shit
 token = os.environ.get("TOKEN")
@@ -38,6 +38,7 @@ client = discord.Client()
 print("Running!")
 @client.event
 async def on_message(message):
+    global current_game_channel
 
     if message.author == client.user:
         return
@@ -45,11 +46,11 @@ async def on_message(message):
     serv = message.guild
 
     # commands
-    if message.channel in current_games:
+    if message.channel == current_game_channel:
         output = hungergames.game(message)
         if isinstance(output, list):
             if output[-1] == 'Finished!':
-                current_games.remove(message.channel)
+                current_game_channel = None
             for event in output:
                 await message.channel.send(event)
                 time.sleep(3)
@@ -123,8 +124,11 @@ async def on_message(message):
         await message.channel.send(output)
 
     elif message.content == "hunger games start!":
-        print("yikes")
-        current_games.append(message.channel)
+        if current_game_channel is not None:
+            thing = "Due to a cascading series of bad decisions, the game only works in one channel at a time, and" \
+                    " there's another game being played somewhere in the universe right now, so fuck you I guess?"
+            await message.channel.send(thing)
+        current_game_channel = message.channel
         output = hungergames.initialize(message)
         await message.channel.send(output)
 
