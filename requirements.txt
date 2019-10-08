@@ -1,6 +1,6 @@
 discord.py
 psycopg2-binary
-pixivpy
+pixivpy>=3.4.0
 pybooru
 praw
 requests
