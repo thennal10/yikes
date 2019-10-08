@@ -1483,6 +1483,7 @@ def initialize(message):
             return_string = ""
             for j in range(len(tributes)):
                 return_string += f"{tributes[j].name}, district {tributes[j].district}, {tributes[j].gender}\n"
+            return_string += "Use ``next!`` to cycle through days"
             initializing = False
             return return_string
 

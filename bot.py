@@ -48,11 +48,11 @@ async def on_message(message):
     if message.channel in current_games:
         output = hungergames.game(message)
         if isinstance(output, list):
+            if output[-1] == 'Finished!':
+                current_games.remove(message.channel)
             for event in output:
                 await message.channel.send(event)
                 time.sleep(3)
-            if output[-1] == 'Finished!':
-                current_games.remove(message.channel)
         else:
             await message.channel.send(output)
 
