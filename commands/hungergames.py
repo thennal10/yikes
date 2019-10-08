@@ -562,7 +562,7 @@ class Tribute:
                 subchoice = random.choice(['K-ON', 'Haikyuu', 'Hyouka', 'TTGL', 'Eromanga Sensei', 'Penguindrum',
                                            'Made in Abyss', 'Highschool DxD', 'Ouran Koukou Host Club'])
                 choices = [f"{t1}, fearing for {self.hisher} life, doesn't stop to grab any supplies and instead"
-                           f" simply runs into a nearby forest as fast as {self.heshe}.",
+                           f" simply runs into a nearby forest as fast as {self.heshe} can.",
                            f"{t1} grabs some food and a canteen of water, before running away from the Cornucopia as"
                            f" fast as {self.heshe} can.",
                            f"{t1} spots a {subchoice} Premium Box Set, and {self.hisher} degeneracy compels"
