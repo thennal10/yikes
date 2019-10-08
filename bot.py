@@ -128,9 +128,10 @@ async def on_message(message):
             thing = "Due to a cascading series of bad decisions, the game only works in one channel at a time, and" \
                     " there's another game being played somewhere in the universe right now, so fuck you I guess?"
             await message.channel.send(thing)
-        current_game_channel = message.channel
-        output = hungergames.initialize(message)
-        await message.channel.send(output)
+        else:
+            current_game_channel = message.channel
+            output = hungergames.initialize(message)
+            await message.channel.send(output)
 
     elif message.content == "yikes!":
         await commands.yikes(message, discord)
