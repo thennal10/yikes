@@ -1465,8 +1465,8 @@ def initialize(message):
     else:
         if numOfDistricts == 0:  # not set yet
             try:
-                if int(message.content) == 0:  # oh you sneaky little bastard
-                    return f"Please input a non-zero integer."
+                if int(message.content) <= 0:  # oh you sneaky little bastard
+                    return f"Please input a positive integer."
                 numOfDistricts = int(message.content)
             except ValueError:  # yeets out if it doesn't an actual number
                 return f"Please input a number."
