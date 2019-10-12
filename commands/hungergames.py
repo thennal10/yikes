@@ -2414,7 +2414,7 @@ def three_v_three(party1, party2):
         injured.inj = True
         return f"{st1}, {st2} and {st3} encounter {wk1}, {wk2}, and {wk3} {choose}. After a long, drawn out fight," \
             f" {st1} and {strong1.hisher} allies manage to come out victorious, though sacrifices are inevitable:" \
-            f" {injured} is left wounded."
+            f" {injured.name} is left wounded."
 
 
 def one_v_one_final_showdown(trib1, trib2, party=None):
