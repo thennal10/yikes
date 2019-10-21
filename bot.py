@@ -35,6 +35,7 @@ api = pixivpy3.AppPixivAPI()
 api.login(puser, ppass)
 client = discord.Client()
 
+
 print("Running!")
 @client.event
 async def on_message(message):
@@ -135,6 +136,16 @@ async def on_message(message):
 
     elif message.content == "yikes!":
         await commands.yikes(message, discord)
+
+    elif message.channel.id == 635538705389584425:
+        try:
+            msg = message.content.split(" ")
+            output_channel = client.get_channel(int(msg[0]))
+            await output_channel.send(" ".join(msg[1:]))
+        except ValueError:
+            await message.channel.send("The first word of the message should be the channel ID.")
+        except AttributeError:
+            await message.channel.send("Can't find a channel with the given ID.")
 
     else:
         if "source" not in message.content.lower():
