@@ -1461,13 +1461,13 @@ class Party:
 def initialize(message):
     global tributes, numOfDistricts, numOfTributes, initializing
     if message.content == 'hunger games start!':
-        return "Enter number of districts:"
+        return "Enter number of tributes:"
     else:
         if numOfDistricts == 0:  # not set yet
             try:
                 if int(message.content) <= 0:  # oh you sneaky little bastard
                     return f"Please input a positive integer."
-                numOfDistricts = int(message.content)
+                numOfDistricts = int(message.content)//2
             except ValueError:  # yeets out if it doesn't an actual number
                 return f"Please input a number."
 
@@ -1480,10 +1480,10 @@ def initialize(message):
             return f"Name tribute #{numOfTributes}\n"
         else:
             tributes.append(Tribute(message.content, ceil(numOfTributes / 2)))
-            return_string = ""
-            for j in range(len(tributes)):
-                return_string += f"{tributes[j].name}, district {tributes[j].district}, {tributes[j].gender}\n"
-            return_string += "Use ``next!`` to cycle through days"
+            return_string = "**Tributes:**"
+            for tribute in tributes:
+                return_string += f"{tribute.name}, {tribute.gender} - district {tribute.district}\n"
+            return_string += "Use ``next!`` to cycle through days."
             initializing = False
             return return_string
 
@@ -2555,23 +2555,11 @@ def do_things(tributes_list, trib_pick_action_function, party_pick_action_functi
 def Showdown():
     global tributes, events, day
 
-    events.append(f"**Day {day}**")
-    events.append("The darkness gives way to glistening rays of a the morning star, as the final day arrives. Each"
-                  " tribute reminisces about the games, their lives before everything went to hell, and the fleeting"
-                  " friendships they formed.")
-
     # split up all teams, because fuck you I ain't coding another set of sorting hat functions for this shit
     tributes_copy = tributes.copy()  # because split() adds in an additional tribute.
     for tribute in tributes_copy:
-        if type(tribute) == Tribute:
-            events.append(f"{tribute.name} sets off alone.")
-        elif tribute.type == 2:
-            events.append(f"{tribute.trib1.name} and {tribute.trib2.name} say their farewells as they split up, and"
-                          f" set off alone.")
-            tribute.split()
-        elif tribute.type == 3:
-            events.append(f"{tribute.trib1.name}, {tribute.trib2.name} and {tribute.trib3.name} say their farewells"
-                          f" as they split up, and set off alone.")
+        if type(tribute) == Party:
+            # this happens pretty rarely (3% ish probability)
             tribute.split()
     events.append("**The Final Bloodbath**")
     events.append("As the force field accelerates ever closer to the center of the arena, the remaining tributes"
@@ -2693,6 +2681,7 @@ def game(message):
     elif message.content == 'reset!':
         reset()
         return ['Game reset. Use ``hunger games start!`` to start again', 'Finished!']
+
 
 def reset():
     global numOfDistricts, initializing, numOfTributes, events, tributes, dead, deadthisday, day, rare_weapons_spawned
