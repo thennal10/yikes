@@ -19,8 +19,6 @@ current_game_channel = None
 # initializing shit
 token = os.environ.get("TOKEN")
 DATABASE_URL = os.environ['DATABASE_URL']
-puser = os.environ['PIXIV_USERNAME']
-ppass = os.environ['PIXIV_PASSWORD']
 client_id = os.environ['REDDIT_CLIENT_ID']
 client_secret = os.environ['REDDIT_CLIENT_SECRET']
 
@@ -31,8 +29,6 @@ reddit = praw.Reddit(client_id=client_id,
 
 # connecting
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-api = pixivpy3.AppPixivAPI()
-api.login(puser, ppass)
 client = discord.Client()
 
 
@@ -90,9 +86,6 @@ async def on_message(message):
     elif message.content == "list!":
         output = customcommands.cclist(conn)
         await message.channel.send(output)
-
-    elif message.content.startswith("pixiv!"):
-        await imagegrabber.pixiv(message, api, os, discord)
 
     elif message.content.startswith("danbooru!"):
         output = imagegrabber.danbooru(message, danb, oldposts)

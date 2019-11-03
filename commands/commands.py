@@ -135,7 +135,6 @@ async def yikes(message, discord):
                    "!": "Calls a custom command",
                    "remove:": "Removes a custom command",
                    "list!": "Lists all custom commands",
-                   "pixiv!": "Posts a random illustration from pixiv based on rankings. Use 'pixiv! help' to get list of modes",
                    "danbooru!": "Posts top ranking illustrations from danbooru based on given tags.",
                    "reddit!": "Posts a reddit submission based on given parameters",
                    "reddit!search": "Posts the results from a reddit search query based on given parameters",
