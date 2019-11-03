@@ -2,7 +2,6 @@ import discord
 import os
 import time
 import psycopg2
-import pixivpy3
 from pybooru import Danbooru
 import praw
 from commands import commands, customcommands, imagegrabber, search, scorepredictor, hungergames, sourcefinder
@@ -146,5 +145,6 @@ async def on_message(message):
                 output = sourcefinder.sauce_finder(attachment.url)
                 if output != 0:
                     await message.channel.send(output)
+
 
 client.run(token)
