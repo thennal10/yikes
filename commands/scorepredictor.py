@@ -67,7 +67,10 @@ def friendlist_creator(username):
 def model_creator(message):
     msplit = message.content.split()
     username = msplit[2]
-    user = get_user(username)
+    try:
+        user = get_user(username)
+    except:
+        return f"No user found with the username ``{username}``.", None, None
     #anime = jikan.search('anime', msplit[3])['results'][0]
     friendlist = friendlist_creator(username)
     X, y = [], []
@@ -95,5 +98,8 @@ def model_creator(message):
 def score_predictor(message, model, friendlist):
     search = message.content[9:]
     anime = jikan.search('anime', search)['results'][0]
-    X = [[find_anime(anime['mal_id'], friendlist)]]
-    return f"""I'd guess a score of {model.predict(X)[0]} for {anime['title']}"""
+    try:
+        X = [[find_anime(anime['mal_id'], friendlist)]]
+        return f"""I'd guess a score of {model.predict(X)[0]} for {anime['title']}"""
+    except:
+        return "No model found. Create a model with ``score predictor: [your mal]``."

@@ -103,9 +103,11 @@ async def on_message(message):
         await message.channel.send(output)
 
     elif message.content.startswith("score predictor:"):
+        await message.channel.send("Creating model...")
         output, model, friendlist = scorepredictor.model_creator(message)
-        modellist[0] = model
-        friendlistlist[0] = friendlist
+        if model is not None and friendlist is not None:
+            modellist[0] = model
+            friendlistlist[0] = friendlist
         await message.channel.send(output)
 
     elif message.content.startswith("predict:"):
