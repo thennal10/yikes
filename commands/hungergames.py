@@ -527,12 +527,13 @@ class Tribute:
                     return f"{t1} picks up a {self.weapon} sticking up in the ground and slits {t2}'s throat."
                 elif self.weapon in clubbers:
                     self.kills += 1
-                    kill(tribute2)
                     if len(deadthisday) > 0:
                         temp = random.choice(deadthisday)
+                        kill(tribute2)
                         return f"{t1} grabs a {self.weapon} lying near {temp.name}'s corpse and bashes {t2}'s skull" \
                             f" in with it."
                     else:
+                        kill(tribute2)
                         return f"{t1} grabs a {self.weapon} lying near a dead tribute's corpse and bashes {t2}'s" \
                             f" skull in with it."
 
