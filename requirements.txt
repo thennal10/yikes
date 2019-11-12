@@ -9,4 +9,5 @@ numpy
 sklearn
 jikanpy
 saucenao
+html5lib
 beautifulsoup4
