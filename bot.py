@@ -4,7 +4,8 @@ import time
 import psycopg2
 from pybooru import Danbooru
 import praw
-from commands import commands, customcommands, imagegrabber, search, scorepredictor, hungergames, sourcefinder
+from commands import commands, customcommands, imagegrabber, search, scorepredictor, hungergames, sourcefinder, \
+    tweetexpander
 
 #from dotenv import load_dotenv
 #load_dotenv()
@@ -127,6 +128,10 @@ async def on_message(message):
             current_game_channel = message.channel
             output = hungergames.initialize(message)
             await message.channel.send(output)
+
+    elif message.content.startswith("expand!"):
+        output = tweetexpander.expand(message.content[7:])
+        await message.channel.send(output)
 
     elif message.content == "yikes!":
         await commands.yikes(message, discord)
