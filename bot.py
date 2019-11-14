@@ -15,6 +15,7 @@ oldsubmissions = []
 modellist = [0]
 friendlistlist = [0]
 current_game_channel = None
+FIRE_ID = 453714878645927936
 
 # initializing shit
 token = os.environ.get("TOKEN")
@@ -145,6 +146,14 @@ async def on_message(message):
             await message.channel.send("The first word of the message should be the channel ID.")
         except AttributeError:
             await message.channel.send("Can't find a channel with the given ID.")
+
+    elif message.author.id == FIRE_ID and message.content == "<:chibiaqua:611916034290614283>":
+        posts = await message.channel.history(limit=2).flatten()
+        delta = (message.created_at - posts[1].created_at)
+        seconds = delta.seconds + (delta.days*86400)
+        hour = round(seconds/3600)
+        await message.channel.send(f"Fire, posting a singular <:chibiaqua:611916034290614283> {hour} hours after the"
+                                   f" conversation ended does not count as contributing to it.")
 
     else:
         if "source" not in message.content.lower():
