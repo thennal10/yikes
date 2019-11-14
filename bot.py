@@ -152,8 +152,9 @@ async def on_message(message):
         delta = (message.created_at - posts[1].created_at)
         seconds = delta.seconds + (delta.days*86400)
         hour = round(seconds/3600)
-        await message.channel.send(f"Fire, posting a singular <:chibiaqua:611916034290614283> {hour} hours after the"
-                                   f" conversation ended does not count as contributing to it.")
+        if hour > 1:
+            await message.channel.send(f"Fire, posting a singular <:chibiaqua:611916034290614283> {hour} hours after"
+                                       f" the conversation ended does not count as contributing to it.")
 
     else:
         if "source" not in message.content.lower():
