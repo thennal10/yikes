@@ -30,7 +30,7 @@ def generate(message):
     print(first_word)
     print(n_words)
 
-    df = pd.read_csv('commands/data/content_analysis.csv')
+    df = pd.read_csv('data/content_analysis.csv')
     df = df.loc[df['name'] == user]['content']
     ls = [x for x in df.values.tolist() if str(x) != 'nan']
     precorpus = " \n ".join(ls)
