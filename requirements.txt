@@ -1,4 +1,4 @@
-discord.py=1.2.5
+discord.py==1.2.5
 psycopg2-binary
 requests
 git+http://github.com/AWConant/jikanpy.git
