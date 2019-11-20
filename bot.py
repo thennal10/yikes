@@ -1,171 +1,43 @@
-import discord
 import os
-import time
-import psycopg2
-from pybooru import Danbooru
-import praw
-from commands import commands, customcommands, imagegrabber, search, scorepredictor, hungergames, sourcefinder, \
-    tweetexpander, textgenerator
+import discord
+from discord.ext import commands
 
-#from dotenv import load_dotenv
-#load_dotenv()
-
-oldposts = []
-oldsubmissions = []
-modellist = [0]
-friendlistlist = [0]
-current_game_channel = None
-FIRE_ID = 453714878645927936
+from dotenv import load_dotenv
+load_dotenv()
 
 # initializing shit
-token = os.environ.get("TOKEN")
-DATABASE_URL = os.environ['DATABASE_URL']
-client_id = os.environ['REDDIT_CLIENT_ID']
-client_secret = os.environ['REDDIT_CLIENT_SECRET']
-
-danb = Danbooru('danbooru')
-reddit = praw.Reddit(client_id=client_id,
-                     client_secret=client_secret,
-                     user_agent='yikes:v1 by u/thennal')
-
-# connecting
-conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-client = discord.Client()
+TOKEN = os.environ.get("TOKEN")
 
 
-print("Running!")
-@client.event
-async def on_message(message):
-    global current_game_channel
+def get_prefix(bot, message):
+    """A callable Prefix for our bot. This could be edited to allow per server prefixes."""
 
-    if message.author == client.user:
-        return
+    prefixes = ['!']
 
-    serv = message.guild
-
-    # commands
-    if message.channel == current_game_channel:
-        output = hungergames.game(message)
-        if isinstance(output, list):
-            if output[-1] == 'Finished!':
-                current_game_channel = None
-            for event in output:
-                await message.channel.send(event)
-                time.sleep(3)
-        else:
-            await message.channel.send(output)
-
-    elif message.content.startswith("peachlator:"):
-        output = commands.peachlator(message)
-        await message.channel.send(output)
-
-    elif message.content.startswith("word_leaderboard"):
-        output = await commands.word_leaderboard(message, serv)
-        await message.channel.send(output)
-
-    elif message.content.startswith("score:"):
-        output = commands.score(message)
-        await message.channel.send(output)
-
-    elif message.content.startswith("strokify:"):
-        output = commands.strokify(message)
-        await message.channel.send(output)
-
-    elif message.content.startswith("custom:"):
-        output = customcommands.custom(message, conn)
-        await message.channel.send(output)
-
-    elif message.content.startswith("!"):
-        output, noise = customcommands.call_custom(message, conn)
-        if not noise:
-            await message.channel.send(output)
-
-    elif message.content.startswith("remove:"):
-        output = customcommands.remove(message, conn)
-        await message.channel.send(output)
-
-    elif message.content == "list!":
-        output = customcommands.cclist(conn)
-        await message.channel.send(output)
-
-    elif message.content.startswith("danbooru!"):
-        output = imagegrabber.danbooru(message, danb, oldposts)
-        await message.channel.send(output)
-
-    elif message.content.startswith("reddit!"):
-        output = imagegrabber.reddit_get(message, reddit, oldsubmissions)
-        await message.channel.send(output)
-
-    elif message.content.startswith("anime!"):
-        output = search.anisearch(message)
-        await message.channel.send(output)
-
-    elif message.content.startswith("manga!"):
-        output = search.mangasearch(message)
-        await message.channel.send(output)
-
-    elif message.content.startswith("score predictor:"):
-        await message.channel.send("Creating model...")
-        output, model, friendlist = scorepredictor.model_creator(message)
-        if model is not None and friendlist is not None:
-            modellist[0] = model
-            friendlistlist[0] = friendlist
-        await message.channel.send(output)
-
-    elif message.content.startswith("predict:"):
-        output = scorepredictor.score_predictor(message, modellist[0], friendlistlist[0])
-        await message.channel.send(output)
-
-    elif message.content.startswith("source!"):
-        output = sourcefinder.source_from_message(message)
-        await message.channel.send(output)
-
-    elif message.content == "hunger games start!":
-        if current_game_channel is not None:
-            thing = "Due to a cascading series of bad decisions, the game only works in one channel at a time, and" \
-                    " there's another game being played somewhere in the universe right now, so fuck you I guess?"
-            await message.channel.send(thing)
-        else:
-            current_game_channel = message.channel
-            output = hungergames.initialize(message)
-            await message.channel.send(output)
-
-    elif message.content.startswith("expand!"):
-        output = tweetexpander.expand(message.content[7:])
-        await message.channel.send(output)
-
-    elif message.content.startswith("text generator!"):
-        output = textgenerator.generate(message)
-        await message.channel.send(output)
-
-    elif message.content == "yikes!":
-        await commands.yikes(message, discord)
-
-    elif message.channel.id == 635538705389584425:
-        try:
-            msg = message.content.split(" ")
-            output_channel = client.get_channel(int(msg[0]))
-            await output_channel.send(" ".join(msg[1:]))
-        except ValueError:
-            await message.channel.send("The first word of the message should be the channel ID.")
-        except AttributeError:
-            await message.channel.send("Can't find a channel with the given ID.")
-
-    elif message.author.id == FIRE_ID and message.content == "<:chibiaqua:611916034290614283>":
-        posts = await message.channel.history(limit=2).flatten()
-        delta = (message.created_at - posts[1].created_at)
-        seconds = delta.seconds + (delta.days*86400)
-        hour = round(seconds/3600)
-        if hour > 1:
-            await message.channel.send(f"Fire, posting a singular <:chibiaqua:611916034290614283> {hour} hours after"
-                                       f" the conversation ended does not count as contributing to it.")
-
-    else:
-        if "source" not in message.content.lower():
-            for attachment in message.attachments:
-                output = sourcefinder.sauce_finder(attachment.url)
-                if output != 0:
-                    await message.channel.send(output)
+    # If we are in a guild, we allow for the user to mention us or use any of the prefixes in our list.
+    return commands.when_mentioned_or(*prefixes)(bot, message)
 
 
-client.run(token)
+# Below cogs represents our folder our cogs are in. Following is the file name. So 'meme.py' in cogs, would be cogs.meme
+# Think of it like a dot path import
+initial_extensions = ['cogs.basic', 'cogs.custom', 'cogs.search', 'cogs.source', 'cogs.tweet', 'cogs.generator',
+                      'cogs.specific']
+
+bot = commands.Bot(command_prefix=get_prefix, description='An abominable bot for an abominable server')
+
+# Here we load our extensions(cogs) listed above in [initial_extensions].
+if __name__ == '__main__':
+    for extension in initial_extensions:
+        bot.load_extension(extension)
+
+
+@bot.event
+async def on_ready():
+
+    print(f'\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n')
+
+    await bot.change_presence(activity=discord.Activity(name='Yiking'))
+    print(f'Successfully logged in and booted...!')
+
+
+bot.run(TOKEN, bot=True, reconnect=True)
