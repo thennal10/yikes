@@ -82,6 +82,7 @@ class BasicCog(commands.Cog):
 
     @word_leaderboard.error
     async def word_leaderboard_error(self, ctx, error):
+        print(error)
         await ctx.send("Usage: ``!leaderboard [no of messages] [phrase1] + [phrase2]...``")
 
 
