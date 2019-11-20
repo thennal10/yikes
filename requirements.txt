@@ -1,7 +1,5 @@
 discord.py
 psycopg2-binary
-pybooru
-praw
 requests
 git+http://github.com/AWConant/jikanpy.git
 tqdm
