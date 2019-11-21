@@ -4,12 +4,12 @@ from jikanpy import Jikan
 
 jikan = Jikan()
 
-class SearchCog(commands.Cog):
+class Search(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='anime')
+    @commands.command(name='anime', help='Pulls up the mal and anilist of a given anime')
     async def anisearch(self, ctx, *, search):
         search_result = jikan.search('anime', search)
         title = search_result['results'][0]['title']
@@ -40,7 +40,7 @@ class SearchCog(commands.Cog):
         await ctx.send("Usage: ``!anime [search]``")
 
 
-    @commands.command(name='manga')
+    @commands.command(name='manga', help='Pulls up the mal and anilist of a given manga/ln')
     async def mangasearch(self, ctx, *, search):
         search_result = jikan.search('manga', search)
         title = search_result['results'][0]['title']
@@ -73,4 +73,4 @@ class SearchCog(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(SearchCog(bot))
+    bot.add_cog(Search(bot))

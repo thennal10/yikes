@@ -8,12 +8,12 @@ def make_pairs(corpus):
         yield (corpus[i], corpus[i + 1])
 
 
-class GeneratorCog(commands.Cog):
+class Generators(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='generator')
+    @commands.command(name='generator', help='Generates a text string based on a user')
     async def generate(self, ctx, user, first_word='N/A', n_words: int = 30):
 
         print(user)
@@ -62,4 +62,4 @@ class GeneratorCog(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(GeneratorCog(bot))
+    bot.add_cog(Generators(bot))

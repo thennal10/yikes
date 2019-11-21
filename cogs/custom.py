@@ -7,13 +7,13 @@ DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
 
-class CustomCog(commands.Cog):
+class Custom(commands.Cog):
     """CustomCog"""
 
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='custom')
+    @commands.command(name='custom', help='Adds a custom command')
     async def custom_command(self, ctx, key, *, value):
         # SQL shit
         sql = """INSERT INTO customcommands (command, output) VALUES (%s, %s);"""
@@ -34,7 +34,7 @@ class CustomCog(commands.Cog):
     async def custom_command_error(self, ctx, error):
         await ctx.send("Usage: ``!custom [command] [link/text]``")
 
-    @commands.command(name='')
+    @commands.command(name='', help="Calls a custom command, just use the prefix")
     async def call_command(self, ctx, key):
         # More SQL shit
         sql = """SELECT command, output FROM customcommands;"""
@@ -48,7 +48,7 @@ class CustomCog(commands.Cog):
                 await ctx.send(row[1])
             row = cur.fetchone()
 
-    @commands.command(name='remove')
+    @commands.command(name='remove', help='Removes a custom command')
     async def remove(self, ctx, key):
         # Even more SQL
         sql = """SELECT command, output FROM customcommands;"""
@@ -71,7 +71,7 @@ class CustomCog(commands.Cog):
     async def remove_error(self, ctx, error):
         await ctx.send("Usage: ``!remove [command]``")
 
-    @commands.command(name='list')
+    @commands.command(name='list', help='Lists all custom commands')
     async def cclist(self, ctx):
         # EVEN MORE SQL
         sql = """SELECT command, output FROM customcommands;"""
@@ -88,4 +88,4 @@ class CustomCog(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(CustomCog(bot))
+    bot.add_cog(Custom(bot))

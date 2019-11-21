@@ -10,7 +10,7 @@ def leaderboard_name(l):
     return name
 
 
-class BasicCog(commands.Cog):
+class Basic(commands.Cog):
     """BasicCog"""
 
     def __init__(self, bot):
@@ -153,4 +153,4 @@ class BasicCog(commands.Cog):
 # The setup fucntion below is neccesarry. Remember we give bot.add_cog() the name of the class in this case SimpleCog.
 # When we load the cog, we use the name of the file.
 def setup(bot):
-    bot.add_cog(BasicCog(bot))
+    bot.add_cog(Basic(bot))

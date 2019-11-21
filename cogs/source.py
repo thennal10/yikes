@@ -9,7 +9,7 @@ saucenao = SauceNao(directory='data', databases=999, minimum_similarity=65, comb
                     title_minimum_similarity=90)
 
 
-class SourceCog(commands.Cog):
+class Source(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
@@ -41,4 +41,4 @@ class SourceCog(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(SourceCog(bot))
+    bot.add_cog(Source(bot))
