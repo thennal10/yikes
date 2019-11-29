@@ -1,4 +1,6 @@
 import os
+import traceback
+import sys
 import psycopg2
 from discord.ext import commands
 
@@ -12,6 +14,38 @@ class Custom(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+
+        if hasattr(ctx.command, 'on_error'):
+            return
+
+        if isinstance(error, commands.CommandNotFound):
+            # More SQL shit
+            key_list = []
+            temp = error.args[0][9:]
+            for count, c in enumerate(temp):
+                if temp[count:] == '" is not found':
+                    key = temp[:count]
+                    break
+            else:
+                print(error)
+                return
+            sql = """SELECT command, output FROM customcommands;"""
+            cur = conn.cursor()
+            cur.execute(sql)
+            row = cur.fetchone()
+
+            while row is not None:
+                if row[0] == key:
+                    cur.close()
+                    return await ctx.send(row[1])
+                row = cur.fetchone()
+
+        print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
+        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+
 
     @commands.command(name='custom', help='Adds a custom command')
     async def custom_command(self, ctx, key, *, value):
@@ -34,19 +68,6 @@ class Custom(commands.Cog):
     async def custom_command_error(self, ctx, error):
         await ctx.send("Usage: ``!custom [command] [link/text]``")
 
-    @commands.command(name='', help="Calls a custom command, just use the prefix")
-    async def call_command(self, ctx, key):
-        # More SQL shit
-        sql = """SELECT command, output FROM customcommands;"""
-        cur = conn.cursor()
-        cur.execute(sql)
-        row = cur.fetchone()
-
-        while row is not None:
-            if row[0] == key:
-                cur.close()
-                await ctx.send(row[1])
-            row = cur.fetchone()
 
     @commands.command(name='remove', help='Removes a custom command')
     async def remove(self, ctx, key):
