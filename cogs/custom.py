@@ -80,6 +80,7 @@ class Custom(commands.Cog):
             if row[0] == key:
                 sql = f"""DELETE FROM customcommands WHERE command ='{key}';"""
                 cur.execute(sql)
+                conn.commit()
                 await ctx.send("Removal successful.")
                 break
             row = cur.fetchone()
