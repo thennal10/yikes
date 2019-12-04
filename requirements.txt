@@ -6,6 +6,7 @@ tqdm
 numpy
 sklearn
 jikanpy
+wikipedia
 saucenao
 html5lib
 beautifulsoup4

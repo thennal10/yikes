@@ -1,4 +1,5 @@
 import requests
+import wikipedia
 from discord.ext import commands
 from jikanpy import Jikan
 
@@ -71,6 +72,17 @@ class Search(commands.Cog):
     async def mangasearch_error(self, ctx, error):
         await ctx.send("Usage: ``!manga [search]``")
 
+
+    @commands.command(name='wiki', help='Pulls up the wikipedia link for a given search')
+    async def wikisearch(self, ctx, *, search):
+        results = wikipedia.search(search)
+        if len(results) == 0:
+            return await ctx.send(f"No results found for ``{search}``")
+        await ctx.send(wikipedia.page(results[0]).url)
+
+    @wikisearch.error
+    async def wikisearch_error(self, ctx, error):
+        await ctx.send("Usage: ``!wiki [search]``")
 
 def setup(bot):
     bot.add_cog(Search(bot))
