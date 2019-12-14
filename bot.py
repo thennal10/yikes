@@ -38,5 +38,9 @@ async def on_ready():
     await bot.change_presence(activity=discord.Activity(name='Yiking'))
     print(f'Successfully logged in and booted...!')
 
+@bot.command(name='ping')
+async def ping(ctx):
+    await ctx.send(f"Man, PPTA was such a good show. Anyway, latency's bout ``{round(bot.latency*1000)}ms``")
+
 
 bot.run(TOKEN, bot=True, reconnect=True)

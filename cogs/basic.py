@@ -143,14 +143,5 @@ class Basic(commands.Cog):
         await ctx.send("Peachlator, at your service. Usage: ``!peachlator [text]``")
 
 
-    @commands.Cog.listener()
-    async def on_member_ban(self, guild, user):
-        """Event Listener which is called when a user is banned from the guild."""
-
-        print(f'{user.name}-{user.id} was banned from {guild.name}-{guild.id}')
-
-
-# The setup fucntion below is neccesarry. Remember we give bot.add_cog() the name of the class in this case SimpleCog.
-# When we load the cog, we use the name of the file.
 def setup(bot):
     bot.add_cog(Basic(bot))
