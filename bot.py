@@ -9,13 +9,13 @@ from discord.ext import commands
 TOKEN = os.environ.get("TOKEN")
 
 
-def get_prefix(bot, message):
+def get_prefix(yikes, message):
     """A callable Prefix for our bot. This could be edited to allow per server prefixes."""
 
     prefixes = ['$', 'y!']
 
     # If we are in a guild, we allow for the user to mention us or use any of the prefixes in our list.
-    return commands.when_mentioned_or(*prefixes)(bot, message)
+    return commands.when_mentioned_or(*prefixes)(yikes, message)
 
 
 # Below cogs represents our folder our cogs are in. Following is the file name. So 'meme.py' in cogs, would be cogs.meme
@@ -37,6 +37,7 @@ async def on_ready():
 
     await bot.change_presence(activity=discord.Activity(name='Yiking'))
     print(f'Successfully logged in and booted...!')
+
 
 @bot.command(name='ping')
 async def ping(ctx):
