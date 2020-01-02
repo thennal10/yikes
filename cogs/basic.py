@@ -89,21 +89,28 @@ class Basic(commands.Cog):
     @commands.command(name='peachlator', help='What it says on the tin')
     async def peachlator(self, ctx, *, input: str):
         # load dictionary
-        trans_dict = {}
-        file = open("peachdict.txt", "r")
-        for line in file:
-            isv = False
-            value = ""
-            key = ""
-            for word in line.split():
-                if word == "-":
-                    isv = True
-                elif isv:
-                    strword = word.rstrip("\n")
-                    value += strword + " "
-                else:
-                    key += word + " "
-            trans_dict[key.rstrip()] = value.rstrip()
+        trans_dict = {'winky babies': 'sperm',
+                      'winky': 'penis',
+                      'winkies': 'penises',
+                      'hooha': 'vagina',
+                      'hoohas': 'vaginas',
+                      'poot': 'flatulate',
+                      'poots': 'flatulence',
+                      'spawn': 'baby',
+                      'babies': 'semen',
+                      'baby': 'sperm cell',
+                      'boys': 'testicles',
+                      'boy': 'testicle',
+                      'horizontal festivity': 'sexual intercourse',
+                      'horizontal festivities': 'sexual intercourse',
+                      'horizontal stuff': 'sexual intercourse',
+                      'penguindrum': 'trash',
+                      'wotakoi': 'trash',
+                      'nether region': 'genital area',
+                      'nether regions': 'genital areas',
+                      'jellybean': 'clitoris',
+                      'jellybeans': 'clitorides',
+                      'jellybeanmegaly': 'clitoromegaly'}
 
         # replace words
         new_message = ["Translation:"] + input.split()
