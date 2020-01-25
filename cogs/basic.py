@@ -110,7 +110,8 @@ class Basic(commands.Cog):
                       'nether regions': 'genital areas',
                       'jellybean': 'clitoris',
                       'jellybeans': 'clitorides',
-                      'jellybeanmegaly': 'clitoromegaly'}
+                      'jellybeanmegaly': 'clitoromegaly',
+                      'mother nature time': 'menstruation'}
 
         # replace words
         new_message = ["Translation:"] + input.split()
