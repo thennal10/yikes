@@ -87,8 +87,8 @@ class Basic(commands.Cog):
 
 
     @commands.command(name='peachlator', help='What it says on the tin')
-    async def peachlator(self, ctx, *, input: str):
-        # load dictionary
+    async def peachlator(self, ctx, *, inp: str):
+        # load dict
         trans_dict = {'winky babies': 'sperm',
                       'winky': 'penis',
                       'winkies': 'penises',
@@ -113,36 +113,49 @@ class Basic(commands.Cog):
                       'jellybeanmegaly': 'clitoromegaly',
                       'mother nature time': 'menstruation'}
 
-        # replace words
-        new_message = ["Translation:"] + input.split()
-        for i in range(len(new_message)):
-            for key in trans_dict:
-                splitkey = key.split()
-                # don't ask
-                for j, skey in enumerate(splitkey):
-                    if i + j >= len(new_message):
-                        incl = False
-                        break
-                    elif skey != new_message[i + j].lower():
-                        incl = False
-                        break
-                    incl = True
+        # made it into a list so I don't have to worry about differing word lengths
+        new_message = ["Translation:"] + inp.split()
 
-                # Handles capitalization
-                if new_message[i].isupper():
-                    splitval = trans_dict[key].upper().split()
-                elif new_message[i][0].isupper():
-                    splitval = trans_dict[key].capitalize().split()
+        # new dict with keys as a list of words
+        flattened_dict = {tuple(k.split()): trans_dict[k] for k in trans_dict}
+
+        for key in flattened_dict:
+            # indicates the point we're at with the given key
+            i = 0
+            caps = False
+            allcaps = False
+            for idx, word in enumerate(new_message):
+                if (key[i] == word) or (key[i] == word.lower()):
+
+                    # check if the word is capitalized or in allcaps
+                    if key[i].capitalize() == word:
+                        caps = True
+                    if key[i].upper() == word:
+                        allcaps = True
+
+                    i += 1
+                    # if we find a valid word
+                    if i == len(key):
+
+                        if caps:
+                            result = flattened_dict[key].capitalize()
+                        elif allcaps:
+                            result = flattened_dict[key].upper()
+                        else:
+                            result = flattened_dict[key]
+
+                        new_message[idx] = result
+                        # remove leftover words
+                        for r in range(1, i):
+                            new_message.pop(idx - r)
+
+                        i = 0
+
                 else:
-                    splitval = trans_dict[key].split()
-
-                # still need to add a case for when splitval > splitkey but eh
-                if incl:
-                    for k, val in enumerate(splitval):
-                        new_message[i + k] = val
-                    for l in range((len(splitkey)) - (len(splitval))):
-                        del new_message[i + l + len(splitval)]
-                    i = i - len(splitval)
+                    # so that it's a continuous word and not like, splintered across a sentence
+                    i = 0
+                    caps = False
+                    allcaps = False
 
         await ctx.send(" ".join(new_message))
 
