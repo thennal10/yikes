@@ -32,11 +32,7 @@ if __name__ == '__main__':
 
 @bot.event
 async def on_ready():
-
     print(f'\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n')
-
-    await bot.change_presence(activity=discord.Activity(name='Yiking'))
-    print(f'Successfully logged in and booted...!')
 
 
 @bot.command(name='ping')
