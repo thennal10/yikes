@@ -4,10 +4,15 @@ import sys
 import psycopg2
 from discord.ext import commands
 
-
+MIA = 405533644250152960
 DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
+async def check_server(ctx):
+    if MIA == ctx.guild.id:
+        return True
+    else:
+        await ctx.send("This command is currently disabled for this server.")
 
 class Custom(commands.Cog):
     """CustomCog"""
@@ -49,20 +54,22 @@ class Custom(commands.Cog):
 
     @commands.command(name='custom', help='Adds a custom command')
     async def custom_command(self, ctx, key, *, value):
-        # SQL shit
-        sql = """INSERT INTO customcommands (command, output) VALUES (%s, %s);"""
-        data = (key, value)
-        cur = conn.cursor()
-        try:
-            cur.execute(sql, data)
-            conn.commit()
-            cur.close()
-            await ctx.send("Immortalized!")
-        except:
-            conn.rollback()
-            conn.commit()
-            cur.close()
-            await ctx.send("Command already exists, or you fucking broke the bot. Congrats, asshole.")
+        if_MIA = await check_server(ctx)
+        if if_MIA:
+            # SQL shit
+            sql = """INSERT INTO customcommands (command, output) VALUES (%s, %s);"""
+            data = (key, value)
+            cur = conn.cursor()
+            try:
+                cur.execute(sql, data)
+                conn.commit()
+                cur.close()
+                await ctx.send("Immortalized!")
+            except:
+                conn.rollback()
+                conn.commit()
+                cur.close()
+                await ctx.send("Command already exists, or you fucking broke the bot. Congrats, asshole.")
 
     @custom_command.error
     async def custom_command_error(self, ctx, error):
@@ -71,23 +78,25 @@ class Custom(commands.Cog):
 
     @commands.command(name='remove', help='Removes a custom command')
     async def remove(self, ctx, key):
-        # Even more SQL
-        sql = """SELECT command, output FROM customcommands;"""
-        cur = conn.cursor()
-        cur.execute(sql)
-        row = cur.fetchone()
-        while row is not None:
-            if row[0] == key:
-                sql = f"""DELETE FROM customcommands WHERE command ='{key}';"""
-                cur.execute(sql)
-                conn.commit()
-                await ctx.send("Removal successful.")
-                break
+        if_MIA = await check_server(ctx)
+        if if_MIA:
+            # Even more SQL
+            sql = """SELECT command, output FROM customcommands;"""
+            cur = conn.cursor()
+            cur.execute(sql)
             row = cur.fetchone()
-        else:
-            await ctx.send("That command doesn't exist, you dumb fuck. Use ``list!`` to get a list of existing"
-                           " commands.")
-        cur.close()
+            while row is not None:
+                if row[0] == key:
+                    sql = f"""DELETE FROM customcommands WHERE command ='{key}';"""
+                    cur.execute(sql)
+                    conn.commit()
+                    await ctx.send("Removal successful.")
+                    break
+                row = cur.fetchone()
+            else:
+                await ctx.send("That command doesn't exist, you dumb fuck. Use ``$list`` to get a list of existing"
+                               " commands.")
+            cur.close()
 
     @remove.error
     async def remove_error(self, ctx, error):

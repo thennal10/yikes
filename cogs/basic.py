@@ -2,6 +2,7 @@ import os
 import psycopg2
 from discord.ext import commands
 
+MIA = 405533644250152960
 DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
@@ -12,6 +13,13 @@ def leaderboard_name(l):
         if count != len(l) - 1:
             name += "/"
     return name
+
+
+async def check_server(ctx):
+    if MIA == ctx.guild.id:
+        return True
+    else:
+        await ctx.send("This command is currently disabled for this server.")
 
 
 class Basic(commands.Cog):
@@ -36,7 +44,7 @@ class Basic(commands.Cog):
 
     @strokify.error
     async def strokify_error(self, ctx, error):
-        await ctx.send("Usage: ``!strokify [phrase]``")
+        await ctx.send("Usage: ``$strokify [phrase]``")
 
 
     @commands.command(name='score', help='Outputs a score based on the string')
@@ -51,7 +59,7 @@ class Basic(commands.Cog):
 
     @score.error
     async def score_error(self, ctx, error):
-        await ctx.send("Usage: ``!score [phrase]``")
+        await ctx.send("Usage: ``$score [phrase]``")
 
 
     @commands.command(name='leaderboard', help='Creates a leaderboard based on a given word/phrase')
@@ -87,7 +95,7 @@ class Basic(commands.Cog):
     @word_leaderboard.error
     async def word_leaderboard_error(self, ctx, error):
         print(error)
-        await ctx.send("Usage: ``!leaderboard [no of messages] [phrase1] + [phrase2]...``")
+        await ctx.send("Usage: ``$leaderboard [no of messages] [phrase1] + [phrase2]...``")
 
 
     @commands.command(name='peachlator', help='What it says on the tin')
@@ -153,25 +161,27 @@ class Basic(commands.Cog):
 
     @commands.command(name='update_peachlator', help='Update the peachlator')
     async def update_peachlator(self, ctx, *, inp: str):
-        data = [word.strip() for word in inp.split("-")]
+        if_MIA = await check_server(ctx)
+        if if_MIA:
+            data = [word.strip() for word in inp.split("-")]
 
-        if len(data) > 2 or len(data) < 2:
-            await ctx.send("Usage: ``$update_peachlator [word] - [translation]``")
-            return
+            if len(data) > 2 or len(data) < 2:
+                await ctx.send("Usage: ``$update_peachlator [word] - [translation]``")
+                return
 
-        sql = """INSERT INTO peachdict (input, output) VALUES (%s, %s);"""
+            sql = """INSERT INTO peachdict (input, output) VALUES (%s, %s);"""
 
-        cur = conn.cursor()
-        try:
-            cur.execute(sql, data)
-            conn.commit()
-            cur.close()
-            await ctx.send("Updated!")
-        except:
-            conn.rollback()
-            conn.commit()
-            cur.close()
-            await ctx.send("Translation already exists, or you fucking broke the bot. Congrats, asshole.")
+            cur = conn.cursor()
+            try:
+                cur.execute(sql, data)
+                conn.commit()
+                cur.close()
+                await ctx.send("Updated!")
+            except:
+                conn.rollback()
+                conn.commit()
+                cur.close()
+                await ctx.send("Translation already exists, or you fucking broke the bot. Congrats, asshole.")
 
     @update_peachlator.error
     async def update_peachlator_error(self, ctx, error):
@@ -180,23 +190,25 @@ class Basic(commands.Cog):
 
     @commands.command(name='remove_peachlator', help='Removes a translation')
     async def remove_peachlator(self, ctx, *, key: str):
-        # Even more SQL
-        cur = conn.cursor()
-        sql = """SELECT input, output FROM peachdict;"""
-        cur.execute(sql)
-        row = cur.fetchone()
-        while row is not None:
-            if row[0] == key:
-                sql = f"""DELETE FROM peachdict WHERE input='{key}';"""
-                cur.execute(sql)
-                conn.commit()
-                await ctx.send("Removal successful.")
-                break
+        if_MIA = await check_server(ctx)
+        if if_MIA:
+            # Even more SQL
+            cur = conn.cursor()
+            sql = """SELECT input, output FROM peachdict;"""
+            cur.execute(sql)
             row = cur.fetchone()
-        else:
-            await ctx.send("Translation doesn't exist.")
+            while row is not None:
+                if row[0] == key:
+                    sql = f"""DELETE FROM peachdict WHERE input='{key}';"""
+                    cur.execute(sql)
+                    conn.commit()
+                    await ctx.send("Removal successful.")
+                    break
+                row = cur.fetchone()
+            else:
+                await ctx.send("Translation doesn't exist.")
 
-        cur.close()
+            cur.close()
 
     @remove_peachlator.error
     async def remove_peachlator_error(self, ctx, error):
