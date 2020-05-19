@@ -1,5 +1,7 @@
 import os
 import psycopg2
+import discord
+from wordcloud import WordCloud
 from discord.ext import commands
 
 MIA = 405533644250152960
@@ -96,6 +98,29 @@ class Basic(commands.Cog):
     async def word_leaderboard_error(self, ctx, error):
         print(error)
         await ctx.send("Usage: ``$leaderboard [no of messages] [phrase1] + [phrase2]...``")
+
+
+    @commands.command(name='wordcloud', aliases=['wc'], help='Creates a wordcloud based on the mentioned user')
+    async def wordcloud(self, ctx, member: discord.Member, channel: discord.TextChannel, lookup_num: int = 1000):
+        wordstr = "" # Somewhere to store the words
+
+        perm = channel.permissions_for(ctx.guild.me)
+        if perm.read_message_history:
+            async for msg in channel.history(limit=lookup_num):
+                if msg.author == member:
+                    wordstr += " " + msg.content.capitalize()
+
+        # Create the wordcloud object
+        cloud = WordCloud(width=1000, height=1000, margin=0,
+                              background_color="white", colormap="tab20").generate(wordstr)
+
+        cloud.to_file('data/wordcloud.png')
+        await ctx.send(file=discord.File('data/wordcloud.png'))
+
+    @wordcloud.error
+    async def wordcloud_error(self, ctx, error):
+        print(error)
+        await ctx.send("Usage: ``$wordcloud @[user] #[channel] [no of messages]``")
 
 
     @commands.command(name='peachlator', help='What it says on the tin')

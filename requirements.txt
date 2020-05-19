@@ -3,6 +3,7 @@ psycopg2-binary
 requests
 git+http://github.com/AWConant/jikanpy.git
 tqdm
+wordcloud
 numpy
 sklearn
 jikanpy
