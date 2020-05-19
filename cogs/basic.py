@@ -2,6 +2,7 @@ import os
 import psycopg2
 import discord
 from wordcloud import WordCloud
+from wordcloud import STOPWORDS
 from discord.ext import commands
 
 MIA = 405533644250152960
@@ -104,8 +105,9 @@ class Basic(commands.Cog):
     async def wordcloud(self, ctx, member: discord.Member, channel: discord.TextChannel, lookup_num: int = 1000):
         # culled words
         stopwords = {"oh", "yeah", "the", "and", "of", "to", "the", "https", "http", "www", "com", "lol", "lmao",
-                     "a", "an", "is", "yes", "that", "imgur", "twitter", "wa", "youtube", "youtu", "be"}
+                     "yes", "that", "imgur", "twitter", "wa", "youtube", "youtu", "be"}
         stopwords |= {word.capitalize() for word in stopwords}
+        stopwords |= STOPWORDS # add the original stopwords list
 
         wordstr = "" # Somewhere to store the words
 
