@@ -105,8 +105,8 @@ class Basic(commands.Cog):
         # culled words
         stopwords = {"oh", "yeah", "the", "and", "of", "to", "the", "https", "http", "www", "com", "lol", "lmao",
                      "a", "an", "is", "yes", "that", "imgur", "twitter", "wa", "youtube", "youtu", "be"}
-        stopwords += {word.capitalize() for word in stopwords}
-        
+        stopwords |= {word.capitalize() for word in stopwords}
+
         wordstr = "" # Somewhere to store the words
 
         perm = channel.permissions_for(ctx.guild.me)
