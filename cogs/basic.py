@@ -103,12 +103,6 @@ class Basic(commands.Cog):
 
     @commands.command(name='wordcloud', aliases=['wc'], help='Creates a wordcloud based on the mentioned user')
     async def wordcloud(self, ctx, member: discord.Member, channel: discord.TextChannel, lookup_num: int = 1000):
-        # culled words
-        stopwords = {"oh", "yeah", "the", "and", "of", "to", "the", "https", "http", "www", "com", "lol", "lmao",
-                     "yes", "that", "imgur", "twitter", "wa", "youtube", "youtu", "be"}
-        stopwords |= {word.capitalize() for word in stopwords}
-        stopwords |= STOPWORDS # add the original stopwords list
-
         wordstr = "" # Somewhere to store the words
 
         perm = channel.permissions_for(ctx.guild.me)
@@ -119,8 +113,7 @@ class Basic(commands.Cog):
 
         # Create the wordcloud object
         cloud = WordCloud(width=1000, height=1000, margin=0,
-                          background_color="white", colormap="tab20",
-                          stopwords=stopwords).generate(wordstr)
+                          background_color="white", colormap="tab20").generate(wordstr)
 
         cloud.to_file('data/wordcloud.png')
         await ctx.send(file=discord.File('data/wordcloud.png'))
