@@ -139,10 +139,17 @@ class Search(commands.Cog):
             result = request.json()['list'][0]
 
             # Makes a nice looking embed
-            embed = Embed(title=f"**{result['word']}** by {result['author']}", description=f"{result['definition']}", color=0xb3c98d)
-            embed.add_field(name="Example(s)", value=result['example'], inline=False)
-            embed.add_field(name="Thumbs", value=f":thumbsup:{result['thumbs_up']} | :thumbsdown:{result['thumbs_down']}", inline=False)
-            embed.add_field(name="Link", value=result['permalink'])
+            embed = Embed(title=f"**{result['word']}** by {result['author']}",
+                          description=f"{parse(result['definition'])}",
+                          color=0xb3c98d)
+            embed.add_field(name="Example(s)",
+                            value=parse(result['example']),
+                            inline=False)
+            embed.add_field(name="Thumbs",
+                            value=f":thumbsup:{result['thumbs_up']} | :thumbsdown:{result['thumbs_down']}",
+                            inline=False)
+            embed.add_field(name="Link",
+                            value=result['permalink'])
 
             await ctx.send(embed=embed)
         except IndexError:
@@ -152,6 +159,10 @@ class Search(commands.Cog):
     async def urban_error(self, ctx, error):
         print(error)
         await ctx.send("Usage: ``$urban [search]``")
+
+# just removes square brackets, used for $urban
+def parse(word):
+    return "".join([ch for ch in word if ch not in ['[',']']])
 
 def setup(bot):
     bot.add_cog(Search(bot))
