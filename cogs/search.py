@@ -15,9 +15,10 @@ class Search(commands.Cog):
 
     @commands.command(name='anime', help='Pulls up the mal and anilist of a given anime')
     async def anisearch(self, ctx, *, search):
-        search_result = jikan.search('anime', search)
-        title = search_result['results'][0]['title']
-        result_url = search_result['results'][0]['url']
+        # Temp fix until mal gets its shit back together
+        #search_result = jikan.search('anime', search)
+        #title = search_result['results'][0]['title']
+        #result_url = search_result['results'][0]['url']
 
         query = '''
         query ($search: String) {
@@ -27,7 +28,7 @@ class Search(commands.Cog):
         }
         '''
         variables = {
-            'search': title
+            'search': search
         }
         url = 'https://graphql.anilist.co'
 
@@ -35,9 +36,9 @@ class Search(commands.Cog):
         if response:
             # convert the response to a dict using json() and get the id
             anime_id = response.json()['data']['Media']['id']
-            await ctx.send(f"{result_url}\nhttps://anilist.co/anime/{anime_id}")
+            await ctx.send(f"https://anilist.co/anime/{anime_id}")
         else:
-            await ctx.send(f"{result_url}\nAnilist URL not found")
+            await ctx.send(f"Anilist URL not found")
 
     @anisearch.error
     async def anisearch_error(self, ctx, error):
@@ -47,9 +48,10 @@ class Search(commands.Cog):
 
     @commands.command(name='manga', help='Pulls up the mal and anilist of a given manga/ln')
     async def mangasearch(self, ctx, *, search):
-        search_result = jikan.search('manga', search)
-        title = search_result['results'][0]['title']
-        result_url = search_result['results'][0]['url']
+        # See above
+        #search_result = jikan.search('manga', search)
+        #title = search_result['results'][0]['title']
+        #result_url = search_result['results'][0]['url']
 
         query = '''
         query ($search: String) {
@@ -59,7 +61,7 @@ class Search(commands.Cog):
         }
         '''
         variables = {
-            'search': title
+            'search': search
         }
         url = 'https://graphql.anilist.co'
 
@@ -68,9 +70,9 @@ class Search(commands.Cog):
         if response:
             # convert the response to a dict using json() and get the id
             manga_id = response.json()['data']['Media']['id']
-            await ctx.send(f"{result_url}\nhttps://anilist.co/manga/{manga_id}")
+            await ctx.send(f"https://anilist.co/manga/{manga_id}")
         else:
-            await ctx.send(f"{result_url}\nAnilist URL not found")
+            await ctx.send(f"Anilist URL not found")
 
     @mangasearch.error
     async def mangasearch_error(self, ctx, error):
