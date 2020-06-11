@@ -1,6 +1,7 @@
 import os
 import requests
 import wikipedia
+from discord import Embed
 from discord.ext import commands
 from jikanpy import Jikan
 
@@ -128,6 +129,29 @@ class Search(commands.Cog):
     async def wikisearch_error(self, ctx, error):
         print(error)
         await ctx.send("Usage: ``$wiki [search]``")
+
+
+    @commands.command(name='urban', help='Pulls up the urban dictionary entry for a given search')
+    async def urban(self, ctx, *, search):
+        request = requests.get("http://api.urbandictionary.com/v0/define", params={"term": search})
+
+        try:
+            result = request.json()['list'][0]
+
+            # Makes a nice looking embed
+            embed = Embed(title=f"**{result['word']}** by {result['author']}", description=f"{result['definition']}", color=0xb3c98d)
+            embed.add_field(name="Example(s)", value=result['example'], inline=False)
+            embed.add_field(name="Thumbs", value=f":thumbsup:{result['thumbs_up']} | :thumbsdown:{result['thumbs_down']}", inline=False)
+            embed.add_field(name="Link", value=result['permalink'])
+
+            await ctx.send(embed=embed)
+        except IndexError:
+            await ctx.send(f"Nothing found for ``{search}``.")
+
+    @urban.error
+    async def urban_error(self, ctx, error):
+        print(error)
+        await ctx.send("Usage: ``$urban [search]``")
 
 def setup(bot):
     bot.add_cog(Search(bot))
