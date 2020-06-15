@@ -160,6 +160,23 @@ class Search(commands.Cog):
         print(error)
         await ctx.send("Usage: ``$urban [search]``")
 
+
+    @commands.command(name='rt', help='Pulls up the rotten tomatoes entry for a given search')
+    async def rt(self, ctx, *, search):
+        rq = requests.get("https://www.rottentomatoes.com/napi/search", params={"query":search})
+
+        try:
+            result_url = rq.json()['movies'][0]['url']
+            await ctx.send("https://www.rottentomatoes.com" + result_url)
+        except IndexError:
+            await ctx.send(f"Nothing found for ``{search}``.")
+
+    @rt.error
+    async def rt_error(self, ctx, error):
+        print(error)
+        await ctx.send("Usage: ``$rt [search]``")
+
+
 # just removes square brackets, used for $urban
 def parse(word):
     return "".join([ch for ch in word if ch not in ['[',']']])
