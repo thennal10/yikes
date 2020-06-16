@@ -1,11 +1,10 @@
 import os
 import requests
-import wikipedia
 from discord import Embed
 from discord.ext import commands
-from jikanpy import Jikan
+#from jikanpy import Jikan
 
-jikan = Jikan()
+#jikan = Jikan()
 vglist_token = os.environ['VGLIST_TOKEN']
 vglist_email = os.environ['VGLIST_EMAIL']
 
@@ -120,10 +119,25 @@ class Search(commands.Cog):
 
     @commands.command(name='wiki', help='Pulls up the wikipedia link for a given search')
     async def wikisearch(self, ctx, *, search):
-        results = wikipedia.search(search)
-        if len(results) == 0:
-            return await ctx.send(f"No results found for ``{search}``")
-        await ctx.send(wikipedia.page(results[0]).url)
+        params = {
+            "action": "query",
+            "format": "json",
+            "generator": "search",
+            "gsrsearch": search,
+            "prop": "info",
+            "inprop": "url"
+        }
+
+        req = requests.get(url="https://en.wikipedia.org/w/api.php", params=params)
+
+        try:
+            result = req.json()['query']['pages']
+            # it gives you an unsorted list by default, for some reason
+            for r in result:
+                if result[r]['index'] == 1:
+                    return await ctx.send(result[r]['fullurl'])
+        except KeyError:
+            await ctx.send(f"Nothing found for ``{search}``.")
 
     @wikisearch.error
     async def wikisearch_error(self, ctx, error):
