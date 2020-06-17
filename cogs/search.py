@@ -87,8 +87,7 @@ class Search(commands.Cog):
                   gameSearch(query: $query) {
                     nodes {
                       id
-                      name
-                      coverUrl
+                      steamAppIds
                     }
                   }
                 }
@@ -109,7 +108,10 @@ class Search(commands.Cog):
         if len(results) == 0:
             await ctx.send(f"Game not found.")
         else:
-            await ctx.send(f"https://vglist.co/games/{results[0]['id']}")
+            output = f"https://vglist.co/games/{results[0]['id']}"
+            if len(results[0]['steamAppIds']):
+                output += f"\nhttps://store.steampowered.com/app/{results[0]['steamAppIds'][0]}"
+            await ctx.send(output)
 
     @gamesearch.error
     async def gamesearch_error(self, ctx, error):
