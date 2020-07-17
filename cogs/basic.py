@@ -1,4 +1,7 @@
 import os
+import re
+import json
+import random
 import psycopg2
 import discord
 from wordcloud import WordCloud
@@ -7,6 +10,7 @@ from discord.ext import commands
 
 MIA = 405533644250152960
 DATABASE_URL = os.environ['DATABASE_URL']
+WORDS = json.load(open('data/fuckrai.json'))
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
 def leaderboard_name(l):
@@ -16,7 +20,6 @@ def leaderboard_name(l):
         if count != len(l) - 1:
             name += "/"
     return name
-
 
 async def check_server(ctx):
     if MIA == ctx.guild.id:
@@ -239,6 +242,44 @@ class Basic(commands.Cog):
     @remove_peachlator.error
     async def remove_peachlator_error(self, ctx, error):
         await ctx.send("Usage: ``$remove_peachlator [word]``")
+
+    @commands.command(name='madlibs', helps="Replaces word types encased in square brackets with random words")
+    async def madlibs(self, ctx, *, msg: str):
+        # A dict to convert word type aliases to the actual word type
+        wordalias = {'noun' : 'noun',
+                     'n': 'noun',
+                     'verb': 'verb',
+                     'v': 'verb',
+                     'adverb': 'adverb',
+                     'adv': 'adverb',
+                     'adjective': 'adjective',
+                     'adj': 'adjective'}
+
+        # Regex to detect anything in between square brackets
+        pattern = re.compile('\[(.*?)\]')
+        if not pattern.findall(msg):
+            return await ctx.send("No words to swap given. Enclose a valid word type in square brackets, "
+                                  "like ``[noun]``.")
+
+        output = ""
+        prev = 0
+        iterator = pattern.finditer(msg)
+
+        try:
+            for match in iterator:
+                # good luck trying to figure this out in three years
+                output += msg[prev:match.span()[0]] + random.choice(WORDS[(wordalias[match.group()[1:-1]])])
+                prev = match.span()[1]
+            output += msg[prev:]
+
+            await ctx.send(output)
+        except KeyError as e:
+            await ctx.send(f"No idea what ``{e.args[0]}`` is. Valid word types are ``noun`` (``n``), ``verb`` (``v``), "
+                           f"``adjective`` (``adj``), and ``adverb`` (``adv``).")
+
+    @madlibs.error
+    async def madlibs_error(self, ctx, error):
+        await ctx.send("Usage: ``$madlibs [sentence]``, with words types you want to swap encased in square brackets.")
 
 def setup(bot):
     bot.add_cog(Basic(bot))
