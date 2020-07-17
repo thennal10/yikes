@@ -1,9 +1,13 @@
+import os
 import requests
+import psycopg2
 from discord.ext import commands
 import logging
 from saucenao import SauceNao
 
 
+DATABASE_URL = os.environ['DATABASE_URL']
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 saucenao = SauceNao(directory='data', databases=999, minimum_similarity=65, combine_api_types=False,
                     api_key='', exclude_categories='', move_to_categories=False,  use_author_as_category=False,
                     output_type=SauceNao.API_HTML_TYPE, start_file='', log_level=logging.ERROR,
@@ -14,10 +18,18 @@ class Source(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.update()
+
+    def update(self):
+        sql = """SELECT channel FROM saucechan;"""
+        cur = conn.cursor()
+        cur.execute(sql)
+        self.active_channels = [tup[0] for tup in cur.fetchall()]
+        cur.close()
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.channel.id == 413449617401708555:
+        if message.channel.id in self.active_channels:
             if "source" not in message.content.lower():
                 for attachment in message.attachments:
                     img_data = requests.get(attachment.url).content
@@ -40,6 +52,53 @@ class Source(commands.Cog):
                                 break
                             except Exception as e:
                                 print(e)
+
+    @commands.command(name='sauce_activate', help='Activates automatic pixiv source finding for the posted channel')
+    async def sauce_activate(self, ctx):
+        # SQL shit
+        sql = """INSERT INTO saucechan (channel) VALUES (%s);"""
+        data = (ctx.channel.id,)
+        print(data)
+        cur = conn.cursor()
+        try:
+            cur.execute(sql, data)
+            conn.commit()
+            cur.close()
+            await ctx.send("Saucing activated for this channel.")
+            self.update()
+        except:
+            conn.rollback()
+            conn.commit()
+            cur.close()
+            await ctx.send("Channel is already sauced up.")
+
+    @sauce_activate.error
+    async def sauce_activate_error(self, ctx, error):
+        await ctx.send("Something went wrong. REEEE at premed.")
+
+    @commands.command(name='sauce_deactivate', help='Deactivates saucing.')
+    async def sauce_deactivate(self, ctx):
+        # Even more SQL
+        sql = """SELECT channel FROM saucechan;"""
+        cur = conn.cursor()
+        cur.execute(sql)
+        row = cur.fetchone()
+        while row is not None:
+            if row[0] == ctx.channel.id:
+                sql = f"""DELETE FROM saucechan WHERE channel ='{ctx.channel.id}';"""
+                cur.execute(sql)
+                conn.commit()
+                await ctx.send("Deactivation successful. No more sauce for this channel.")
+                self.update()
+                break
+            row = cur.fetchone()
+        else:
+            await ctx.send("Channel isn't sauced to begin with.")
+        cur.close()
+
+    @sauce_deactivate.error
+    async def sauce_deactivate_error(self, ctx):
+        await ctx.send("Something went wrong. REEE at premed.")
 
 
     @commands.command(name="trace", help="Finds the source of an anime screenshot")
