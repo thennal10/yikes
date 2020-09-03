@@ -179,8 +179,7 @@ class Search(commands.Cog):
 
     @commands.command(name='rt', help='Pulls up the rotten tomatoes entry for a given search')
     async def rt(self, ctx, *, search):
-        rq = requests.get("https://www.rottentomatoes.com/napi/search", params={"query":search})
-        print(rq)
+        rq = requests.get("https://www.rottentomatoes.com/api/private/v2.0/search", params={"q":search})
         try:
             result_url = rq.json()['movies'][0]['url']
             await ctx.send("https://www.rottentomatoes.com" + result_url)
