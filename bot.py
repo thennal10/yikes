@@ -2,8 +2,6 @@ import os
 import discord
 from discord.ext import commands
 
-#from dotenv import load_dotenv
-#load_dotenv()
 
 # initializing shit
 TOKEN = os.environ.get("TOKEN")
@@ -20,7 +18,7 @@ def get_prefix(yikes, message):
 
 # Below cogs represents our folder our cogs are in. Following is the file name. So 'meme.py' in cogs, would be cogs.meme
 # Think of it like a dot path import
-initial_extensions = ['cogs.basic', 'cogs.custom', 'cogs.search', 'cogs.source', 'cogs.specific']
+initial_extensions = ['cogs.basic', 'cogs.custom', 'cogs.search', 'cogs.source', 'cogs.specific', 'cogs.reminders']
 
 bot = commands.Bot(command_prefix=get_prefix, description='An abominable bot for an abominable server')
 
