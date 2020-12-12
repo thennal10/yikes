@@ -1,4 +1,4 @@
-discord.py>=1.4.1
+discord.py>=1.5.1
 psycopg2-binary
 requests
 git+http://github.com/AWConant/jikanpy.git
@@ -7,7 +7,6 @@ wordcloud
 numpy
 sklearn
 jikanpy
-saucenao
 html5lib
 beautifulsoup4
 pandas
