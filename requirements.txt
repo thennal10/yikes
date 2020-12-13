@@ -6,7 +6,6 @@ tqdm
 wordcloud
 numpy
 sklearn
-jikanpy
 html5lib
 beautifulsoup4
 pandas

@@ -2,9 +2,8 @@ import os
 import requests
 from discord import Embed
 from discord.ext import commands
-#from jikanpy import Jikan
 
-#jikan = Jikan()
+
 vglist_token = os.environ['VGLIST_TOKEN']
 vglist_email = os.environ['VGLIST_EMAIL']
 
@@ -15,11 +14,6 @@ class Search(commands.Cog):
 
     @commands.command(name='anime', help='Pulls up the mal and anilist of a given anime')
     async def anisearch(self, ctx, *, search):
-        # Temp fix until mal gets its shit back together
-        #search_result = jikan.search('anime', search)
-        #title = search_result['results'][0]['title']
-        #result_url = search_result['results'][0]['url']
-
         query = '''
         query ($search: String) {
             Media (search: $search, type: ANIME) {
@@ -48,11 +42,6 @@ class Search(commands.Cog):
 
     @commands.command(name='manga', help='Pulls up the mal and anilist of a given manga/ln')
     async def mangasearch(self, ctx, *, search):
-        # See above
-        #search_result = jikan.search('manga', search)
-        #title = search_result['results'][0]['title']
-        #result_url = search_result['results'][0]['url']
-
         query = '''
         query ($search: String) {
             Media (search: $search, type: MANGA) {
