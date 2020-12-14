@@ -27,7 +27,7 @@ class Source(commands.Cog):
     async def on_message(self, message):
         if message.channel.id in self.active_channels:
             if "source" not in message.content.lower():
-                urls = []
+                urls = set()
                 for attachment in message.attachments:
                     img_url = attachment.url
                     params = {"url": img_url, "output_type": 2, "db": 999, "api_key": SAUCENAO_KEY}
@@ -64,11 +64,11 @@ class Source(commands.Cog):
                         except:
                             continue
                         if similarity_check and pixiv_check:
-                            urls.append(result['data']['ext_urls'][0])
+                            urls.add(result['data']['ext_urls'][0])
                             break
                     else:
                         if float(results[0]['header']['similarity']) > 80:
-                            urls.append(results[0]['data']['ext_urls'][0])
+                            urls.add(results[0]['data']['ext_urls'][0])
                 if len(urls):
                     await message.channel.send("\n".join([f'<{url}>' for url in urls]))
 
