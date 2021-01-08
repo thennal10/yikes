@@ -9,40 +9,37 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
 
 class Custom(commands.Cog):
-    """CustomCog"""
 
     def __init__(self, bot):
         self.bot = bot
 
+    # Doubles as an error handler
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
+        if isinstance(error, commands.UserInputError):
+            await ctx.reply(f'{error}\nType `$help {ctx.command.name}` for usage instructions.')
 
-        if hasattr(ctx.command, 'on_error'):
-            return
+        elif isinstance(error, commands.CheckFailure):
+            await ctx.reply(error)
 
-        if isinstance(error, commands.CommandNotFound):
+        elif isinstance(error, commands.CommandNotFound):
             # More SQL shit
-            temp = error.args[0][9:]
-            for count, c in enumerate(temp):
-                if temp[count:] == '" is not found':
-                    key = temp[:count]
-                    break
-            else:
-                print(error)
-                return
             sql = """SELECT command, output FROM customcommands;"""
             cur = conn.cursor()
             cur.execute(sql)
             row = cur.fetchone()
 
             while row is not None:
-                if row[0] == key:
+                if row[0] == ctx.invoked_with:
                     cur.close()
                     return await ctx.send(row[1])
                 row = cur.fetchone()
+            else:
+                await ctx.reply(f'Command `${ctx.invoked_with}` not found.')
 
-        print(f'Ignoring exception in command [{ctx.command}]:', file=sys.stderr)
-        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+        else:
+            print(error)
+            await ctx.reply('Something went wrong. Ping Premed and tell him to fix his bot.')
 
     @commands.command(name='custom', help='Adds a custom command')
     @commands.is_owner()
