@@ -4,10 +4,10 @@ import requests
 import psycopg2
 from discord.ext import commands
 
-
 DATABASE_URL = os.environ['DATABASE_URL']
 SAUCENAO_KEY = os.environ['SAUCENAO_KEY']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+
 
 class Source(commands.Cog):
 
@@ -36,7 +36,7 @@ class Source(commands.Cog):
                     if self.short_limit <= 1:
                         loop_count = 0
                         while self.short_limit <= 1 and loop_count < 10:
-                            loop_count += 1 # a failsafe to prevent an infinitely running loop
+                            loop_count += 1  # a failsafe to prevent an infinitely running loop
                             await asyncio.sleep(30)
 
                             # check (and assign vars) if you've hit the cap, because commands are async
@@ -50,7 +50,7 @@ class Source(commands.Cog):
                                     continue
                                 else:
                                     raise Exception(f'Saucenao request failed. Request: {sauce}')
-                    else: # an if else so that it doesn't request twice
+                    else:  # an if else so that it doesn't request twice
                         rq = requests.get("https://saucenao.com/search.php", params=params)
                         sauce = rq.json()
                         self.short_limit = sauce['header']['short_remaining']
@@ -85,7 +85,8 @@ class Source(commands.Cog):
             cur.close()
             await ctx.send("Saucing activated for this channel.")
             self.update()
-        except:
+        except Exception as e:
+            print(e)
             conn.rollback()
             conn.commit()
             cur.close()
@@ -114,25 +115,27 @@ class Source(commands.Cog):
     @commands.command(name="trace", help="Finds the source of an anime screenshot")
     async def trace(self, ctx, url: str = None):
         if url:
-            await ctx.reply(self.tracer(url))
+            await ctx.reply(tracer(url))
         else:
             if len(ctx.message.attachments) == 0:
                 raise commands.MissingRequiredArgument('Missing image url or an attachment.')
             for attachment in ctx.message.attachments:
-                await ctx.reply(self.tracer(attachment.url))
+                await ctx.reply(tracer(attachment.url))
 
-    def tracer(self, url):
-        req = requests.get(url="https://trace.moe/api/search?", params={"url": url})
 
-        if req.status_code != 200:  # quick check for url validity
-            return "The linked url/attachment was invalid."
+def tracer(url):
+    req = requests.get(url="https://trace.moe/api/search?", params={"url": url})
 
-        result = req.json()['docs'][0]
-        output = f"{round(result['similarity'] * 100)}% sure that it's from **{result['title_romaji']}**"
-        if result['episode']:
-            output += f", EP {result['episode']}"
+    if req.status_code != 200:  # quick check for url validity
+        return "The linked url/attachment was invalid."
 
-        return output + f"\nhttps://anilist.co/anime/{result['anilist_id']}"
+    result = req.json()['docs'][0]
+    output = f"{round(result['similarity'] * 100)}% sure that it's from **{result['title_romaji']}**"
+    if result['episode']:
+        output += f", EP {result['episode']}"
+
+    return output + f"\nhttps://anilist.co/anime/{result['anilist_id']}"
+
 
 def setup(bot):
     bot.add_cog(Source(bot))
