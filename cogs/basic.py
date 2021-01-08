@@ -4,7 +4,7 @@ import json
 import random
 import psycopg2
 import discord
-from wordcloud import WordCloud
+from wordcloud import WordCloud, STOPWORDS
 from discord.ext import commands
 
 DATABASE_URL = os.environ['DATABASE_URL']
@@ -81,11 +81,16 @@ class Basic(commands.Cog):
         if perm.read_message_history:
             async for msg in channel.history(limit=number_of_messages):
                 if msg.author == member:
-                    wordstr += " " + msg.content.capitalize()
+                    wordstr += "\n" + msg.content
+
+        stopwords = set(STOPWORDS)
+        stopwords = stopwords | {"oh", "yeah", "https", "http", "www", "com", "lol", "lmao",
+                                 "that", "imgur", "twitter", "youtube", "youtu"}
 
         # Create the wordcloud object
         cloud = WordCloud(width=1000, height=1000, margin=0,
-                          background_color="white", colormap="tab20").generate(wordstr)
+                          background_color="white", colormap="tab20",
+                          stopwords=stopwords).generate(wordstr)
 
         cloud.to_file('data/wordcloud.png')
         await ctx.send(file=discord.File('data/wordcloud.png'))
