@@ -118,7 +118,7 @@ class Source(commands.Cog):
             await ctx.reply(tracer(url))
         else:
             if len(ctx.message.attachments) == 0:
-                raise commands.MissingRequiredArgument('Missing image url or an attachment.')
+                raise commands.UserInputError('Missing image url or an attachment.')
             for attachment in ctx.message.attachments:
                 await ctx.reply(tracer(attachment.url))
 

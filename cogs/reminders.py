@@ -28,7 +28,7 @@ class Reminders(commands.Cog):
 
         split_input = input.split(' in ')
         if len(split_input) == 1:  # input error checking
-            raise commands.BadArgument('Invalid arguments.')
+            raise commands.UserInputError('Invalid arguments.')
 
         content = " in ".join(split_input[:-1])  # Rejoins any split up 'in's in the message
 
@@ -41,7 +41,7 @@ class Reminders(commands.Cog):
                 wait_time += multiplier * time_conv[word]
 
         if wait_time <= 0:  # more input error checking
-            raise commands.BadArgument('Invalid time.')
+            raise commands.UserInputError('Invalid time.')
 
         # add the reminder to the database, w unix time
         sql = f"""INSERT INTO reminders VALUES ({ctx.message.author.id}, '{content}', {int(time.time() + wait_time)});"""
