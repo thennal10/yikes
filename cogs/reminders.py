@@ -8,12 +8,15 @@ from discord.ext import commands
 DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
+
 class Reminders(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='remindme', help='Reminds you after a specified delay', usage="$remindme [message] in [time] [quantity] [time] [quantity]...")
+    @commands.command(name='remindme',
+                      help='Reminds you after a specified delay',
+                      usage="$remindme [message] in [time] [quantity] [time] [quantity]...")
     async def remindme(self, ctx, *, input):
         # Makes life easier
         time_conv = {'second': 1,
@@ -21,13 +24,13 @@ class Reminders(commands.Cog):
                      'hour': 3600,
                      'day': 86400,
                      'week': 604800}
-        time_conv.update({k + 's':time_conv[k] for k in time_conv}) # Just adds plural versions
+        time_conv.update({k + 's': time_conv[k] for k in time_conv})  # Just adds plural versions
 
         split_input = input.split(' in ')
-        if len(split_input) == 1: # input error checking
+        if len(split_input) == 1:  # input error checking
             raise commands.BadArgument('Invalid arguments.')
 
-        content = " in ".join(split_input[:-1]) # Rejoins any split up 'in's in the message
+        content = " in ".join(split_input[:-1])  # Rejoins any split up 'in's in the message
 
         # calculates the time delay
         wait_time = 0
@@ -37,7 +40,7 @@ class Reminders(commands.Cog):
                 multiplier = int(time_unparsed[i - 1])
                 wait_time += multiplier * time_conv[word]
 
-        if wait_time <= 0: # more input error checking
+        if wait_time <= 0:  # more input error checking
             raise commands.BadArgument('Invalid time.')
 
         # add the reminder to the database, w unix time
@@ -55,7 +58,7 @@ class Reminders(commands.Cog):
             cur.close()
             await ctx.send(f"Error: ``{e}``")
 
-        await self.reminder(wait_time, ctx.author, content) # set reminder
+        await self.reminder(wait_time, ctx.author, content)  # set reminder
 
     # sleeps for a while and then calls another function
     async def reminder(self, seconds, ctx, content):
@@ -87,12 +90,13 @@ class Reminders(commands.Cog):
         cur.execute(sql)
         table = cur.fetchall()
 
-        for row in table: # (user_id, message, unix time)
+        for row in table:  # (user_id, message, unix time)
             user = self.bot.get_user(row[0])
             if row[2] <= time.time():
                 await self.del_and_send(user, row[1])
             else:
                 await self.reminder(row[2] - time.time(), user, row[1])
+
 
 def setup(bot):
     bot.add_cog(Reminders(bot))
