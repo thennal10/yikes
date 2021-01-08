@@ -10,6 +10,8 @@ class ErrorHandler(commands.Cog):
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.UserInputError):
             await ctx.reply(f'{error}\nType `$help {ctx.command.name}` for usage instructions.')
+        elif isinstance(error, commands.CheckFailure):
+            await ctx.reply(error)
         else:
             print(error)
             await ctx.reply('Something went wrong. Ping Premed and tell him to fix his bot.')
