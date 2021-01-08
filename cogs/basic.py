@@ -226,6 +226,11 @@ class Basic(commands.Cog):
             await ctx.send(f"No idea what ``{e.args[0]}`` is. Valid word types are ``noun`` (``n``), ``verb`` (``v``), "
                            f"``adjective`` (``adj``), and ``adverb`` (``adv``).")
 
+    @commands.command(name='echo', helps='Echo message to a certain channel.')
+    @commands.is_owner()
+    async def echo(self, ctx, channel: discord.TextChannel, *, message: str):
+        await channel.send(message)
+
 
 def leaderboard_name(l):
     name = ""
