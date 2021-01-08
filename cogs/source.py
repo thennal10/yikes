@@ -125,6 +125,8 @@ class Source(commands.Cog):
         if url:
             await ctx.reply(self.tracer(url))
         else:
+            if len(ctx.message.attachments) == 0:
+                raise Exception('No attachments')
             for attachment in ctx.message.attachments:
                 await ctx.reply(self.tracer(attachment.url))
 
