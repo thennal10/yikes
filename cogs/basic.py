@@ -48,11 +48,6 @@ class Basic(commands.Cog):
 
         await ctx.send("".join(outputmsg))
 
-    @strokify.error
-    async def strokify_error(self, ctx, error):
-        await ctx.send("Usage: ``$strokify [phrase]``")
-
-
     @commands.command(name='score', help='Outputs a score based on the string')
     async def score(self, ctx, *, input: str):
 
@@ -63,12 +58,7 @@ class Basic(commands.Cog):
 
         await ctx.send(f"bout {num}/10")
 
-    @score.error
-    async def score_error(self, ctx, error):
-        await ctx.send("Usage: ``$score [phrase]``")
-
-
-    @commands.command(name='leaderboard', help='Creates a leaderboard based on a given word/phrase')
+    @commands.command(name='leaderboard', help='Creates a leaderboard based on a given word/phrase', usage='$leaderboard [no of messages] [phrase1] + [phrase2]...')
     async def word_leaderboard(self, ctx, msglimit: int, *, actmsg: str):
 
         searchwords = actmsg.split(" + ")
@@ -98,12 +88,6 @@ class Basic(commands.Cog):
         leaderboard += "```"
         await ctx.send(leaderboard)
 
-    @word_leaderboard.error
-    async def word_leaderboard_error(self, ctx, error):
-        print(error)
-        await ctx.send("Usage: ``$leaderboard [no of messages] [phrase1] + [phrase2]...``")
-
-
     @commands.command(name='wordcloud', aliases=['wc'], help='Creates a wordcloud based on the mentioned user')
     async def wordcloud(self, ctx, member: discord.Member, channel: discord.TextChannel, lookup_num: int = 1000):
         wordstr = "" # Somewhere to store the words
@@ -120,12 +104,6 @@ class Basic(commands.Cog):
 
         cloud.to_file('data/wordcloud.png')
         await ctx.send(file=discord.File('data/wordcloud.png'))
-
-    @wordcloud.error
-    async def wordcloud_error(self, ctx, error):
-        print(error)
-        await ctx.send("Usage: ``$wordcloud @[user] #[channel] [no of messages]``")
-
 
     @commands.command(name='peachlator', help='What it says on the tin')
     async def peachlator(self, ctx, *, inp: str):
@@ -183,12 +161,7 @@ class Basic(commands.Cog):
 
         await ctx.send(" ".join(new_message))
 
-    @peachlator.error
-    async def peachlator_error(self, ctx, error):
-        await ctx.send("Peachlator, at your service. Usage: ``$peachlator [text]``")
-
-
-    @commands.command(name='update_peachlator', help='Update the peachlator')
+    @commands.command(name='update_peachlator', help='Update the peachlator', usage='$update_peachlator [word] - [translation]')
     async def update_peachlator(self, ctx, *, inp: str):
         if_MIA = await check_server(ctx)
         if if_MIA:
@@ -212,11 +185,6 @@ class Basic(commands.Cog):
                 cur.close()
                 await ctx.send("Translation already exists, or you fucking broke the bot. Congrats, asshole.")
 
-    @update_peachlator.error
-    async def update_peachlator_error(self, ctx, error):
-        await ctx.send("Usage: ``$update_peachlator [word] - [translation]``")
-
-
     @commands.command(name='remove_peachlator', help='Removes a translation')
     async def remove_peachlator(self, ctx, *, key: str):
         if_MIA = await check_server(ctx)
@@ -238,10 +206,6 @@ class Basic(commands.Cog):
                 await ctx.send("Translation doesn't exist.")
 
             cur.close()
-
-    @remove_peachlator.error
-    async def remove_peachlator_error(self, ctx, error):
-        await ctx.send("Usage: ``$remove_peachlator [word]``")
 
     @commands.command(name='madlibs', helps="Replaces word types encased in square brackets with random words")
     async def madlibs(self, ctx, *, msg: str):
@@ -276,10 +240,6 @@ class Basic(commands.Cog):
         except KeyError as e:
             await ctx.send(f"No idea what ``{e.args[0]}`` is. Valid word types are ``noun`` (``n``), ``verb`` (``v``), "
                            f"``adjective`` (``adj``), and ``adverb`` (``adv``).")
-
-    @madlibs.error
-    async def madlibs_error(self, ctx, error):
-        await ctx.send("Usage: ``$madlibs [sentence]``, with words types you want to swap encased in square brackets.")
 
 def setup(bot):
     bot.add_cog(Basic(bot))

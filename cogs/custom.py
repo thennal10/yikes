@@ -71,11 +71,6 @@ class Custom(commands.Cog):
                 cur.close()
                 await ctx.send("Command already exists, or you fucking broke the bot. Congrats, asshole.")
 
-    @custom_command.error
-    async def custom_command_error(self, ctx, error):
-        await ctx.send("Usage: ``!custom [command] [link/text]``")
-
-
     @commands.command(name='remove', help='Removes a custom command')
     async def remove(self, ctx, key):
         if_MIA = await check_server(ctx)
@@ -97,10 +92,6 @@ class Custom(commands.Cog):
                 await ctx.send("That command doesn't exist, you dumb fuck. Use ``$list`` to get a list of existing"
                                " commands.")
             cur.close()
-
-    @remove.error
-    async def remove_error(self, ctx, error):
-        await ctx.send("Usage: ``!remove [command]``")
 
     @commands.command(name='list', help='Lists all custom commands')
     async def cclist(self, ctx):

@@ -91,10 +91,6 @@ class Source(commands.Cog):
             cur.close()
             await ctx.send("Channel is already sauced up.")
 
-    @sauce_activate.error
-    async def sauce_activate_error(self, ctx, error):
-        await ctx.send("Something went wrong. REEEE at premed.")
-
     @commands.command(name='sauce_deactivate', help='Deactivates saucing.')
     async def sauce_deactivate(self, ctx):
         # Even more SQL
@@ -115,18 +111,13 @@ class Source(commands.Cog):
             await ctx.send("Channel isn't sauced to begin with.")
         cur.close()
 
-    @sauce_deactivate.error
-    async def sauce_deactivate_error(self, ctx):
-        await ctx.send("Something went wrong. REEE at premed.")
-
-
     @commands.command(name="trace", help="Finds the source of an anime screenshot")
     async def trace(self, ctx, url: str = None):
         if url:
             await ctx.reply(self.tracer(url))
         else:
             if len(ctx.message.attachments) == 0:
-                raise Exception('No attachments')
+                raise commands.MissingRequiredArgument('Missing image url or an attachment.')
             for attachment in ctx.message.attachments:
                 await ctx.reply(self.tracer(attachment.url))
 
@@ -134,7 +125,7 @@ class Source(commands.Cog):
         req = requests.get(url="https://trace.moe/api/search?", params={"url": url})
 
         if req.status_code != 200:  # quick check for url validity
-            return "The linked url/attachment was invalid"
+            return "The linked url/attachment was invalid."
 
         result = req.json()['docs'][0]
         output = f"{round(result['similarity'] * 100)}% sure that it's from **{result['title_romaji']}**"
@@ -142,11 +133,6 @@ class Source(commands.Cog):
             output += f", EP {result['episode']}"
 
         return output + f"\nhttps://anilist.co/anime/{result['anilist_id']}"
-
-    @trace.error
-    async def trace_error(self, ctx, error):
-        await ctx.send("Usage: ``$trace [image url]`` or just ``$trace`` with an image attachment")
-
 
 def setup(bot):
     bot.add_cog(Source(bot))

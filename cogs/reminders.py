@@ -12,10 +12,8 @@ class Reminders(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.reminder_error_message = "Usage: ``$remindme [message] in [time] [quantity] [time] [quantity]...``\n" \
-                                      + "Eg: ``$remindme simp for coco in 2 weeks 3 hours 1 second``"
 
-    @commands.command(name='remindme', help='Reminds you after a specified delay')
+    @commands.command(name='remindme', help='Reminds you after a specified delay', usage="$remindme [message] in [time] [quantity] [time] [quantity]...")
     async def remindme(self, ctx, *, input):
         # Makes life easier
         time_conv = {'second': 1,
@@ -27,7 +25,7 @@ class Reminders(commands.Cog):
 
         split_input = input.split(' in ')
         if len(split_input) == 1: # input error checking
-            return await ctx.send(self.reminder_error_message)
+            raise commands.BadArgument('Invalid arguments.')
 
         content = " in ".join(split_input[:-1]) # Rejoins any split up 'in's in the message
 
@@ -40,7 +38,7 @@ class Reminders(commands.Cog):
                 wait_time += multiplier * time_conv[word]
 
         if wait_time <= 0: # more input error checking
-            return await ctx.send(self.reminder_error_message)
+            raise commands.BadArgument('Invalid time.')
 
         # add the reminder to the database, w unix time
         sql = f"""INSERT INTO reminders VALUES ({ctx.message.author.id}, '{content}', {int(time.time() + wait_time)});"""
@@ -58,10 +56,6 @@ class Reminders(commands.Cog):
             await ctx.send(f"Error: ``{e}``")
 
         await self.reminder(wait_time, ctx.author, content) # set reminder
-
-    @remindme.error
-    async def remindme_error(self, ctx, error):
-        await ctx.send(self.reminder_error_message)
 
     # sleeps for a while and then calls another function
     async def reminder(self, seconds, ctx, content):

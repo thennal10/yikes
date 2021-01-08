@@ -34,11 +34,6 @@ class Search(commands.Cog):
         else:
             await ctx.reply(f"Anilist URL not found")
 
-    @anisearch.error
-    async def anisearch_error(self, ctx, error):
-        print(error)
-        await ctx.reply("Usage: ``$anime [search]``")
-
 
     @commands.command(name='manga', help='Pulls up the mal and anilist of a given manga/ln')
     async def mangasearch(self, ctx, *, search):
