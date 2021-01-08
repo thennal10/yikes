@@ -30,14 +30,14 @@ class Search(commands.Cog):
         if response:
             # convert the response to a dict using json() and get the id
             anime_id = response.json()['data']['Media']['id']
-            await ctx.send(f"https://anilist.co/anime/{anime_id}")
+            await ctx.reply(f"https://anilist.co/anime/{anime_id}")
         else:
-            await ctx.send(f"Anilist URL not found")
+            await ctx.reply(f"Anilist URL not found")
 
     @anisearch.error
     async def anisearch_error(self, ctx, error):
         print(error)
-        await ctx.send("Usage: ``$anime [search]``")
+        await ctx.reply("Usage: ``$anime [search]``")
 
 
     @commands.command(name='manga', help='Pulls up the mal and anilist of a given manga/ln')
@@ -59,14 +59,14 @@ class Search(commands.Cog):
         if response:
             # convert the response to a dict using json() and get the id
             manga_id = response.json()['data']['Media']['id']
-            await ctx.send(f"https://anilist.co/manga/{manga_id}")
+            await ctx.reply(f"https://anilist.co/manga/{manga_id}")
         else:
-            await ctx.send(f"Anilist URL not found")
+            await ctx.reply(f"Anilist URL not found")
 
     @mangasearch.error
     async def mangasearch_error(self, ctx, error):
         print(error)
-        await ctx.send("Usage: ``$manga [search]``")
+        await ctx.reply("Usage: ``$manga [search]``")
 
 
     @commands.command(name='game', help='Pulls up the vglist link for a given game')
@@ -95,17 +95,17 @@ class Search(commands.Cog):
 
         results = response['data']['gameSearch']['nodes']
         if len(results) == 0:
-            await ctx.send(f"Game not found.")
+            await ctx.reply(f"Game not found.")
         else:
             output = f"https://vglist.co/games/{results[0]['id']}"
             if len(results[0]['steamAppIds']):
                 output += f"\nhttps://store.steampowered.com/app/{results[0]['steamAppIds'][0]}"
-            await ctx.send(output)
+            await ctx.reply(output)
 
     @gamesearch.error
     async def gamesearch_error(self, ctx, error):
         print(error)
-        await ctx.send("Usage: ``$game [search]``")
+        await ctx.reply("Usage: ``$game [search]``")
 
 
     @commands.command(name='wiki', help='Pulls up the wikipedia link for a given search')
@@ -126,14 +126,14 @@ class Search(commands.Cog):
             # it gives you an unsorted list by default, for some reason
             for r in result:
                 if result[r]['index'] == 1:
-                    return await ctx.send(result[r]['fullurl'])
+                    return await ctx.reply(result[r]['fullurl'])
         except KeyError:
-            await ctx.send(f"Nothing found for ``{search}``.")
+            await ctx.reply(f"Nothing found for ``{search}``.")
 
     @wikisearch.error
     async def wikisearch_error(self, ctx, error):
         print(error)
-        await ctx.send("Usage: ``$wiki [search]``")
+        await ctx.reply("Usage: ``$wiki [search]``")
 
 
     @commands.command(name='urban', help='Pulls up the urban dictionary entry for a given search')
@@ -156,14 +156,14 @@ class Search(commands.Cog):
             embed.add_field(name="Link",
                             value=result['permalink'])
 
-            await ctx.send(embed=embed)
+            await ctx.reply(embed=embed)
         except IndexError:
-            await ctx.send(f"Nothing found for ``{search}``.")
+            await ctx.reply(f"Nothing found for ``{search}``.")
 
     @urban.error
     async def urban_error(self, ctx, error):
         print(error)
-        await ctx.send("Usage: ``$urban [search]``")
+        await ctx.reply("Usage: ``$urban [search]``")
 
 
     @commands.command(name='rt', help='Pulls up the rotten tomatoes entry for a given search')
@@ -171,14 +171,14 @@ class Search(commands.Cog):
         rq = requests.get("https://www.rottentomatoes.com/api/private/v2.0/search", params={"q":search})
         try:
             result_url = rq.json()['movies'][0]['url']
-            await ctx.send("https://www.rottentomatoes.com" + result_url)
+            await ctx.reply("https://www.rottentomatoes.com" + result_url)
         except IndexError:
-            await ctx.send(f"Nothing found for ``{search}``.")
+            await ctx.reply(f"Nothing found for ``{search}``.")
 
     @rt.error
     async def rt_error(self, ctx, error):
         print(error)
-        await ctx.send("Usage: ``$rt [search]``")
+        await ctx.reply("Usage: ``$rt [search]``")
 
 
 # just removes square brackets, used for $urban

@@ -70,7 +70,7 @@ class Source(commands.Cog):
                         if float(results[0]['header']['similarity']) > 80:
                             urls.add(results[0]['data']['ext_urls'][0])
                 if len(urls):
-                    await message.channel.send("\n".join([f'<{url}>' for url in urls]))
+                    await message.reply("\n".join([f'<{url}>' for url in urls]))
 
     @commands.command(name='sauce_activate', help='Activates automatic pixiv source finding for the posted channel')
     async def sauce_activate(self, ctx):
@@ -123,10 +123,10 @@ class Source(commands.Cog):
     @commands.command(name="trace", help="Finds the source of an anime screenshot")
     async def trace(self, ctx, url: str = None):
         if url:
-            await ctx.send(self.tracer(url))
+            await ctx.reply(self.tracer(url))
         else:
             for attachment in ctx.message.attachments:
-                await ctx.send(self.tracer(attachment.url))
+                await ctx.reply(self.tracer(attachment.url))
 
     def tracer(self, url):
         req = requests.get(url="https://trace.moe/api/search?", params={"url": url})
