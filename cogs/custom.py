@@ -4,15 +4,9 @@ import sys
 import psycopg2
 from discord.ext import commands
 
-MIA = 405533644250152960
 DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
-async def check_server(ctx):
-    if MIA == ctx.guild.id:
-        return True
-    else:
-        await ctx.send("This command is currently disabled for this server.")
 
 class Custom(commands.Cog):
     """CustomCog"""
@@ -28,7 +22,6 @@ class Custom(commands.Cog):
 
         if isinstance(error, commands.CommandNotFound):
             # More SQL shit
-            key_list = []
             temp = error.args[0][9:]
             for count, c in enumerate(temp):
                 if temp[count:] == '" is not found':
@@ -48,50 +41,48 @@ class Custom(commands.Cog):
                     return await ctx.send(row[1])
                 row = cur.fetchone()
 
-        print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
+        print(f'Ignoring exception in command [{ctx.command}]:', file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
-
     @commands.command(name='custom', help='Adds a custom command')
+    @commands.is_owner()
     async def custom_command(self, ctx, key, *, value):
-        if_MIA = await check_server(ctx)
-        if if_MIA:
-            # SQL shit
-            sql = """INSERT INTO customcommands (command, output) VALUES (%s, %s);"""
-            data = (key, value)
-            cur = conn.cursor()
-            try:
-                cur.execute(sql, data)
-                conn.commit()
-                cur.close()
-                await ctx.send("Immortalized!")
-            except:
-                conn.rollback()
-                conn.commit()
-                cur.close()
-                await ctx.send("Command already exists, or you fucking broke the bot. Congrats, asshole.")
+        # SQL shit
+        sql = """INSERT INTO customcommands (command, output) VALUES (%s, %s);"""
+        data = (key, value)
+        cur = conn.cursor()
+        try:
+            cur.execute(sql, data)
+            conn.commit()
+            cur.close()
+            await ctx.send("Immortalized!")
+        except Exception as e:
+            print(e)
+            conn.rollback()
+            conn.commit()
+            cur.close()
+            await ctx.send("Command already exists, or you fucking broke the bot. Congrats, asshole.")
 
     @commands.command(name='remove', help='Removes a custom command')
+    @commands.is_owner()
     async def remove(self, ctx, key):
-        if_MIA = await check_server(ctx)
-        if if_MIA:
-            # Even more SQL
-            sql = """SELECT command, output FROM customcommands;"""
-            cur = conn.cursor()
-            cur.execute(sql)
+        # Even more SQL
+        sql = """SELECT command, output FROM customcommands;"""
+        cur = conn.cursor()
+        cur.execute(sql)
+        row = cur.fetchone()
+        while row is not None:
+            if row[0] == key:
+                sql = f"""DELETE FROM customcommands WHERE command ='{key}';"""
+                cur.execute(sql)
+                conn.commit()
+                await ctx.send("Removal successful.")
+                break
             row = cur.fetchone()
-            while row is not None:
-                if row[0] == key:
-                    sql = f"""DELETE FROM customcommands WHERE command ='{key}';"""
-                    cur.execute(sql)
-                    conn.commit()
-                    await ctx.send("Removal successful.")
-                    break
-                row = cur.fetchone()
-            else:
-                await ctx.send("That command doesn't exist, you dumb fuck. Use ``$list`` to get a list of existing"
-                               " commands.")
-            cur.close()
+        else:
+            await ctx.send("That command doesn't exist, you dumb fuck. Use ``$list`` to get a list of existing"
+                           " commands.")
+        cur.close()
 
     @commands.command(name='list', help='Lists all custom commands')
     async def cclist(self, ctx):
