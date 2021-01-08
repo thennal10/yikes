@@ -20,7 +20,9 @@ def get_prefix(yikes, message):
 # Think of it like a dot path import
 initial_extensions = ['cogs.basic', 'cogs.custom', 'cogs.search', 'cogs.source', 'cogs.specific', 'cogs.reminders']
 
-bot = commands.Bot(command_prefix=get_prefix, description='An abominable bot for an abominable server')
+bot = commands.Bot(command_prefix=get_prefix,
+                   description='An abominable bot for an abominable server',
+                   allowed_mentions=discord.AllowedMentions(replied_user=False))
 
 # Here we load our extensions(cogs) listed above in [initial_extensions].
 if __name__ == '__main__':
