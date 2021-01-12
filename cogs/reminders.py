@@ -15,7 +15,7 @@ class Reminders(commands.Cog):
         self.bot = bot
 
     @commands.command(name='remindme',
-                      help='Reminds you after a specified delay',
+                      help='Reminds you after a specified delay.',
                       usage="$remindme [message] in [time] [quantity] [time] [quantity]...")
     async def remindme(self, ctx, *, input):
         # Makes life easier

@@ -12,7 +12,7 @@ class Search(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='anime', help='Pulls up the mal and anilist of a given anime')
+    @commands.command(name='anime', help='Pulls up the anilist of a given anime.')
     async def anisearch(self, ctx, *, search):
         query = '''
         query ($search: String) {
@@ -34,7 +34,7 @@ class Search(commands.Cog):
         else:
             await ctx.reply(f"Anilist URL not found")
 
-    @commands.command(name='manga', help='Pulls up the mal and anilist of a given manga/ln')
+    @commands.command(name='manga', help='Pulls up the anilist of a given manga/ln.')
     async def mangasearch(self, ctx, *, search):
         query = '''
         query ($search: String) {
@@ -57,7 +57,7 @@ class Search(commands.Cog):
         else:
             await ctx.reply(f"Anilist URL not found")
 
-    @commands.command(name='game', help='Pulls up the vglist link for a given game')
+    @commands.command(name='game', help='Pulls up the vglist link for a given game.')
     async def gamesearch(self, ctx, *, search):
         query = '''
                 query($query: String!) {
@@ -90,7 +90,7 @@ class Search(commands.Cog):
                 output += f"\nhttps://store.steampowered.com/app/{results[0]['steamAppIds'][0]}"
             await ctx.reply(output)
 
-    @commands.command(name='wiki', help='Pulls up the wikipedia link for a given search')
+    @commands.command(name='wiki', help='Pulls up the wikipedia link for a given search.')
     async def wikisearch(self, ctx, *, search):
         params = {
             "action": "query",
@@ -112,7 +112,7 @@ class Search(commands.Cog):
         except KeyError:
             await ctx.reply(f"Nothing found for ``{search}``.")
 
-    @commands.command(name='urban', help='Pulls up the urban dictionary entry for a given search')
+    @commands.command(name='urban', help='Pulls up the urban dictionary entry for a given search.')
     async def urban(self, ctx, *, search):
         request = requests.get("http://api.urbandictionary.com/v0/define", params={"term": search})
 
@@ -136,7 +136,7 @@ class Search(commands.Cog):
         except IndexError:
             await ctx.reply(f"Nothing found for ``{search}``.")
 
-    @commands.command(name='rt', help='Pulls up the rotten tomatoes entry for a given search')
+    @commands.command(name='rt', help='Pulls up the rotten tomatoes entry for a given search.')
     async def rt(self, ctx, *, search):
         rq = requests.get("https://www.rottentomatoes.com/api/private/v2.0/search", params={"q": search})
         try:

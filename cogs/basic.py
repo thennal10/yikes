@@ -17,7 +17,7 @@ class Basic(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='strokify', help='TuRnS gIvEn InPuT tO tHiS')
+    @commands.command(name='strokify', help='TuRnS gIvEn InPuT tO tHiS.')
     async def strokify(self, ctx, *, input: str):
         iscap = False
         outputmsg = list(input)
@@ -29,7 +29,7 @@ class Basic(commands.Cog):
 
         await ctx.send("".join(outputmsg))
 
-    @commands.command(name='score', help='Outputs a score based on the string')
+    @commands.command(name='score', help='Outputs a score based on the string.')
     async def score(self, ctx, *, input: str):
 
         num = 0
@@ -40,7 +40,7 @@ class Basic(commands.Cog):
         await ctx.send(f"bout {num}/10")
 
     @commands.command(name='leaderboard',
-                      help='Creates a leaderboard based on a given word/phrase',
+                      help='Creates a leaderboard based on a given word/phrase.',
                       usage='[no of messages] [phrase1] + [phrase2]...')
     async def word_leaderboard(self, ctx, msglimit: int, *, actmsg: str):
 
@@ -95,7 +95,7 @@ class Basic(commands.Cog):
         cloud.to_file('data/wordcloud.png')
         await ctx.send(file=discord.File('data/wordcloud.png'))
 
-    @commands.command(name='peachlator', help='What it says on the tin')
+    @commands.command(name='peachlator', help='What it says on the tin.')
     async def peachlator(self, ctx, *, input: str):
         # get the table
         cur = conn.cursor()
@@ -197,7 +197,9 @@ class Basic(commands.Cog):
 
         cur.close()
 
-    @commands.command(name='madlibs', helps="Replaces word types encased in square brackets with random words")
+    @commands.command(name='madlibs',
+                      brief='What it says on the tin.',
+                      help="Replaces word types encased in square brackets with random words.")
     async def madlibs(self, ctx, *, phrase: str):
         # A dict to convert word type aliases to the actual word type
         wordalias = {'noun': 'noun',
@@ -231,7 +233,7 @@ class Basic(commands.Cog):
             await ctx.send(f"No idea what ``{e.args[0]}`` is. Valid word types are ``noun`` (``n``), ``verb`` (``v``), "
                            f"``adjective`` (``adj``), and ``adverb`` (``adv``).")
 
-    @commands.command(name='echo', helps='Echo message to a certain channel.')
+    @commands.command(name='echo', help='Echo message to a certain channel.')
     @commands.is_owner()
     async def echo(self, ctx, channel: discord.TextChannel, *, message: str):
         await channel.send(message)
