@@ -11,8 +11,9 @@ class Peachlator(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='peachlator', help='What it says on the tin.')
+    @commands.command(name='peachlator')
     async def peachlator(self, ctx, *, input: str):
+        '''Translates to peachlang'''
         # get the table
         cur = conn.cursor()
         sql = """SELECT * FROM peachdict;"""
@@ -66,11 +67,10 @@ class Peachlator(commands.Cog):
 
         await ctx.send(" ".join(new_message))
 
-    @commands.command(name='update_peachlator',
-                      help='Update the peachlator. Premed only.',
-                      usage='$update_peachlator [word] - [translation]')
+    @commands.command(name='update_peachlator', usage='$update_peachlator [word] - [translation]')
     @commands.is_owner()
     async def update_peachlator(self, ctx, *, inp: str):
+        '''Update the peachlator. Premed only'''
         data = [word.strip() for word in inp.split("-")]
 
         if len(data) > 2 or len(data) < 2:
@@ -92,9 +92,10 @@ class Peachlator(commands.Cog):
             cur.close()
             await ctx.send("Translation already exists, or you fucking broke the bot. Congrats, asshole.")
 
-    @commands.command(name='remove_peachlator', help='Removes a translation. Premed only.')
+    @commands.command(name='remove_peachlator')
     @commands.is_owner()
     async def remove_peachlator(self, ctx, *, key: str):
+        '''Removes a translation. Premed only'''
         # Even more SQL
         cur = conn.cursor()
         sql = """SELECT input, output FROM peachdict;"""

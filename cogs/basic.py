@@ -19,8 +19,9 @@ class Basic(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='strokify', help='TuRnS gIvEn InPuT tO tHiS.')
+    @commands.command(name='strokify')
     async def strokify(self, ctx, *, input: str):
+        '''TuRnS gIvEn InPuT tO tHiS'''
         iscap = False
         outputmsg = list(input)
         for count, character in enumerate(outputmsg):
@@ -31,9 +32,9 @@ class Basic(commands.Cog):
 
         await ctx.send("".join(outputmsg))
 
-    @commands.command(name='score', help='Outputs a score based on the string.')
+    @commands.command(name='score')
     async def score(self, ctx, *, input: str):
-
+        '''Outputs a score based on the string'''
         num = 0
         for character in input:
             num += ord(character)
@@ -41,11 +42,9 @@ class Basic(commands.Cog):
 
         await ctx.send(f"bout {num}/10")
 
-    @commands.command(name='leaderboard',
-                      help='Creates a leaderboard based on a given word/phrase.',
-                      usage='[no of messages] [phrase1] + [phrase2]...')
+    @commands.command(name='leaderboard', usage='[no of messages] [phrase1] + [phrase2]...')
     async def word_leaderboard(self, ctx, msglimit: int, *, actmsg: str):
-
+        '''Creates a leaderboard based on a given word/phrase'''
         searchwords = actmsg.split(" + ")
         print(searchwords)
         peeps = [["N/A", 0]]
@@ -73,10 +72,9 @@ class Basic(commands.Cog):
         leaderboard += "```"
         await ctx.send(leaderboard)
 
-    @commands.command(name='wordcloud',
-                      aliases=['wc'],
-                      help='Creates a wordcloud based on the mentioned user.')
+    @commands.command(name='wordcloud', aliases=['wc'])
     async def wordcloud(self, ctx, member: discord.Member, channel: discord.TextChannel, number_of_messages: int = 1000):
+        '''Creates a wordcloud based on the mentioned user'''
         wordstr = ""  # Somewhere to store the words
 
         perm = channel.permissions_for(ctx.guild.me)
@@ -97,10 +95,9 @@ class Basic(commands.Cog):
         cloud.to_file('data/wordcloud.png')
         await ctx.send(file=discord.File('data/wordcloud.png'))
 
-    @commands.command(name='madlibs',
-                      brief='What it says on the tin.',
-                      help="Replaces word types encased in square brackets with random words.")
+    @commands.command(name='madlibs', brief='What it says on the tin')
     async def madlibs(self, ctx, *, phrase: str):
+        '''Replaces word types encased in square brackets with random words'''
         # A dict to convert word type aliases to the actual word type
         wordalias = {'noun': 'noun',
                      'n': 'noun',
@@ -133,15 +130,15 @@ class Basic(commands.Cog):
             await ctx.send(f"No idea what ``{e.args[0]}`` is. Valid word types are ``noun`` (``n``), ``verb`` (``v``), "
                            f"``adjective`` (``adj``), and ``adverb`` (``adv``).")
 
-    @commands.command(name='echo', help='Echo message to a certain channel.')
+    @commands.command(name='echo')
     @commands.is_owner()
     async def echo(self, ctx, channel: discord.TextChannel, *, message: str):
+        '''Echo message to a certain channel. Premed only'''
         await channel.send(message)
 
-    @commands.command(name='convert',
-                      help='Converts a physical quantity to another unit.',
-                      usage='[quantity] [unit] to [unit]')
+    @commands.command(name='convert', usage='[quantity] [unit] to [unit]')
     async def convert(self, ctx, *, message: str):
+        '''Converts a physical quantity to another unit'''
         # Basic input parsing
         if len(message.split(' to ')) > 1:
             messagelist = message.split(' to ')
