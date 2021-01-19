@@ -149,7 +149,7 @@ class Basic(commands.Cog):
         try:
             original = ureg(messagelist[0])
             converted = original.to(messagelist[1])
-            await ctx.send(f"**{original}** is **{converted:.2f}**")
+            await ctx.send(f"**{original}** is **{converted:.3g}**")
         # ValueError when unit its converted into has a scaling factor too
         # Like '5lbs to 5kg'
         except (pint.UndefinedUnitError, pint.DimensionalityError, ValueError) as e:
