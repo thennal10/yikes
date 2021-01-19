@@ -34,10 +34,4 @@ if __name__ == '__main__':
 async def on_ready():
     print(f'\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n')
 
-
-@bot.command(name='ping')
-async def ping(ctx):
-    await ctx.send(f"Man, PPTA was such a good show. Anyway, latency's bout ``{round(bot.latency*1000)}ms``")
-
-
 bot.run(TOKEN, bot=True, reconnect=True)

@@ -19,6 +19,10 @@ class Basic(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command(name="ping")
+    async def ping(self, ctx):
+        await ctx.send(f"The fuck you want? Latency: `{self.bot.latency:.0f}ms`")
+
     @commands.command(name='strokify')
     async def strokify(self, ctx, *, input: str):
         '''TuRnS gIvEn InPuT tO tHiS'''
