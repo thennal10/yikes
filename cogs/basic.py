@@ -4,12 +4,14 @@ import json
 import random
 import psycopg2
 import discord
+import pint
 from wordcloud import WordCloud, STOPWORDS
 from discord.ext import commands
 
 DATABASE_URL = os.environ['DATABASE_URL']
 WORDS = json.load(open('data/fuckrai.json'))
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+ureg = pint.UnitRegistry()
 
 
 class Basic(commands.Cog):
@@ -135,6 +137,30 @@ class Basic(commands.Cog):
     @commands.is_owner()
     async def echo(self, ctx, channel: discord.TextChannel, *, message: str):
         await channel.send(message)
+
+    @commands.command(name='convert',
+                      help='Converts a physical quantity to another unit.',
+                      usage='[quantity] [unit] to [unit]')
+    async def convert(self, ctx, *, message: str):
+        # Basic input parsing
+        if len(message.split(' to ')) > 1:
+            messagelist = message.split(' to ')
+        else:
+            raise commands.UserInputError('Add a `to` between the units you want to convert.')
+
+        # Rest of the input parsing is done by pint
+        try:
+            original = ureg(messagelist[0])
+            converted = original.to(messagelist[1])
+            await ctx.send(f"**{original}** is **{converted:.2f}**")
+        # ValueError when unit its converted into has a scaling factor too
+        # Like '5lbs to 5kg'
+        except (pint.UndefinedUnitError, pint.DimensionalityError, ValueError) as e:
+            await ctx.send(e)
+        # very specific case when 'to' is included but units aren't
+        # if no unit is given, ureg() converts the string to an int, and .to raises an AttributeError
+        except AttributeError:
+            await ctx.send(f"No unit given to be converted from.")
 
 
 def leaderboard_name(l):
