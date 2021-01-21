@@ -46,36 +46,6 @@ class Basic(commands.Cog):
 
         await ctx.send(f"bout {num}/10")
 
-    @commands.command(name='leaderboard', usage='[no of messages] [phrase1] + [phrase2]...')
-    async def word_leaderboard(self, ctx, msglimit: int, *, actmsg: str):
-        '''Creates a leaderboard based on a given word/phrase'''
-        searchwords = actmsg.split(" + ")
-        print(searchwords)
-        peeps = [["N/A", 0]]
-
-        for chan in ctx.guild.text_channels:
-            perm = chan.permissions_for(ctx.guild.me)
-            if perm.read_message_history:
-                async for msg in chan.history(limit=msglimit):
-                    for searchword in searchwords:
-                        if searchword in msg.content.lower() and not msg.author.bot:
-                            found = 0
-                            for peep in peeps:
-                                if msg.author.name == peep[0]:
-                                    peep[1] += 1
-                                    found = 1
-                                    break
-                            if found == 0:
-                                peeps.append([msg.author.name, 1])
-            print(chan)
-        peeps.sort(key=lambda x: x[1], reverse=True)
-
-        leaderboard = f"**The {leaderboard_name(searchwords)} Leaderboard**```\nRank  | Name\n\n"
-        for count, peep in enumerate(peeps[:10]):
-            leaderboard += f"""[{count + 1}]   > {peep[0]}: {peep[1]}\n"""
-        leaderboard += "```"
-        await ctx.send(leaderboard)
-
     @commands.command(name='wordcloud', aliases=['wc'])
     async def wordcloud(self, ctx, member: discord.Member, channel: discord.TextChannel, number_of_messages: int = 1000):
         '''Creates a wordcloud based on the mentioned user'''
@@ -162,15 +132,6 @@ class Basic(commands.Cog):
         # if no unit is given, ureg() converts the string to an int, and .to raises an AttributeError
         except AttributeError:
             await ctx.send(f"No unit given to be converted from.")
-
-
-def leaderboard_name(l):
-    name = ""
-    for count, element in enumerate(l):
-        name += element.capitalize()
-        if count != len(l) - 1:
-            name += "/"
-    return name
 
 
 def setup(bot):
