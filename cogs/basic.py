@@ -39,11 +39,7 @@ class Basic(commands.Cog):
     @commands.command(name='score')
     async def score(self, ctx, *, input: str):
         '''Outputs a score based on the string'''
-        num = 0
-        for character in input:
-            num += ord(character)
-        num = (num % 10) + 1
-
+        num = sum([ord(character) for character in input]) % 11
         await ctx.send(f"bout {num}/10")
 
     @commands.command(name='wordcloud', aliases=['wc'])
