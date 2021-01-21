@@ -13,7 +13,7 @@ class Peachlator(commands.Cog):
 
     @commands.command(name='peachlator')
     async def peachlator(self, ctx, *, input: str):
-        '''Translates to peachlang'''
+        """Translates to peachlang"""
         # get the table
         cur = conn.cursor()
         sql = """SELECT * FROM peachdict;"""
@@ -70,7 +70,7 @@ class Peachlator(commands.Cog):
     @commands.command(name='update_peachlator', usage='$update_peachlator [word] - [translation]')
     @commands.is_owner()
     async def update_peachlator(self, ctx, *, inp: str):
-        '''Update the peachlator. Premed only'''
+        """Update the peachlator. Premed only"""
         data = [word.strip() for word in inp.split("-")]
 
         if len(data) > 2 or len(data) < 2:
@@ -95,7 +95,7 @@ class Peachlator(commands.Cog):
     @commands.command(name='remove_peachlator')
     @commands.is_owner()
     async def remove_peachlator(self, ctx, *, key: str):
-        '''Removes a translation. Premed only'''
+        """Removes a translation. Premed only"""
         # Even more SQL
         cur = conn.cursor()
         sql = """SELECT input, output FROM peachdict;"""

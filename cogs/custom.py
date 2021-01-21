@@ -42,7 +42,7 @@ class Custom(commands.Cog):
     @commands.command(name='custom')
     @commands.is_owner()
     async def custom_command(self, ctx, key, *, value):
-        '''Adds a custom command. Premed only'''
+        """Adds a custom command. Premed only"""
         # SQL shit
         sql = """INSERT INTO customcommands (command, output) VALUES (%s, %s);"""
         data = (key, value)
@@ -62,7 +62,7 @@ class Custom(commands.Cog):
     @commands.command(name='remove')
     @commands.is_owner()
     async def remove(self, ctx, key):
-        '''Removes a custom command. Premed only'''
+        """Removes a custom command. Premed only"""
         # Even more SQL
         sql = """SELECT command, output FROM customcommands;"""
         cur = conn.cursor()
@@ -83,7 +83,7 @@ class Custom(commands.Cog):
 
     @commands.command(name='list')
     async def cclist(self, ctx):
-        '''Lists all custom commands'''
+        """Lists all custom commands"""
         # EVEN MORE SQL
         sql = """SELECT command, output FROM customcommands;"""
         cur = conn.cursor()

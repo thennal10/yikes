@@ -74,7 +74,7 @@ class Source(commands.Cog):
 
     @commands.command(name='sauce_activate', brief='Activates saucing.')
     async def sauce_activate(self, ctx):
-        '''Activates automatic pixiv source finding for the posted channel'''
+        """Activates automatic pixiv source finding for the posted channel"""
         # SQL shit
         sql = """INSERT INTO saucechan (channel) VALUES (%s);"""
         data = (ctx.channel.id,)
@@ -95,7 +95,7 @@ class Source(commands.Cog):
 
     @commands.command(name='sauce_deactivate')
     async def sauce_deactivate(self, ctx):
-        '''Deactivates saucing'''
+        """Deactivates saucing"""
         # Even more SQL
         sql = """SELECT channel FROM saucechan;"""
         cur = conn.cursor()
@@ -116,7 +116,7 @@ class Source(commands.Cog):
 
     @commands.command(name="trace")
     async def trace(self, ctx, url: str = None):
-        '''Finds the source of an anime screenshot'''
+        """Finds the source of an anime screenshot"""
         if url:
             await ctx.reply(tracer(url))
         else:

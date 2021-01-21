@@ -14,7 +14,7 @@ class Search(commands.Cog):
 
     @commands.command(name='anime')
     async def anisearch(self, ctx, *, search):
-        '''Pulls up the anilist of a given anime'''
+        """Pulls up the anilist of a given anime"""
         query = '''
         query ($search: String) {
             Media (search: $search, type: ANIME) {
@@ -37,7 +37,7 @@ class Search(commands.Cog):
 
     @commands.command(name='manga')
     async def mangasearch(self, ctx, *, search):
-        '''Pulls up the anilist of a given manga/ln'''
+        """Pulls up the anilist of a given manga/ln"""
         query = '''
         query ($search: String) {
             Media (search: $search, type: MANGA) {
@@ -61,7 +61,7 @@ class Search(commands.Cog):
 
     @commands.command(name='game')
     async def gamesearch(self, ctx, *, search):
-        '''Pulls up the vglist link for a given game'''
+        """Pulls up the vglist link for a given game"""
         query = '''
                 query($query: String!) {
                   gameSearch(query: $query) {
@@ -95,7 +95,7 @@ class Search(commands.Cog):
 
     @commands.command(name='wiki')
     async def wikisearch(self, ctx, *, search):
-        '''Pulls up the wikipedia link for a given search'''
+        """Pulls up the wikipedia link for a given search"""
         params = {
             "action": "query",
             "format": "json",
@@ -118,7 +118,7 @@ class Search(commands.Cog):
 
     @commands.command(name='urban')
     async def urban(self, ctx, *, search):
-        '''Pulls up the urban dictionary entry for a given search'''
+        """Pulls up the urban dictionary entry for a given search"""
         request = requests.get("http://api.urbandictionary.com/v0/define", params={"term": search})
 
         try:
@@ -143,7 +143,7 @@ class Search(commands.Cog):
 
     @commands.command(name='rt')
     async def rt(self, ctx, *, search):
-        '''Pulls up the rotten tomatoes entry for a given search'''
+        """Pulls up the rotten tomatoes entry for a given search"""
         rq = requests.get("https://www.rottentomatoes.com/api/private/v2.0/search", params={"q": search})
         try:
             result_url = rq.json()['movies'][0]['url']

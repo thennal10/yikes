@@ -16,7 +16,7 @@ class Reminders(commands.Cog):
 
     @commands.command(name='remindme', usage="$remindme [message] in [time] [quantity] [time] [quantity]...")
     async def remindme(self, ctx, *, input):
-        '''Reminds you after a specified delay'''
+        """Reminds you after a specified delay"""
         # Makes life easier
         time_conv = {'second': 1,
                      'minute': 60,
