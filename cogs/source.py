@@ -17,62 +17,77 @@ class Source(commands.Cog):
         self.short_limit = 6
 
     def update(self):
+        """Update the active_channel property in memory"""
         sql = """SELECT channel FROM saucechan;"""
         cur = conn.cursor()
         cur.execute(sql)
         self.active_channels = [tup[0] for tup in cur.fetchall()]
         cur.close()
 
+    async def get_sauce(self, message):
+        """Gets the actual sauce from message attachments"""
+        urls = set()
+        for attachment in message.attachments:
+            img_url = attachment.url
+            params = {"url": img_url, "output_type": 2, "db": 999, "api_key": SAUCENAO_KEY}
+
+            # because saucenao rate limiting
+            if self.short_limit <= 1:
+                loop_count = 0
+                while self.short_limit <= 1 and loop_count < 10:
+                    loop_count += 1  # a failsafe to prevent an infinitely running loop
+                    await asyncio.sleep(30)
+
+                    # check (and assign vars) if you've hit the cap, because commands are async
+                    rq = requests.get("https://saucenao.com/search.php", params=params)
+                    sauce = rq.json()
+                    try:
+                        self.short_limit = sauce['header']['short_remaining']
+                        break
+                    except KeyError:
+                        if sauce['header']['status'] == -2:
+                            continue
+                        else:
+                            raise Exception(f'Saucenao request failed. Request: {sauce}')
+            else:  # an if else so that it doesn't request twice
+                rq = requests.get("https://saucenao.com/search.php", params=params)
+                sauce = rq.json()
+                self.short_limit = sauce['header']['short_remaining']
+
+            results = sauce['results']
+
+            for result in results:
+                similarity_check = float(result['header']['similarity']) > 80
+                try:
+                    pixiv_check = 'www.pixiv.net' in result['data']['ext_urls'][0]
+                except:
+                    continue
+                if similarity_check and pixiv_check:
+                    urls.add(result['data']['ext_urls'][0])
+                    break
+            else:
+                if float(results[0]['header']['similarity']) > 80:
+                    urls.add(results[0]['data']['ext_urls'][0])
+        return urls
+
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.channel.id in self.active_channels:
             if "source" not in message.content.lower():
-                urls = set()
-                for attachment in message.attachments:
-                    img_url = attachment.url
-                    params = {"url": img_url, "output_type": 2, "db": 999, "api_key": SAUCENAO_KEY}
-
-                    # because saucenao rate limiting
-                    if self.short_limit <= 1:
-                        loop_count = 0
-                        while self.short_limit <= 1 and loop_count < 10:
-                            loop_count += 1  # a failsafe to prevent an infinitely running loop
-                            await asyncio.sleep(30)
-
-                            # check (and assign vars) if you've hit the cap, because commands are async
-                            rq = requests.get("https://saucenao.com/search.php", params=params)
-                            sauce = rq.json()
-                            try:
-                                self.short_limit = sauce['header']['short_remaining']
-                                break
-                            except KeyError:
-                                if sauce['header']['status'] == -2:
-                                    continue
-                                else:
-                                    raise Exception(f'Saucenao request failed. Request: {sauce}')
-                    else:  # an if else so that it doesn't request twice
-                        rq = requests.get("https://saucenao.com/search.php", params=params)
-                        sauce = rq.json()
-                        self.short_limit = sauce['header']['short_remaining']
-
-                    results = sauce['results']
-
-                    for result in results:
-                        similarity_check = float(result['header']['similarity']) > 80
-                        try:
-                            pixiv_check = 'www.pixiv.net' in result['data']['ext_urls'][0]
-                        except:
-                            continue
-                        if similarity_check and pixiv_check:
-                            urls.add(result['data']['ext_urls'][0])
-                            break
-                    else:
-                        if float(results[0]['header']['similarity']) > 80:
-                            urls.add(results[0]['data']['ext_urls'][0])
+                urls = await self.get_sauce(message)
                 if len(urls):
                     await message.reply("\n".join([f'<{url}>' for url in urls]))
 
-    @commands.command(name='sauce_activate', brief='Activates saucing.')
+    @commands.command(name='sauce')
+    async def sauce(self, ctx):
+        """Sauces attached images"""
+        urls = await self.get_sauce(ctx.message)
+        if len(urls):
+            await ctx.reply("\n".join([f'<{url}>' for url in urls]))
+        else:
+            await ctx.reply('No sauce found for attached images, or no attached images found.')
+
+    @commands.command(name='sauce_activate', brief='Activates saucing')
     async def sauce_activate(self, ctx):
         """Activates automatic pixiv source finding for the posted channel"""
         # SQL shit
