@@ -21,6 +21,7 @@ class Basic(commands.Cog):
 
     @commands.command(name="ping")
     async def ping(self, ctx):
+        """Pong!"""
         await ctx.send(f"The fuck you want? Latency: `{self.bot.latency*1000:.0f}ms`")
 
     @commands.command(name='strokify')
