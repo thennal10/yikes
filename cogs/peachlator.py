@@ -11,8 +11,8 @@ class Peachlator(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='peachlator')
-    async def peachlator(self, ctx, *, input: str):
+    @commands.command(name='peachlator', usage='$peachlator [text] OR reply to message')
+    async def peachlator(self, ctx):
         """Translates to peachlang"""
         # get the table
         cur = conn.cursor()
@@ -21,8 +21,15 @@ class Peachlator(commands.Cog):
         table = cur.fetchall()
         cur.close()
 
-        # made it into a list so I don't have to worry about differing word lengths
-        new_message = ["Translation:"] + input.split()
+        # check for replies first, then move on to text included with command
+        ref = ctx.message.reference
+        if ref:
+            message_split = ref.resolved.content.split()
+        else:
+            message_split = ctx.message.content.split()[1:]
+            if not message_split:
+                raise commands.UserInputError('No reply or text to translate found.')
+        new_message = ["Translation:"] + message_split
 
         # new dict with keys as a list of words
         flattened_dict = {tuple(k[0].split()): k[1] for k in table}
