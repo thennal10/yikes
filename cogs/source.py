@@ -1,4 +1,5 @@
 import os
+import random
 import asyncio
 import requests
 import psycopg2
@@ -14,7 +15,6 @@ class Source(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.update()
-        self.short_limit = 6
 
     def update(self):
         """Update the active_channel property in memory"""
@@ -31,42 +31,39 @@ class Source(commands.Cog):
             img_url = attachment.url
             params = {"url": img_url, "output_type": 2, "db": 999, "api_key": SAUCENAO_KEY}
 
-            # because saucenao rate limiting
-            if self.short_limit <= 1:
-                loop_count = 0
-                while self.short_limit <= 1 and loop_count < 10:
-                    loop_count += 1  # a failsafe to prevent an infinitely running loop
-                    await asyncio.sleep(30)
+            max_attempts = 5
+            attempts = 0
 
-                    # check (and assign vars) if you've hit the cap, because commands are async
-                    rq = requests.get("https://saucenao.com/search.php", params=params)
-                    sauce = rq.json()
-                    try:
-                        self.short_limit = sauce['header']['short_remaining']
-                        break
-                    except KeyError:
-                        if sauce['header']['status'] == -2:
-                            continue
-                        else:
-                            raise Exception(f'Saucenao request failed. Request: {sauce}')
-            else:  # an if else so that it doesn't request twice
+            while attempts < max_attempts:
+                # Make a request to saucenao api
                 rq = requests.get("https://saucenao.com/search.php", params=params)
                 sauce = rq.json()
-                self.short_limit = sauce['header']['short_remaining']
+
+                # If not rate limited, break out of while loop and continue with the rest of the code
+                if sauce['header']['status'] != -2:
+                    break
+
+                # If rate limited, wait and try again
+                await asyncio.sleep(30 + random.randrange(30))
+                attempts = attempts + 1
+            else:
+                return
 
             results = sauce['results']
 
+            # check for minimum similarity requirement
+            def similarity_check(r): return float(r['header']['similarity']) > 80
+            # try and find a pixiv link that passes similarity check
             for result in results:
-                similarity_check = float(result['header']['similarity']) > 80
-                try:
-                    pixiv_check = 'www.pixiv.net' in result['data']['ext_urls'][0]
-                except:
-                    continue
-                if similarity_check and pixiv_check:
+                try: pixiv_check = 'www.pixiv.net' in result['data']['ext_urls'][0]
+                except: continue
+
+                if similarity_check(result) and pixiv_check:
                     urls.add(result['data']['ext_urls'][0])
                     break
+            # if no pixiv link, just get the first result and see if it passes the sim check
             else:
-                if float(results[0]['header']['similarity']) > 80:
+                if similarity_check(results[0]):
                     urls.add(results[0]['data']['ext_urls'][0])
         return urls
 
@@ -75,7 +72,7 @@ class Source(commands.Cog):
         if message.channel.id in self.active_channels:
             if "source" not in message.content.lower():
                 urls = await self.get_sauce(message)
-                if len(urls):
+                if urls:
                     await message.reply("\n".join([f'<{url}>' for url in urls]))
 
     @commands.command(name='sauce')
