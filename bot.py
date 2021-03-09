@@ -2,7 +2,6 @@ import os
 import discord
 from discord.ext import commands
 
-
 # initializing shit
 TOKEN = os.environ.get("TOKEN")
 
