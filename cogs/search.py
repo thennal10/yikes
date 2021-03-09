@@ -2,6 +2,7 @@ import os
 import requests
 from discord import Embed
 from discord.ext import commands
+from json import JSONDecodeError
 
 vglist_token = os.environ['VGLIST_TOKEN']
 vglist_email = os.environ['VGLIST_EMAIL']
@@ -150,6 +151,8 @@ class Search(commands.Cog):
             await ctx.reply("https://www.rottentomatoes.com" + result_url)
         except IndexError:
             await ctx.reply(f"Nothing found for ``{search}``.")
+        except JSONDecodeError:
+            await ctx.reply("RottenTomatoes cut me off. Tell premed to turn it on and off again.")
 
 
 # just removes square brackets, used for $urban
