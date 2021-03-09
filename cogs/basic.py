@@ -125,6 +125,8 @@ class Basic(commands.Cog):
         # Like '5lbs to 5kg'
         except (pint.UndefinedUnitError, pint.DimensionalityError, ValueError) as e:
             await ctx.send(e)
+        except pint.OffsetUnitCalculusError:
+            await ctx.send(f"Bot does not yet support temperature units.")
         # very specific case when 'to' is included but units aren't
         # if no unit is given, ureg() converts the string to an int, and .to raises an AttributeError
         except AttributeError:
