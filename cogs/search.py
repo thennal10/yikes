@@ -2,7 +2,6 @@ import os
 import requests
 from discord import Embed
 from discord.ext import commands
-from json import JSONDecodeError
 
 vglist_token = os.environ['VGLIST_TOKEN']
 vglist_email = os.environ['VGLIST_EMAIL']
@@ -141,18 +140,6 @@ class Search(commands.Cog):
             await ctx.reply(embed=embed)
         except IndexError:
             await ctx.reply(f"Nothing found for ``{search}``.")
-
-    @commands.command(name='rt')
-    async def rt(self, ctx, *, search):
-        """Pulls up the rotten tomatoes entry for a given search"""
-        rq = requests.get("https://www.rottentomatoes.com/api/private/v2.0/search", params={"q": search})
-        try:
-            result_url = rq.json()['movies'][0]['url']
-            await ctx.reply("https://www.rottentomatoes.com" + result_url)
-        except IndexError:
-            await ctx.reply(f"Nothing found for ``{search}``.")
-        except JSONDecodeError:
-            await ctx.reply("RottenTomatoes cut me off. Tell premed to turn it on and off again.")
 
 
 # just removes square brackets, used for $urban
