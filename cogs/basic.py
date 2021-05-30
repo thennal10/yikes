@@ -132,6 +132,25 @@ class Basic(commands.Cog):
         except AttributeError:
             await ctx.send(f"No unit given to be converted from.")
 
+    @commands.command(name='poll', usage='[choice] | [choice] |...')
+    async def poll(self, ctx, *, options: str):
+        """Creates a poll"""
+        choices = options.split(' | ')
+
+        if len(choices) <= 1:
+            return await ctx.send('You need to include more than one option.\n Type $help poll for usage instructions.')
+        elif len(choices) > 9:
+            return await ctx.send('Too many options. Keep it to 9.')
+
+        int_to_word = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
+        str_message = "**Poll**\n"
+        for i, choice in enumerate(choices):
+            str_message += f"{int_to_word[i]} - **{choice}**\n"
+
+        message = await ctx.send(str_message)
+
+        for i, choice in enumerate(choices):
+            await message.add_reaction(int_to_word[i])
 
 def setup(bot):
     bot.add_cog(Basic(bot))
