@@ -31,7 +31,6 @@ class Reminders(commands.Cog):
                 youtube_id = match.groups()[-1]
                 youtube = googleapiclient.discovery.build("youtube", "v3", developerKey=YOUTUBE_KEY)
 
-                print(youtube_id)
                 request = youtube.videos().list(part="liveStreamingDetails", id=youtube_id)
                 response = request.execute()
 
