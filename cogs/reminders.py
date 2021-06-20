@@ -1,13 +1,16 @@
 import os
+import re
 import time
-import datetime
+import calendar
 import asyncio
 import psycopg2
+import googleapiclient.discovery
+from datetime import datetime
 from discord.ext import commands
 
 DATABASE_URL = os.environ['DATABASE_URL']
+YOUTUBE_KEY = os.environ['YOUTUBE_KEY']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-
 
 class Reminders(commands.Cog):
 
@@ -17,39 +20,63 @@ class Reminders(commands.Cog):
     @commands.command(name='remindme', usage="$remindme [message] in [time] [quantity] [time] [quantity]...")
     async def remindme(self, ctx, *, input):
         """Reminds you after a specified delay"""
-        # Makes life easier
-        time_conv = {'second': 1,
-                     'minute': 60,
-                     'hour': 3600,
-                     'day': 86400,
-                     'week': 604800}
-        time_conv.update({k + 's': time_conv[k] for k in time_conv})  # Just adds plural versions
 
         split_input = input.split(' in ')
-        if len(split_input) == 1:  # input error checking
-            raise commands.UserInputError('Invalid arguments.')
+        if len(split_input) == 1:  # input checking
+            # check if it's a youtube URL
+            url_pattern = re.compile('https?:\/\/(www\.)?(youtube|youtu.be)(.com)?\/(watch\?v=)?(.+?)(?=[&?\s]|$)')
+            match = url_pattern.match(input)
 
-        content = " in ".join(split_input[:-1])  # Rejoins any split up 'in's in the message
+            if match:
+                youtube_id = match.groups()[-1]
+                youtube = googleapiclient.discovery.build("youtube", "v3", developerKey=YOUTUBE_KEY)
 
-        # calculates the time delay
-        wait_time = 0
-        time_unparsed = split_input[-1].split(' ')
-        for i, word in enumerate(time_unparsed):
-            if word in time_conv.keys():
-                multiplier = int(time_unparsed[i - 1])
-                wait_time += multiplier * time_conv[word]
+                print(youtube_id)
+                request = youtube.videos().list(part="liveStreamingDetails", id=youtube_id)
+                response = request.execute()
 
-        if wait_time <= 0:  # more input error checking
-            raise commands.UserInputError('Invalid time.')
+                try:
+                    time_utc = response['items'][0]['liveStreamingDetails']['scheduledStartTime']
+                    time_unix = calendar.timegm(time.strptime(time_utc, '%Y-%m-%dT%H:%M:%SZ'))
+
+                    wait_time = time_unix - time.time()
+                    content = input
+                except:
+                    raise commands.UserInputError("Invalid youtube url, or not an upcoming premiere/livestream.")
+            else:
+                raise commands.UserInputError('Invalid arguments.')
+        else: # no error
+            # Makes life easier
+            time_conv = {'second': 1,
+                         'minute': 60,
+                         'hour': 3600,
+                         'day': 86400,
+                         'week': 604800}
+            time_conv.update({k + 's': time_conv[k] for k in time_conv})  # Just adds plural versions
+
+            content = " in ".join(split_input[:-1])  # Rejoins any split up 'in's in the message
+
+            # calculates the time delay
+            wait_time = 0
+            time_unparsed = split_input[-1].split(' ')
+            for i, word in enumerate(time_unparsed):
+                if word in time_conv.keys():
+                    multiplier = int(time_unparsed[i - 1])
+                    wait_time += multiplier * time_conv[word]
+
+            if wait_time <= 0:  # more input error checking
+                raise commands.UserInputError('Invalid time.')
+
+            time_unix = time.time() + wait_time
 
         # add the reminder to the database, w unix time
-        sql = f"""INSERT INTO reminders VALUES ({ctx.message.author.id}, '{content}', {int(time.time() + wait_time)});"""
+        sql = f"""INSERT INTO reminders VALUES ({ctx.message.author.id}, '{content}', {int(time_unix)});"""
         cur = conn.cursor()
         try:
             cur.execute(sql)
             conn.commit()
             cur.close()
-            readable_time = datetime.datetime.utcfromtimestamp(time.time() + wait_time).strftime('%d/%m/%Y, %H:%M:%S')
+            readable_time = datetime.utcfromtimestamp(time_unix).strftime('%d/%m/%Y, %H:%M:%S')
             await ctx.send(f"Reminder set for {readable_time}")
         except Exception as e:
             conn.rollback()
