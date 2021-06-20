@@ -89,8 +89,9 @@ class Reminders(commands.Cog):
         cur.execute(sql)
         table = cur.fetchall()
 
+        table.sort(key = lambda x: x[2]) # sort the table by time
         for row in table:  # (user_id, message, unix time)
-            user = self.bot.get_user(row[0])
+            user = await self.bot.fetch_user(row[0])
             if row[2] <= time.time():
                 await self.del_and_send(user, row[1])
             else:
