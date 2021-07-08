@@ -49,7 +49,9 @@ class Expand(commands.Cog):
         while attempts < max_attempts:
             try:
                 response = requests.get(endpoint, data=data, headers=headers).json()
-                video = response['extended_entities']['media'][0]['video_info']['variants'][0]['url']
+                videos = response['extended_entities']['media'][0]['video_info']['variants']
+                # get the url of the largest (read: last on the list) mp4 video
+                video = [v for v in videos if v['content_type'] == 'video/mp4'][-1]['url']
                 return video
             except Exception:
                 attempts += 1
