@@ -32,7 +32,7 @@ class Expand(commands.Cog):
                 pass
 
     async def tweet_expand(self, message):
-        match = re.match(r'https:\/\/twitter\.com\/.*?\/status\/(\d*)', message)
+        match = re.search(r'https:\/\/twitter\.com\/.*?\/status\/(\d*)', message)
         id = match.group(1)
 
         endpoint = "https://api.twitter.com/1.1/statuses/show.json"
