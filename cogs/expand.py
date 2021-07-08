@@ -25,11 +25,8 @@ class Expand(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.channel.id in self.active_channels:
-            try:
-                video = await self.tweet_expand(message.content)
-                await message.reply(video)
-            except Exception:
-                pass
+            video = await self.tweet_expand(message.content)
+            await message.reply(video)
 
     async def tweet_expand(self, message):
         match = re.match(r'https:\/\/twitter\.com\/.*?\/status\/(\d*)', message)
