@@ -25,8 +25,11 @@ class Expand(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.channel.id in self.active_channels:
-            video = await self.tweet_expand(message.content)
-            await message.reply(video)
+            try:
+                video = await self.tweet_expand(message.content)
+                await message.reply(video)
+            except Exception:
+                pass
 
     async def tweet_expand(self, message):
         match = re.match(r'https:\/\/twitter\.com\/.*?\/status\/(\d*)', message)
@@ -40,10 +43,17 @@ class Expand(commands.Cog):
             }
         headers = {"Authorization": f"Bearer {TWITTER_TOKEN}"}
 
-        response = requests.get(endpoint, data=data, headers=headers).json()
-        video = response['extended_entities']['media'][0]['video_info']['variants'][0]['url']
+        max_attempts = 5
+        attempts = 0
 
-        return video
+        while attempts < max_attempts:
+            try:
+                response = requests.get(endpoint, data=data, headers=headers).json()
+                video = response['extended_entities']['media'][0]['video_info']['variants'][0]['url']
+                return video
+            except Exception:
+                attempts += 1
+
 
 
 def setup(bot):
