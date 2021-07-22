@@ -1,4 +1,5 @@
 import os
+import re
 import random
 import asyncio
 import requests
@@ -70,7 +71,15 @@ class Source(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.channel.id in self.active_channels:
-            if "source" not in message.content.lower():
+            match = re.search(r'https://(www\.)?pixiv\.net/(en/)?artworks/(\d*)(/\d*)?', message.content)
+            if match and not message.attachments:
+                id = match.group(3)
+                try:
+                    picn = match.group(4)[1:]
+                except TypeError:
+                    picn = 0
+                await message.reply(f'https://api.pixiv.moe/image/{id}-{picn}.png')
+            elif not match and message.attachments:
                 urls = await self.get_sauce(message)
                 if urls:
                     await message.reply("\n".join([f'<{url}>' for url in urls]))
