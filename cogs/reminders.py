@@ -85,6 +85,24 @@ class Reminders(commands.Cog):
 
         await self.reminder(wait_time, ctx.author, content)  # set reminder
 
+    @commands.command(name='reminderlist', aliases=['rlist'])
+    async def reminderlist(self, ctx):
+        """Lists all upcoming reminders"""
+
+        sql = """SELECT user_id, message, time FROM reminders;"""
+        cur = conn.cursor()
+        cur.execute(sql)
+        row = cur.fetchone()
+        listoutput = ""
+        while row is not None:
+            if row[0] == ctx.author.id:
+                listoutput += f"""{datetime.utcfromtimestamp(row[2]).strftime('%d/%m/%Y, %H:%M:%S')} | {row[1]}\n"""
+            row = cur.fetchone()
+        cur.close()
+        if not listoutput:
+            return await ctx.send('You have no reminders set.')
+        await ctx.send("**Your Reminders**\n```" + listoutput + "```")
+
     # sleeps for a while and then calls another function
     async def reminder(self, seconds, ctx, content):
         await asyncio.sleep(seconds)
