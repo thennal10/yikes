@@ -3,4 +3,6 @@ google-api-python-client
 psycopg2-binary
 requests
 wordcloud
+youtube_dl
+pynacl
 pint
