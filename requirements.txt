@@ -1,8 +1,7 @@
-discord.py>=1.6.0
+discord.py[voice]>=1.6.0
 google-api-python-client
 psycopg2-binary
 requests
 wordcloud
 youtube_dl
-pynacl
 pint
