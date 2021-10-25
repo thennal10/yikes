@@ -24,6 +24,13 @@ class Basic(commands.Cog):
         """Pong!"""
         await ctx.send(f"The fuck you want? Latency: `{self.bot.latency*1000:.0f}ms`")
 
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload):
+        channel = self.bot.get_guild(payload.guild_id).get_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
+        if (message.author.id == self.bot.user.id) and (payload.emoji.name == '❌'):
+            await message.delete()
+
     @commands.command(name='strokify')
     async def strokify(self, ctx, *, input: str):
         """TuRnS gIvEn InPuT tO tHiS"""
