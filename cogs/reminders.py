@@ -77,8 +77,7 @@ class Reminders(commands.Cog):
             cur.execute(sql)
             conn.commit()
             cur.close()
-            readable_time = datetime.utcfromtimestamp(time_unix).strftime('%d/%m/%Y, %H:%M:%S')
-            await ctx.send(f"Reminder set for {readable_time}")
+            await ctx.send(f"Reminder set for <t:{round(time_unix)}>, <t:{round(time_unix)}:R>")
         except Exception as e:
             conn.rollback()
             conn.commit()
